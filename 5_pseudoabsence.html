@@ -1,0 +1,826 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+
+
+
+<title>Pseudo-absence and background data</title>
+
+<script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/bootstrap.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<script src="site_libs/jqueryui-1.11.4/jquery-ui.min.js"></script>
+<link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<link href="site_libs/highlightjs-9.12.0/textmate.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+<link href="site_libs/font-awesome-5.1.0/css/all.css" rel="stylesheet" />
+<link href="site_libs/font-awesome-5.1.0/css/v4-shims.css" rel="stylesheet" />
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+<style type="text/css">
+h1 {
+  font-size: 34px;
+}
+h1.title {
+  font-size: 38px;
+}
+h2 {
+  font-size: 30px;
+}
+h3 {
+  font-size: 24px;
+}
+h4 {
+  font-size: 18px;
+}
+h5 {
+  font-size: 16px;
+}
+h6 {
+  font-size: 12px;
+}
+.table th:not([align]) {
+  text-align: left;
+}
+</style>
+
+
+
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img {
+  max-width:100%;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+summary {
+  display: list-item;
+}
+</style>
+
+
+<style type="text/css">
+/* padding for bootstrap navbar */
+body {
+  padding-top: 51px;
+  padding-bottom: 40px;
+}
+/* offset scroll position for anchor links (for fixed navbar)  */
+.section h1 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h2 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h3 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h4 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h5 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h6 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.dropdown-submenu {
+  position: relative;
+}
+.dropdown-submenu>.dropdown-menu {
+  top: 0;
+  left: 100%;
+  margin-top: -6px;
+  margin-left: -1px;
+  border-radius: 0 6px 6px 6px;
+}
+.dropdown-submenu:hover>.dropdown-menu {
+  display: block;
+}
+.dropdown-submenu>a:after {
+  display: block;
+  content: " ";
+  float: right;
+  width: 0;
+  height: 0;
+  border-color: transparent;
+  border-style: solid;
+  border-width: 5px 0 5px 5px;
+  border-left-color: #cccccc;
+  margin-top: 5px;
+  margin-right: -10px;
+}
+.dropdown-submenu:hover>a:after {
+  border-left-color: #ffffff;
+}
+.dropdown-submenu.pull-left {
+  float: none;
+}
+.dropdown-submenu.pull-left>.dropdown-menu {
+  left: -100%;
+  margin-left: 10px;
+  border-radius: 6px 0 6px 6px;
+}
+</style>
+
+<script>
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark it active
+  menuAnchor.parent().addClass('active');
+
+  // if it's got a parent navbar menu mark it active as well
+  menuAnchor.closest('li.dropdown').addClass('active');
+});
+</script>
+
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "&#xe258;";
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+  background-color: transparent;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<!-- code folding -->
+
+
+
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+@media print {
+.toc-content {
+  /* see https://github.com/w3c/csswg-drafts/issues/4434 */
+  float: right;
+}
+}
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.90em;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+
+</style>
+
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
+
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row-fluid">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">Species distribution modelling</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="index.html">Home</a>
+</li>
+<li>
+  <a href="schedule.html">Course schedule</a>
+</li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+    R practicals
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li>
+      <a href="0_Intro.html">0. Introduction to R</a>
+    </li>
+    <li>
+      <a href="1_SpeciesData.html">1. Species data</a>
+    </li>
+    <li>
+      <a href="2_EnvData.html">2. Environmental data</a>
+    </li>
+    <li>
+      <a href="3_SDM_intro.html">3. SDMs: simple model fitting</a>
+    </li>
+    <li>
+      <a href="4_SDM_eval.html">4. SDMs: assessment and prediction</a>
+    </li>
+    <li>
+      <a href="5_pseudoabsence.html">5. Pseudo-absence and background data</a>
+    </li>
+    <li>
+      <a href="6_SDM_algorithms.html">6. SDMs: algorithms</a>
+    </li>
+    <li>
+      <a href="7_SDM_ensembles.html">7. SDMs: ensembles</a>
+    </li>
+  </ul>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        <li>
+  <a href="mailto:damaris@zurell.de">
+    <span class="fa fa-envelope"></span>
+     
+  </a>
+</li>
+<li>
+  <a href="https://damariszurell.github.io">
+    <span class="fa fa-home"></span>
+     
+  </a>
+</li>
+<li>
+  <a href="https://twitter.com/ZurellLab">
+    <span class="fa fa-twitter"></span>
+     
+  </a>
+</li>
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<div class="fluid-row" id="header">
+
+
+
+<h1 class="title toc-ignore">Pseudo-absence and background data</h1>
+
+</div>
+
+
+<div id="introduction" class="section level1">
+<h1><span class="header-section-number">1</span> Introduction</h1>
+<p>In the previous sessions, we have worked with very convenient presence/absence data to train our species distribution models (SDMs). However, as you have seen when downloading your own GBIF data, we often have only presence records available. Absence data are also inherently difficult to get because it requires a very high sampling effort to classify a species as absent from a location. For plants, we would need complete inventories of a larger region, e.g. several 100 m plots placed within larger 1 km sample squares. For birds, we would need several visits to a specific region within the breeding season. In both cases, we could still miss some species, meaning that we do not record the species although present (resulting in a false negative).</p>
+<p>But what should we do if absence data are not available? Most SDM algorithms (except the profile methods, see session 6) need some kind of absence or background data to contrast the presence data to. There are different approaches for creating background data or pseudo-absence data <span class="citation">(Barbet-Massin et al. 2012; Kramer-Schadt et al. 2013; Phillips et al. 2009)</span>, although there is still room for further developments in this field and more clear-cut recommendations for users would be certainly useful. Nevertheless, I hope this tutorial will provide some examples of how to deal with presence-only data. For advice on how many background/pseudo-absence points you need, please read <span class="citation">(Barbet-Massin et al. 2012)</span>.</p>
+<p>In this session, we look at four different ways of creating background/pseudo-absence data:</p>
+<ul>
+<li>random selection of points within study area (including or excluding the presence locations) <span class="citation">(Barbet-Massin et al. 2012)</span></li>
+<li>random selection of points outside of study area <span class="citation">(Barbet-Massin et al. 2012)</span></li>
+<li>accounting for spatial sampling bias using target-group selection <span class="citation">(Phillips et al. 2009)</span></li>
+<li>accounting for spatial sampling bias using inverse distance weighting <span class="citation">(Kramer-Schadt et al. 2013)</span></li>
+</ul>
+</div>
+<div id="species-presence-data" class="section level1">
+<h1><span class="header-section-number">2</span> Species presence data</h1>
+<p>I created a virtual species data set with presence points for a dummy species called <em>Populus imagines</em> and sister species <em>Populus spp</em>. The spatial resolution of the data is 5 minutes. You can download the data <a href="data/Prac5_data.zip">here</a> or from the moodle page.</p>
+<p>Load and plot the data:</p>
+<pre class="r"><code>library(raster)
+library(dismo)
+
+mask &lt;- raster(&#39;data/Prac5_Europe5min.grd&#39;)
+sp &lt;- read.table(&#39;data/Prac5_presences.txt&#39;, header=T)
+
+# Plot the map and data
+plot(mask,col=&#39;grey&#39;,legend=F)
+points(sp[sp$sp==&#39;Populus_imagines&#39;,1:2],pch=&#39;+&#39;,col=&#39;red&#39;)
+points(sp[sp$sp==&#39;Populus_spp&#39;,1:2],pch=&#39;+&#39;,cex=0.3,col=&#39;grey20&#39;)</code></pre>
+<p><img src="5_pseudoabsence_files/figure-html/unnamed-chunk-2-1.png" width="672" /></p>
+</div>
+<div id="backgroundpseudo-absence-data-selection" class="section level1">
+<h1><span class="header-section-number">3</span> Background/Pseudo-absence data selection</h1>
+<p>We use a lot of methods from the <code>dismo</code> tutorials, which are worth looking into (<a href="https://rspatial.org/raster/sdm/3_sdm_absence-background.html">see link here</a>).</p>
+<div id="random-selection-of-points-within-study-area-but-excluding-the-presence-location" class="section level2">
+<h2><span class="header-section-number">3.1</span> Random selection of points within study area but excluding the presence location</h2>
+<p>The <code>dismo</code> package has a function to sample random points (background data).</p>
+<pre class="r"><code># Randomly select background points from study region
+bg_rand &lt;- randomPoints(mask, 500)
+
+# Plot the map and data
+plot(mask,col=&#39;grey&#39;,legend=F)
+points(sp[sp$sp==&#39;Populus_imagines&#39;,1:2],pch=&#39;+&#39;,col=&#39;red&#39;)
+points(bg_rand,pch=19,cex=0.3)</code></pre>
+<p><img src="5_pseudoabsence_files/figure-html/unnamed-chunk-3-1.png" width="672" /></p>
+<p>So, this function will by default sample from the entire study area independent of the presence points. We can also provide the presence points as additional argument, and by that make sure that random background data are not sampled from presence locations.</p>
+<pre class="r"><code># Randomly select background data but excluding presence locations
+bg_rand2 &lt;- randomPoints(mask, 500, p=sp[sp$sp==&#39;Populus_imagines&#39;,1:2])
+
+# Plot the map and data
+plot(mask,col=&#39;grey&#39;,legend=F)
+points(sp[sp$sp==&#39;Populus_imagines&#39;,1:2],pch=&#39;+&#39;,col=&#39;red&#39;)
+points(bg_rand2,pch=19,cex=0.3)</code></pre>
+<p><img src="5_pseudoabsence_files/figure-html/unnamed-chunk-4-1.png" width="672" /></p>
+<p>Also, we can define an extent from where random points should be drawn. By default, this extent is increased by 5% at each side. To circumvent this, we set <code>extf=1.0</code>.</p>
+<pre class="r"><code># Define extent object:
+e &lt;- extent(8,24,46,57)
+
+# Randomly select background data within a restricted extent
+bg_rand3 &lt;- randomPoints(mask, 500, p=sp[sp$sp==&#39;Populus_imagines&#39;,1:2], ext=e, extf=1.0)
+
+# Plot the map and data
+plot(mask,col=&#39;grey&#39;,legend=F)
+points(sp[sp$sp==&#39;Populus_imagines&#39;,1:2],pch=&#39;+&#39;,col=&#39;red&#39;)
+points(bg_rand3,pch=19,cex=0.3)
+plot(e, add=TRUE, col=&#39;red&#39;)</code></pre>
+<p><img src="5_pseudoabsence_files/figure-html/unnamed-chunk-5-1.png" width="672" /></p>
+<p>Last, we could also restrict the random samples to within a certain buffer distance. For this, we first create a <code>SpatialPointsDataFrame</code>, then place a buffer around these and sample from within the buffer.</p>
+<pre class="r"><code># Make SpatialPointsDataFrame:
+pop_imag &lt;- sp[sp$sp==&#39;Populus_imagines&#39;,1:2]
+coordinates(pop_imag) &lt;- ~x+y
+projection(pop_imag) &lt;- CRS(&#39;+proj=longlat +datum=WGS84&#39;)
+
+# Then, place a buffer of 200 km radius around our presence points
+x &lt;- buffer(pop_imag,width=200000)
+
+# Set all raster cells outside the buffer to NA
+x &lt;- mask(mask,x)
+
+# Randomly select background data within the buffer
+bg_rand4 &lt;- randomPoints(x, 500)
+
+# Plot the map and data
+plot(mask,col=&#39;grey&#39;,legend=F)
+plot(x, legend=F, add=T)
+points(sp[sp$sp==&#39;Populus_imagines&#39;,1:2],pch=&#39;+&#39;,col=&#39;red&#39;)
+points(bg_rand4,pch=19,cex=0.3)</code></pre>
+<p><img src="5_pseudoabsence_files/figure-html/unnamed-chunk-6-1.png" width="672" /></p>
+</div>
+<div id="random-selection-of-points-outside-of-study-area" class="section level2">
+<h2><span class="header-section-number">3.2</span> Random selection of points outside of study area</h2>
+<p><span class="citation">Barbet-Massin et al. (2012)</span> also suggested a method to sample pseudo-absences only beyond a minimum distance from the presence points. We can also use the buffering approach from above to achieve this.</p>
+<pre class="r"><code># Place a buffer of 100 km radius around our presence points
+x &lt;- buffer(pop_imag,width=200000)
+
+# Set all raster cells outside the buffer to NA
+x &lt;- mask(mask,x)
+
+# Now, we set all the buffer cells in the mask to NA
+mask2 &lt;- mask
+values(mask2)[values(x)==1 &amp; !is.na(values(x))] &lt;- NA
+
+# Randomly select background data outside the buffer
+bg_far &lt;- randomPoints(mask2, 500)
+
+# Plot the map and data
+plot(mask,col=&#39;grey&#39;,legend=F)
+plot(x,legend=F, add=T)
+points(sp[sp$sp==&#39;Populus_imagines&#39;,1:2],pch=&#39;+&#39;,col=&#39;red&#39;)
+points(bg_far,pch=19,cex=0.3)</code></pre>
+<p><img src="5_pseudoabsence_files/figure-html/unnamed-chunk-7-1.png" width="672" /></p>
+</div>
+<div id="accounting-for-spatial-sampling-bias-using-target-group-selection" class="section level2">
+<h2><span class="header-section-number">3.3</span> Accounting for spatial sampling bias using target-group selection</h2>
+<p>A critical assumption behind the above-mentioned background/pseudo-absence sampling is that the presence points were systematically or randomly sampled from the known distribution and are not spatially biased. In practice, this assumption is often violated, for example when observers go to more easily accessible areas. <span class="citation">Phillips et al. (2009)</span> suggested a target-group sampling for this. The idea is that we use the presence points of other groups of species as potential pseudo-absence points to mimic survey effort. These target groups should be collected or observed using the same methods and equipments. So, this approach is kind of assuming that no complete inventories were made by the observers but that there is a chance that if the species had been there it would have been observed along with the others.</p>
+<p>Here, we use the sister populus species as target group.</p>
+<pre class="r"><code># Randomly select background points from the target group
+p &lt;- sample(seq_len(nrow(sp[sp$sp==&#39;Populus_spp&#39;,])), 500)
+bg_target &lt;- sp[sp$sp==&#39;Populus_spp&#39;,1:2][p,]
+
+# Plot the map and data
+plot(mask,col=&#39;grey&#39;,legend=F)
+points(sp[sp$sp==&#39;Populus_imagines&#39;,1:2],pch=&#39;+&#39;,col=&#39;red&#39;)
+points(bg_target,pch=19,cex=0.3)</code></pre>
+<p><img src="5_pseudoabsence_files/figure-html/unnamed-chunk-8-1.png" width="672" /></p>
+</div>
+<div id="accounting-for-spatial-sampling-bias-using-inverse-distance-weighting" class="section level2">
+<h2><span class="header-section-number">3.4</span> Accounting for spatial sampling bias using inverse distance weighting</h2>
+<p>In the last example, we manipulate the background to have the same sampling bias as the presence data <span class="citation">(Kramer-Schadt et al. 2013)</span>. For example, this is particularly useful if presence records are restricted to easily accessible areas like roads. We use inverse distance weighting to define the sampling density of the presence points and then sample background proportional to that density. Following <span class="citation">Kramer-Schadt et al. (2013)</span>, we assume a low sampling effort outside the sampling range of the presence data - here a 5% sampling effort.</p>
+<pre class="r"><code># Compute inverse distance weighted interpolation and create raster with density layer
+idw &lt;- geoIDW(as.matrix(sp[sp$sp==&#39;Populus_imagines&#39;,1:2]), 
+              randomPoints(mask, sum(sp$sp==&#39;Populus_imagines&#39;)))
+idw_r &lt;- predict(mask, idw)</code></pre>
+<pre><code>## [inverse distance weighted interpolation]</code></pre>
+<pre class="r"><code># Re-classify density values below 0.05 indicating a 1/20 of the sampling effort
+values(idw_r)[values(idw_r) &lt; 0.05] &lt;- 0.05
+
+# Clip to land mass
+idw_r &lt;- mask(idw_r,mask)
+
+# Randomly select background data proportional to sampling density in presence data
+bg_idw &lt;- randomPoints(idw_r, 500, prob=T)
+
+# Plot the map and data
+plot(idw_r)
+points(sp[sp$sp==&#39;Populus_imagines&#39;,1:2],pch=&#39;+&#39;,col=&#39;red&#39;)
+points(bg_idw,pch=19,cex=0.3)</code></pre>
+<p><img src="5_pseudoabsence_files/figure-html/unnamed-chunk-9-1.png" width="672" /></p>
+</div>
+</div>
+<div id="workflow-for-joining-presence-and-backgroundpseudo-absence-data" class="section level1">
+<h1><span class="header-section-number">4</span> Workflow for joining presence and background/pseudo-absence data</h1>
+<p>In session 2, we have already learned how to join species data and environmental data (at 10 min resolution) using the Alpine Shrew as example species. Here, we will revisit this example, sample random background data and join these with environmental data to come up with a datset containing presences and background data as well as the climatic predictors.</p>
+<pre class="r"><code># Load the data set from session 2 containing species presence data and climate data:
+load(&#39;data/gbif_shrew_env.RData&#39;)
+
+head(gbif_shrew_env)</code></pre>
+<pre><code>##          key             scientificName decimalLatitude decimalLongitude
+## 1 2251919320 Sorex alpinus Schinz, 1837        47.69411        13.681602
+## 2 2330155268 Sorex alpinus Schinz, 1837        48.12057         8.109648
+## 3 2269283117 Sorex alpinus Schinz, 1837        46.39159        10.421819
+## 4 2610972391 Sorex alpinus Schinz, 1837        46.02428        10.828994
+## 6 2609080674 Sorex alpinus Schinz, 1837        46.19628        11.263646
+## 7 2423224540 Sorex alpinus Schinz, 1837        46.98664        10.811803
+##       basisOfRecord speciesKey       species year  cells bio1 bio2 bio3 bio4
+## 1 HUMAN_OBSERVATION    2435986 Sorex alpinus 2019 547643   47   94   33 6777
+## 2 HUMAN_OBSERVATION    2435986 Sorex alpinus 2019 543289   74   80   32 6125
+## 3 HUMAN_OBSERVATION    2435986 Sorex alpinus 2019 564903   14   64   28 5644
+## 4 HUMAN_OBSERVATION    2435986 Sorex alpinus 2019 569225   65   82   30 6522
+## 6 HUMAN_OBSERVATION    2435986 Sorex alpinus 2019 567068   85   94   31 6971
+## 7 HUMAN_OBSERVATION    2435986 Sorex alpinus 2019 558425  -25   53   26 5181
+##   bio5 bio6 bio7 bio8 bio9 bio10 bio11 bio12 bio13 bio14 bio15 bio16 bio17
+## 1  196  -88  284  132    1   132   -42  1495   183    89    26   529   293
+## 2  209  -41  250  151   30   151    -5  1147   120    77    15   342   250
+## 3  134  -90  224   85  -55    85   -55  1022   127    52    28   355   169
+## 4  211  -60  271  145  -19   148   -19   768    98    32    35   268   102
+## 6  242  -55  297  172   -7   172    -7   786    99    33    34   274   104
+## 7   78 -120  198   40  -86    41   -86  1464   162    96    17   464   310
+##   bio18 bio19
+## 1   529   324
+## 2   342   270
+## 3   355   169
+## 4   266   102
+## 6   274   104
+## 7   429   320</code></pre>
+<pre class="r"><code># Plot the species presences
+library(maptools)
+data(wrld_simpl)
+
+plot(wrld_simpl,xlim=c(-12,45), ylim=c(35,73))
+points(gbif_shrew_env$decimalLongitude, gbif_shrew_env$decimalLatitude, col=&#39;red&#39;,  pch=19)</code></pre>
+<p><img src="5_pseudoabsence_files/figure-html/unnamed-chunk-10-1.png" width="672" /></p>
+<p>You have already downloaded the climate data in session 2 and can simply read it back in. We crop it to European extent.</p>
+<pre class="r"><code># You may have to adjust the path to your folder structure:
+clim &lt;- getData(&quot;worldclim&quot;, var=&quot;bio&quot;, res=10, download=F, path=&quot;data/clim_data&quot;)
+
+# Crop to Europe
+clim &lt;- crop(clim, c(-12,45,35,73))</code></pre>
+<p>We place a buffer of 200 km around the shrew records and sample background points randomly from within the buffer but excluding presence locations.</p>
+<pre class="r"><code># Make SpatialPointsDataFrame:
+presences &lt;- gbif_shrew_env[,c(&#39;decimalLongitude&#39;,&#39;decimalLatitude&#39;)]
+coordinates(presences) &lt;- ~decimalLongitude + decimalLatitude
+projection(presences) &lt;- CRS(&#39;+proj=longlat +datum=WGS84&#39;)
+
+# Then, place a buffer of 200 km radius around our presence points
+buf &lt;- buffer(presences,width=200000)
+
+# Create a mask with target resolution and extent from climate layers
+mask &lt;- clim[[1]]
+values(mask)[!is.na(values(mask))] &lt;- 1
+plot(mask, col=&#39;grey90&#39;, legend=F)
+
+# Set all raster cells outside the buffer to NA.
+buf &lt;- mask(mask,buf)
+plot(buf, add=T, col=&#39;grey60&#39;, legend=F)
+
+# Randomly select background data within the buffer, excluding presence locations. We sample 10 times as many background data as we have presences.
+bg_dat &lt;- randomPoints(buf, length(presences)*10, p=presences)
+points(bg_dat, pch=19, cex=0.2, col=&#39;red&#39;)
+points(presences, pch=19, cex=0.5)</code></pre>
+<p><img src="5_pseudoabsence_files/figure-html/unnamed-chunk-13-1.png" width="672" /></p>
+<p>Last, we need to join the presences and background data, and extract the environmental data.</p>
+<pre class="r"><code># First, we prepare the presences data to contain a column indicating 1 for presence.
+sp_env &lt;- data.frame(gbif_shrew_env[,c(&#39;decimalLongitude&#39;,&#39;decimalLatitude&#39;)], occ=1)
+
+# Second, we make sure the background data have the same columns
+bg_dat &lt;- data.frame(bg_dat)
+summary(bg_dat)</code></pre>
+<pre><code>##        x                y        
+##  Min.   : 3.083   Min.   :43.08  
+##  1st Qu.: 8.083   1st Qu.:45.58  
+##  Median :13.417   Median :47.42  
+##  Mean   :13.209   Mean   :47.27  
+##  3rd Qu.:17.583   3rd Qu.:48.75  
+##  Max.   :25.083   Max.   :51.92</code></pre>
+<pre class="r"><code>names(bg_dat) &lt;- c(&#39;decimalLongitude&#39;,&#39;decimalLatitude&#39;)
+bg_dat$occ &lt;- 0
+summary(bg_dat)</code></pre>
+<pre><code>##  decimalLongitude decimalLatitude      occ   
+##  Min.   : 3.083   Min.   :43.08   Min.   :0  
+##  1st Qu.: 8.083   1st Qu.:45.58   1st Qu.:0  
+##  Median :13.417   Median :47.42   Median :0  
+##  Mean   :13.209   Mean   :47.27   Mean   :0  
+##  3rd Qu.:17.583   3rd Qu.:48.75   3rd Qu.:0  
+##  Max.   :25.083   Max.   :51.92   Max.   :0</code></pre>
+<pre class="r"><code># Third, we bind these two data sets
+sp_env &lt;- rbind(sp_env, bg_dat)
+summary(sp_env)</code></pre>
+<pre><code>##  decimalLongitude decimalLatitude      occ         
+##  Min.   : 3.083   Min.   :43.08   Min.   :0.00000  
+##  1st Qu.: 7.721   1st Qu.:45.58   1st Qu.:0.00000  
+##  Median :12.750   Median :47.25   Median :0.00000  
+##  Mean   :12.962   Mean   :47.22   Mean   :0.09091  
+##  3rd Qu.:17.583   3rd Qu.:48.75   3rd Qu.:0.00000  
+##  Max.   :25.083   Max.   :51.92   Max.   :1.00000</code></pre>
+<pre class="r"><code># Last, we join this combined data set with the climate data.
+sp_env &lt;- cbind(sp_env, raster::extract(x = clim, y = sp_env[,c(&#39;decimalLongitude&#39;,&#39;decimalLatitude&#39;)], cellnumbers=T) )
+summary(sp_env)</code></pre>
+<pre><code>##  decimalLongitude decimalLatitude      occ              cells      
+##  Min.   : 3.083   Min.   :43.08   Min.   :0.00000   Min.   :43279  
+##  1st Qu.: 7.721   1st Qu.:45.58   1st Qu.:0.00000   1st Qu.:49783  
+##  Median :12.750   Median :47.25   Median :0.00000   Median :52794  
+##  Mean   :12.962   Mean   :47.22   Mean   :0.09091   Mean   :52868  
+##  3rd Qu.:17.583   3rd Qu.:48.75   3rd Qu.:0.00000   3rd Qu.:56204  
+##  Max.   :25.083   Max.   :51.92   Max.   :1.00000   Max.   :61374  
+##       bio1             bio2             bio3            bio4     
+##  Min.   :-25.00   Min.   : 53.00   Min.   :26.00   Min.   :5106  
+##  1st Qu.: 70.00   1st Qu.: 83.00   1st Qu.:29.00   1st Qu.:6212  
+##  Median : 83.00   Median : 88.00   Median :31.00   Median :6826  
+##  Mean   : 83.73   Mean   : 87.51   Mean   :30.91   Mean   :6802  
+##  3rd Qu.:102.00   3rd Qu.: 94.00   3rd Qu.:32.00   3rd Qu.:7364  
+##  Max.   :159.00   Max.   :105.00   Max.   :39.00   Max.   :8288  
+##       bio5            bio6              bio7            bio8      
+##  Min.   : 78.0   Min.   :-120.00   Min.   :198.0   Min.   :-72.0  
+##  1st Qu.:220.0   1st Qu.: -72.00   1st Qu.:260.0   1st Qu.:114.8  
+##  Median :235.0   Median : -49.00   Median :281.0   Median :156.0  
+##  Mean   :232.2   Mean   : -46.87   Mean   :279.1   Mean   :134.6  
+##  3rd Qu.:257.0   3rd Qu.: -24.00   3rd Qu.:301.0   3rd Qu.:171.0  
+##  Max.   :300.0   Max.   :  47.00   Max.   :329.0   Max.   :204.0  
+##       bio9            bio10         bio11             bio12       
+##  Min.   :-86.00   Min.   : 41   Min.   :-86.000   Min.   : 518.0  
+##  1st Qu.:-11.25   1st Qu.:157   1st Qu.:-29.000   1st Qu.: 704.8  
+##  Median : 13.00   Median :172   Median : -7.000   Median : 833.0  
+##  Mean   : 35.18   Mean   :169   Mean   : -5.687   Mean   : 899.0  
+##  3rd Qu.: 53.00   3rd Qu.:190   3rd Qu.: 14.000   3rd Qu.:1042.0  
+##  Max.   :239.00   Max.   :239   Max.   : 85.000   Max.   :1972.0  
+##      bio13           bio14            bio15           bio16      
+##  Min.   : 65.0   Min.   : 15.00   Min.   : 7.00   Min.   :173.0  
+##  1st Qu.: 86.0   1st Qu.: 35.00   1st Qu.:18.00   1st Qu.:238.0  
+##  Median :102.0   Median : 47.00   Median :26.00   Median :282.0  
+##  Mean   :107.6   Mean   : 50.72   Mean   :25.76   Mean   :299.8  
+##  3rd Qu.:125.0   3rd Qu.: 61.00   3rd Qu.:34.00   3rd Qu.:350.0  
+##  Max.   :195.0   Max.   :143.00   Max.   :46.00   Max.   :561.0  
+##      bio17           bio18           bio19      
+##  Min.   : 74.0   Min.   : 84.0   Min.   : 80.0  
+##  1st Qu.:115.8   1st Qu.:215.0   1st Qu.:127.8  
+##  Median :153.5   Median :262.0   Median :171.5  
+##  Mean   :165.8   Mean   :273.8   Mean   :186.5  
+##  3rd Qu.:197.2   3rd Qu.:319.0   3rd Qu.:221.0  
+##  Max.   :453.0   Max.   :561.0   Max.   :516.0</code></pre>
+<div class="alert alert-info">
+<p><em><strong>Exercise:</strong></em></p>
+<p>Use the GBIF data for your own species (from practical 1), sample background data and prepare a data set with species and climate data. Use these data to run SDMs.</p>
+</div>
+</div>
+<div id="references" class="section level1 unnumbered">
+<h1>References</h1>
+<div id="refs" class="references">
+<div id="ref-BarbetMassin2012a">
+<p>Barbet-Massin, Morgane, Frederic Jiguet, Cecile Helene Albert, and Wilfried Thuiller. 2012. “Selecting Pseudo-Absences for Species Distribution Models: How, Where and How Many?” <em>Methods in Ecology and Evolution</em> 3 (2): 327–38. <a href="https://doi.org/10.1111/j.2041-210X.2011.00172.x">https://doi.org/10.1111/j.2041-210X.2011.00172.x</a>.</p>
+</div>
+<div id="ref-Kramer-Schadt2013">
+<p>Kramer-Schadt, Stephanie, Juergen Niedballa, John D. Pilgrim, Boris Schroeder, Jana Lindenborn, Vanessa Reinfelder, Milena Stillfried, et al. 2013. “The Importance of Correcting for Sampling Bias in Maxent Species Distribution Models.” <em>Diversity and Distributions</em> 19 (11): 1366–79. <a href="https://doi.org/10.1111/ddi.12096">https://doi.org/10.1111/ddi.12096</a>.</p>
+</div>
+<div id="ref-Phillips2009">
+<p>Phillips, Steven J., Miroslav Dudik, Jane Elith, Catherine H. Graham, Anthony Lehmann, John Leathwick, and Simon Ferrier. 2009. “Sample Selection Bias and Presence-Only Distribution Models: Implications for Background and Pseudo-Absence Data.” <em>Ecological Applications</em> 19 (1): 181–97. <a href="https://doi.org/10.1890/07-2153.1">https://doi.org/10.1890/07-2153.1</a>.</p>
+</div>
+</div>
+</div>
+
+<!DOCTYPE html>
+<html>
+
+<br>
+<hr />
+<div id="footer">
+<p>Damaris Zurell, 2020 <a href="http://creativecommons.org/licenses/by/4.0/" >(CC BY 4.0)</a>.  </p>
+</div>
+
+</html>
+
+
+</div>
+</div>
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open')
+  });
+});
+</script>
+
+<!-- code folding -->
+
+<script>
+$(document).ready(function ()  {
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_').toLowerCase();
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

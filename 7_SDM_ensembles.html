@@ -1,0 +1,1016 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+
+
+
+<title>SDM ensembles</title>
+
+<script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/bootstrap.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<script src="site_libs/jqueryui-1.11.4/jquery-ui.min.js"></script>
+<link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<link href="site_libs/highlightjs-9.12.0/textmate.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+<link href="site_libs/font-awesome-5.1.0/css/all.css" rel="stylesheet" />
+<link href="site_libs/font-awesome-5.1.0/css/v4-shims.css" rel="stylesheet" />
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+<style type="text/css">
+h1 {
+  font-size: 34px;
+}
+h1.title {
+  font-size: 38px;
+}
+h2 {
+  font-size: 30px;
+}
+h3 {
+  font-size: 24px;
+}
+h4 {
+  font-size: 18px;
+}
+h5 {
+  font-size: 16px;
+}
+h6 {
+  font-size: 12px;
+}
+.table th:not([align]) {
+  text-align: left;
+}
+</style>
+
+
+
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img {
+  max-width:100%;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+summary {
+  display: list-item;
+}
+</style>
+
+
+<style type="text/css">
+/* padding for bootstrap navbar */
+body {
+  padding-top: 51px;
+  padding-bottom: 40px;
+}
+/* offset scroll position for anchor links (for fixed navbar)  */
+.section h1 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h2 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h3 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h4 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h5 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h6 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.dropdown-submenu {
+  position: relative;
+}
+.dropdown-submenu>.dropdown-menu {
+  top: 0;
+  left: 100%;
+  margin-top: -6px;
+  margin-left: -1px;
+  border-radius: 0 6px 6px 6px;
+}
+.dropdown-submenu:hover>.dropdown-menu {
+  display: block;
+}
+.dropdown-submenu>a:after {
+  display: block;
+  content: " ";
+  float: right;
+  width: 0;
+  height: 0;
+  border-color: transparent;
+  border-style: solid;
+  border-width: 5px 0 5px 5px;
+  border-left-color: #cccccc;
+  margin-top: 5px;
+  margin-right: -10px;
+}
+.dropdown-submenu:hover>a:after {
+  border-left-color: #ffffff;
+}
+.dropdown-submenu.pull-left {
+  float: none;
+}
+.dropdown-submenu.pull-left>.dropdown-menu {
+  left: -100%;
+  margin-left: 10px;
+  border-radius: 6px 0 6px 6px;
+}
+</style>
+
+<script>
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark it active
+  menuAnchor.parent().addClass('active');
+
+  // if it's got a parent navbar menu mark it active as well
+  menuAnchor.closest('li.dropdown').addClass('active');
+});
+</script>
+
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "&#xe258;";
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+  background-color: transparent;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<!-- code folding -->
+
+
+
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+@media print {
+.toc-content {
+  /* see https://github.com/w3c/csswg-drafts/issues/4434 */
+  float: right;
+}
+}
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.90em;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+
+</style>
+
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
+
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row-fluid">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">Species distribution modelling</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="index.html">Home</a>
+</li>
+<li>
+  <a href="schedule.html">Course schedule</a>
+</li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+    R practicals
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li>
+      <a href="0_Intro.html">0. Introduction to R</a>
+    </li>
+    <li>
+      <a href="1_SpeciesData.html">1. Species data</a>
+    </li>
+    <li>
+      <a href="2_EnvData.html">2. Environmental data</a>
+    </li>
+    <li>
+      <a href="3_SDM_intro.html">3. SDMs: simple model fitting</a>
+    </li>
+    <li>
+      <a href="4_SDM_eval.html">4. SDMs: assessment and prediction</a>
+    </li>
+    <li>
+      <a href="5_pseudoabsence.html">5. Pseudo-absence and background data</a>
+    </li>
+    <li>
+      <a href="6_SDM_algorithms.html">6. SDMs: algorithms</a>
+    </li>
+    <li>
+      <a href="7_SDM_ensembles.html">7. SDMs: ensembles</a>
+    </li>
+  </ul>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        <li>
+  <a href="mailto:damaris@zurell.de">
+    <span class="fa fa-envelope"></span>
+     
+  </a>
+</li>
+<li>
+  <a href="https://damariszurell.github.io">
+    <span class="fa fa-home"></span>
+     
+  </a>
+</li>
+<li>
+  <a href="https://twitter.com/ZurellLab">
+    <span class="fa fa-twitter"></span>
+     
+  </a>
+</li>
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<div class="fluid-row" id="header">
+
+
+
+<h1 class="title toc-ignore">SDM ensembles</h1>
+
+</div>
+
+
+<div id="introduction" class="section level1">
+<h1><span class="header-section-number">1</span> Introduction</h1>
+<p>In the previous session, we got to know several SDM algorithms <span class="citation">(Elith et al. 2006; Thuiller et al. 2009; Guisan, Thuiller, and Zimmermann 2017)</span>. But how do we proceed with all these models now? In the end, it would be handy to just work with a single, general prediction. One way to achive a single prediction would be to select the best performing algorithm. However, we have also seen that different models make different assumptions and extrapolate differently to new environments. <em>A priori</em>, it is difficult to judge which of the algorithms will perform best in new situations. Ensemble models have been introduced as an alternative <span class="citation">(Araujo and New 2007)</span>. These combine different models and provide information about the overall trend and the uncertainty around this trend <span class="citation">(Guisan, Thuiller, and Zimmermann 2017; Thuiller et al. 2019)</span>. Sometimes, the term ensembles is used synonymously with model averaging <span class="citation">(Dormann et al. 2018)</span> when only different model algorithms are combined. According to <span class="citation">Araujo and New (2007)</span>, ensembles could also take into account varying initial and boundary conditions (e.g. different data inputs, and different future scenarios).</p>
+<p>In ensembles, predictions can be combined or averaged in different ways <span class="citation">(Thuiller et al. 2009)</span>. Simple averages of predictions are derived using the arithmetic mean or the median. An alternative is to use weighted averages. Here, each model receives a weight derived from information criteria (e.g. AIC) or from predictive performance (e.g. AUC or TSS derived from cross-validation or split-sample approaches). To assess uncertainty in model predictions, we can, for example, calculate the coefficient of variation or standard deviation.</p>
+<p>Here, we will concentrate on how different algorithms can be combined into ensemble predictions. This is primarily meant to show you the main workflow. The ensembles can be adopted individually by using less, more or simply other algorithms, by using different parameterisations for the different algorithms, by using different input data (e.g. atlas data vs. range maps), and projections can be made to different scenarios of future (or past) global change.</p>
+<p>There is one important note for forecast ensembles. Typically, we would make projections under climate change or land use change for scenarios derived from different climate models or land use models. This captures the uncertainty from different underlying model assumptions. This should not be confused with different storylines (the old SRES storylines or newer RCPs in climate models, or the SSPs in land use models; <span class="citation">Vuuren and Carter (2013)</span>). When making projections into the future, we would typically combine ensembles of predictions for different SDM algorithms and different climate and land use models. However, we would not combine projections for different storylines, but would want to analyse the potential pathways separately.</p>
+</div>
+<div id="recap-of-last-session-data-and-model-building-steps" class="section level1">
+<h1><span class="header-section-number">2</span> Recap of last session: data and model building steps</h1>
+<p>We will continue to work on the Ring Ouzel example of the previous session, using data from the British breeding and wintering birds citizen science atlas <span class="citation">(Gillings et al. 2019)</span>. The species presense/absence data and the bioclimatic variables at these locations are available from file. Also, we have already tested the data for multicollinearity and identified bio11 and bio8 as weakly correlated variables with high univariate variable importance, and we have run different algorithms.</p>
+<div id="data" class="section level2">
+<h2><span class="header-section-number">2.1</span> Data</h2>
+<pre class="r"><code>library(raster)
+bg &lt;- raster(&#39;data/Prac3_UK_mask.grd&#39;)
+sp_dat &lt;- read.table(&#39;data/Prac3_RingOuzel.txt&#39;,header=T)</code></pre>
+<p>Previously, we have used a simple split-sample to validate model performance:</p>
+<pre class="r"><code># Read the split-sample back in
+train_i &lt;- scan(&#39;data/indices_traindata.txt&#39;)
+
+# Then, we can subset the training and testing data
+sp_train &lt;- sp_dat[train_i,]
+sp_test &lt;- sp_dat[-train_i,]</code></pre>
+<p>For making predictions in space, we also load the previously processed raster layers of current climate (see session 4).</p>
+<pre class="r"><code>library(raster)
+
+bio_curr &lt;- stack(&#39;data/Prac4_UK_bio_curr.grd&#39;)</code></pre>
+</div>
+<div id="model-fitting" class="section level2">
+<h2><span class="header-section-number">2.2</span> Model fitting</h2>
+<p>In the previous tutorial, we already fitted different model algorithms. Here, we refit them very quickly.</p>
+<pre class="r"><code># Our predictors:
+my_preds &lt;- c(&#39;bio11&#39;, &#39;bio8&#39;)
+
+
+library(dismo)
+
+# Fit BIOCLIM model
+m_bc &lt;- bioclim(bio_curr[[my_preds]], 
+                sp_train[sp_train$Turdus_torquatus==1,c(&#39;EASTING&#39;,&#39;NORTHING&#39;)])
+
+# Fit Domain model
+m_dom &lt;- domain(bio_curr[[my_preds]], 
+                sp_train[sp_train$Turdus_torquatus==1,c(&#39;EASTING&#39;,&#39;NORTHING&#39;)])
+
+# Fit generalised linear model (GLM)
+m_glm &lt;- step(glm( Turdus_torquatus ~ bio11 + I(bio11^2) + bio8 + I(bio8^2),
+    family=&#39;binomial&#39;, data=sp_train))
+
+# Fit generalised additive model (GAM) with cubic smoothing splines
+library(gam)
+m_gamS &lt;- gam( Turdus_torquatus ~ s(bio11, df=4) + s(bio8, df=4),
+    family=&#39;binomial&#39;, data=sp_train)
+
+# Fit Maxent
+library(maxnet)
+m_maxent &lt;- maxnet(p=sp_train$Turdus_torquatus, data=sp_train[,my_preds],
+    maxnet.formula(p=sp_train$Turdus_torquatus, data=sp_train[,my_preds], classes=&quot;lh&quot;))
+
+# Fit classification and regression tree (CART)
+library(rpart)
+m_cart &lt;- rpart( Turdus_torquatus ~ bio11 + bio8,
+    data=sp_train, control=rpart.control(minsplit=20,xval=10))
+
+# Fit Random Forest (RF)
+library(randomForest)
+m_rf &lt;- randomForest( x=sp_train[,my_preds], y=as.factor(sp_train$Turdus_torquatus), 
+    ntree=1000, importance =T)
+
+# Fit boosted regression tree (BRT)
+library(gbm)
+m_brt &lt;- gbm.step(data = sp_train, 
+    gbm.x = my_preds,
+    gbm.y = &#39;Turdus_torquatus&#39;, 
+    family = &#39;bernoulli&#39;,
+    tree.complexity = 2,
+    bag.fraction = 0.75,
+    learning.rate = 0.001,
+    verbose=F)</code></pre>
+<p><img src="7_SDM_ensembles_files/figure-html/unnamed-chunk-4-1.png" width="672" /></p>
+</div>
+<div id="model-assessment" class="section level2">
+<h2><span class="header-section-number">2.3</span> Model assessment</h2>
+<p>We have already validated model performance on the hold-out test data in last session. Remember that we have defined two own functions for this, which we will also need later in this tutorial:</p>
+<pre class="r"><code># We define some useful functions for evaluation:
+# True Skill Statistic
+TSS = function(cmx){
+    require(PresenceAbsence)
+    PresenceAbsence::sensitivity(cmx, st.dev=F) + PresenceAbsence::specificity(cmx, st.dev=F) - 1
+    }
+
+# Calculate explained deviance: null prediction is equivalent to the mean prevalence
+d.square &lt;- function(obs, pred, family=&#39;binomial&#39;){
+    require(dismo)  
+  
+    if (family==&#39;binomial&#39;) {
+      # To avoid dividing by zeros:
+      pred &lt;- ifelse(pred&lt;.00001,.00001,ifelse(pred&gt;.9999,.9999,pred))
+    }
+  # the null model prediction is simply the prevalence of the species:
+    null.pred &lt;- rep(mean(obs), length(obs))
+    
+    # Calculate explained deviance:
+    1 - (calc.deviance(obs, pred, family=family)/
+           calc.deviance(obs, null.pred, family=family))
+}</code></pre>
+<p>In the previous session, we have already stored the results of the model validation and can read them back in:</p>
+<pre class="r"><code># Adapt the file path to your folder structure
+(comp_perf &lt;- read.table(&#39;data/SDM_alg_performances.txt&#39;, header=T))</code></pre>
+<pre><code>##      alg       pcc   sens      spec       TSS       AUC         D2 maxTSS
+## 1     bc 0.8486842 0.7500 0.8602941 0.6102941 0.7948070 -0.4583228  0.260
+## 2    dom 0.7894737 0.7500 0.7941176 0.5441176 0.7821691 -1.0856837  0.680
+## 3    glm 0.8618421 0.8750 0.8602941 0.7352941 0.9333640  0.4607125  0.120
+## 4   gamS 0.8486842 0.9375 0.8382353 0.7757353 0.9375000  0.4586095  0.100
+## 5   cart 0.8684211 0.7500 0.8823529 0.6323529 0.8244485  0.2546056  0.320
+## 6     rf 0.8289474 0.8750 0.8235294 0.6985294 0.9002757  0.2501537  0.090
+## 7    brt 0.8684211 0.8750 0.8676471 0.7426471 0.9402574  0.3945727  0.130
+## 8 maxent 0.8355263 0.9375 0.8235294 0.7610294 0.9384191  0.3160077  0.265</code></pre>
+</div>
+<div id="predictions" class="section level2">
+<h2><span class="header-section-number">2.4</span> Predictions</h2>
+<p>We also know how to make predictions to independent test data:</p>
+<pre class="r"><code>pred_testdata &lt;- data.frame(
+  bc = predict(m_bc, sp_test[,my_preds]),
+  dom = predict(m_dom, sp_test[,my_preds]),
+  glm = predict(m_glm, sp_test[,my_preds], type=&#39;response&#39;),
+  gamS = predict(m_gamS, sp_test[,my_preds], type=&#39;response&#39;),
+  cart = predict(m_cart, sp_test[,my_preds]),
+  rf = predict(m_rf, sp_test[,my_preds], type=&#39;prob&#39;)[,2],
+  brt = predict.gbm(m_brt, sp_test[,my_preds], 
+                         n.trees=m_brt$gbm.call$best.trees, type=&quot;response&quot;),
+  maxent = predict(m_maxent, sp_test[,my_preds], type=&quot;logistic&quot;)
+)
+
+summary(pred_testdata)</code></pre>
+<pre><code>##        bc               dom              glm                 gamS          
+##  Min.   :0.00000   Min.   :0.0000   Min.   :0.0000408   Min.   :0.0000004  
+##  1st Qu.:0.00000   1st Qu.:0.3373   1st Qu.:0.0042416   1st Qu.:0.0067507  
+##  Median :0.07407   Median :0.5179   Median :0.0178688   Median :0.0175060  
+##  Mean   :0.17690   Mean   :0.4914   Mean   :0.1000621   Mean   :0.1010995  
+##  3rd Qu.:0.22222   3rd Qu.:0.6937   3rd Qu.:0.0830426   3rd Qu.:0.0822473  
+##  Max.   :0.96296   Max.   :0.8027   Max.   :0.7418596   Max.   :0.9988305  
+##       cart               rf               brt              maxent         
+##  Min.   :0.00000   Min.   :0.00000   Min.   :0.02166   Min.   :0.0004466  
+##  1st Qu.:0.01351   1st Qu.:0.00000   1st Qu.:0.02166   1st Qu.:0.0238353  
+##  Median :0.01351   Median :0.00000   Median :0.02174   Median :0.0746837  
+##  Mean   :0.11415   Mean   :0.09518   Mean   :0.10233   Mean   :0.1998619  
+##  3rd Qu.:0.01351   3rd Qu.:0.07975   3rd Qu.:0.04399   3rd Qu.:0.2724494  
+##  Max.   :0.77778   Max.   :0.99700   Max.   :0.58043   Max.   :0.9999025</code></pre>
+<p>As we have stored the maxTSS threshold for each model, we can also threshold the predictions to obtain predicted presences and absences.</p>
+<pre class="r"><code># We use the sapply function to apply the thresholding to all columns 
+# in the prediction data frame. You could also use a loop or construct
+# the data frame by hand.
+binpred_testdata &lt;- sapply(names(pred_testdata), FUN=function(alg){ 
+  ifelse(pred_testdata[,alg]&gt;=comp_perf[comp_perf$alg==alg,&#39;maxTSS&#39;],1,0)
+})
+
+summary(binpred_testdata)</code></pre>
+<pre><code>##        bc              dom              glm              gamS       
+##  Min.   :0.0000   Min.   :0.0000   Min.   :0.0000   Min.   :0.0000  
+##  1st Qu.:0.0000   1st Qu.:0.0000   1st Qu.:0.0000   1st Qu.:0.0000  
+##  Median :0.0000   Median :0.0000   Median :0.0000   Median :0.0000  
+##  Mean   :0.2039   Mean   :0.2632   Mean   :0.2171   Mean   :0.2434  
+##  3rd Qu.:0.0000   3rd Qu.:1.0000   3rd Qu.:0.0000   3rd Qu.:0.0000  
+##  Max.   :1.0000   Max.   :1.0000   Max.   :1.0000   Max.   :1.0000  
+##       cart              rf              brt             maxent      
+##  Min.   :0.0000   Min.   :0.0000   Min.   :0.0000   Min.   :0.0000  
+##  1st Qu.:0.0000   1st Qu.:0.0000   1st Qu.:0.0000   1st Qu.:0.0000  
+##  Median :0.0000   Median :0.0000   Median :0.0000   Median :0.0000  
+##  Mean   :0.1842   Mean   :0.2368   Mean   :0.2171   Mean   :0.2566  
+##  3rd Qu.:0.0000   3rd Qu.:0.0000   3rd Qu.:0.0000   3rd Qu.:1.0000  
+##  Max.   :1.0000   Max.   :1.0000   Max.   :1.0000   Max.   :1.0000</code></pre>
+</div>
+</div>
+<div id="making-ensembles" class="section level1">
+<h1><span class="header-section-number">3</span> Making ensembles</h1>
+<p>We have gathered all information now that we need for making ensembles: evaluation statistics, optimal thresholds for binary predictions, and model predictions. The predictions can be combined into ensembles in different ways:<br />
+- mean of probabilities<br />
+- median of probabilities<br />
+- weighted mean of probabilities (weighted by model performance)<br />
+- committee averaging of binary predictions (what is the proportion of models predicting a presence?)</p>
+<pre class="r"><code># Mean of probabilities
+mean_prob &lt;- rowMeans(pred_testdata)
+
+# Median of probabilities
+median_prob &lt;- apply(pred_testdata, 1, median)
+
+# Weighted mean of probabilities, weighted by TSS 
+# (Make sure that order of models is the same in df for predictions and performance!!)
+wmean_prob &lt;- apply(pred_testdata, 1, weighted.mean, w=comp_perf[,&#39;TSS&#39;])
+
+# Committee averaging of binary predictions: calculates the proportion of
+# models that predict the species to be present.
+committee_av &lt;- rowSums(binpred_testdata)/ncol(binpred_testdata)
+
+# We can also calculate uncertainty measures, 
+# e.g. the standard deviation when making ensembles of mean probabilities.
+sd_prob &lt;- apply(pred_testdata, 1, sd)</code></pre>
+<p>Thus, ensembles can be easily constructed by hand. Of course, if you have many input data, models, and scenarios to put into your ensemble, this is easily becoming tedious. For that purpose, it will be very useful to automatise your code and write automatic functions. For an example for automatising your functions, have a look at the code that we published along with <span class="citation">Zurell et al. (2020)</span>, which you can obtain from the corresponding <a href="https://github.com/damariszurell/SSDM-JSDM">github repository</a>. Also, there are packages like <code>biomod2</code> that make it easy to construct ensembles automatically <span class="citation">(Thuiller et al. 2009)</span>.</p>
+<p>Now, let’s assess the performance of these ensembles.</p>
+<pre class="r"><code>library(PresenceAbsence)
+
+# Validating the &quot;mean of probabilities&quot;:
+
+# Prepare validation:
+thresh_dat &lt;- data.frame(ID=seq_len(nrow(sp_test)), 
+        obs = sp_test$Turdus_torquatus,
+        pred = mean_prob)
+        
+# optimal threshold
+thresh &lt;- PresenceAbsence::optimal.thresholds(DATA= thresh_dat)</code></pre>
+<pre><code>## Warning in PresenceAbsence::optimal.thresholds(DATA = thresh_dat): req.sens
+## defaults to 0.85</code></pre>
+<pre><code>## Warning in PresenceAbsence::optimal.thresholds(DATA = thresh_dat): req.spec
+## defaults to 0.85</code></pre>
+<pre><code>## Warning in PresenceAbsence::optimal.thresholds(DATA = thresh_dat): costs assumed
+## to be equal</code></pre>
+<pre class="r"><code>cmx_maxSSS &lt;- PresenceAbsence::cmx(DATA= thresh_dat, threshold=thresh[3,2])
+
+# performance measures
+perf_mean_prob &lt;- data.frame(
+  pcc = PresenceAbsence::pcc(cmx_maxSSS, st.dev=F),
+  sens = PresenceAbsence::sensitivity(cmx_maxSSS, st.dev=F),
+  spec = PresenceAbsence::specificity(cmx_maxSSS, st.dev=F),
+  TSS = TSS(cmx_maxSSS),
+  AUC = PresenceAbsence::auc(thresh_dat, st.dev=F),
+  D2 = d.square(thresh_dat$obs, thresh_dat$pred),
+   maxTSS = thresh[3,2])
+
+#---------------------
+
+# Validating the &quot;median of probabilities&quot;:
+
+# Prepare validation:
+thresh_dat &lt;- data.frame(ID=seq_len(nrow(sp_test)), 
+        obs = sp_test$Turdus_torquatus,
+        pred = median_prob)
+        
+# optimal threshold
+thresh &lt;- PresenceAbsence::optimal.thresholds(DATA= thresh_dat)</code></pre>
+<pre><code>## Warning in PresenceAbsence::optimal.thresholds(DATA = thresh_dat): req.sens
+## defaults to 0.85</code></pre>
+<pre><code>## Warning in PresenceAbsence::optimal.thresholds(DATA = thresh_dat): req.spec
+## defaults to 0.85</code></pre>
+<pre><code>## Warning in PresenceAbsence::optimal.thresholds(DATA = thresh_dat): costs assumed
+## to be equal</code></pre>
+<pre class="r"><code>cmx_maxSSS &lt;- PresenceAbsence::cmx(DATA= thresh_dat, threshold=thresh[3,2])
+
+# performance measures
+perf_median_prob &lt;- data.frame(
+  pcc = PresenceAbsence::pcc(cmx_maxSSS, st.dev=F),
+  sens = PresenceAbsence::sensitivity(cmx_maxSSS, st.dev=F),
+  spec = PresenceAbsence::specificity(cmx_maxSSS, st.dev=F),
+  TSS = TSS(cmx_maxSSS),
+  AUC = PresenceAbsence::auc(thresh_dat, st.dev=F),
+  D2 = d.square(thresh_dat$obs, thresh_dat$pred),
+   maxTSS = thresh[3,2])
+
+#---------------------
+
+# Validating the &quot;weighted mean of probabilities&quot;:
+
+# Prepare validation:
+thresh_dat &lt;- data.frame(ID=seq_len(nrow(sp_test)), 
+        obs = sp_test$Turdus_torquatus,
+        pred = wmean_prob)
+        
+# optimal threshold
+thresh &lt;- PresenceAbsence::optimal.thresholds(DATA= thresh_dat)</code></pre>
+<pre><code>## Warning in PresenceAbsence::optimal.thresholds(DATA = thresh_dat): req.sens
+## defaults to 0.85</code></pre>
+<pre><code>## Warning in PresenceAbsence::optimal.thresholds(DATA = thresh_dat): req.spec
+## defaults to 0.85</code></pre>
+<pre><code>## Warning in PresenceAbsence::optimal.thresholds(DATA = thresh_dat): costs assumed
+## to be equal</code></pre>
+<pre class="r"><code>cmx_maxSSS &lt;- PresenceAbsence::cmx(DATA= thresh_dat, threshold=thresh[3,2])
+
+# performance measures
+perf_wmean_prob &lt;- data.frame(
+  pcc = PresenceAbsence::pcc(cmx_maxSSS, st.dev=F),
+  sens = PresenceAbsence::sensitivity(cmx_maxSSS, st.dev=F),
+  spec = PresenceAbsence::specificity(cmx_maxSSS, st.dev=F),
+  TSS = TSS(cmx_maxSSS),
+  AUC = PresenceAbsence::auc(thresh_dat, st.dev=F),
+  D2 = d.square(thresh_dat$obs, thresh_dat$pred),
+   maxTSS = thresh[3,2])
+
+#---------------------
+
+# Validating the &quot;committee average&quot;:
+
+# Prepare validation:
+thresh_dat &lt;- data.frame(ID=seq_len(nrow(sp_test)), 
+        obs = sp_test$Turdus_torquatus,
+        pred = committee_av)
+        
+# optimal threshold
+thresh &lt;- PresenceAbsence::optimal.thresholds(DATA= thresh_dat)</code></pre>
+<pre><code>## Warning in PresenceAbsence::optimal.thresholds(DATA = thresh_dat): req.sens
+## defaults to 0.85</code></pre>
+<pre><code>## Warning in PresenceAbsence::optimal.thresholds(DATA = thresh_dat): req.spec
+## defaults to 0.85</code></pre>
+<pre><code>## Warning in PresenceAbsence::optimal.thresholds(DATA = thresh_dat): costs assumed
+## to be equal</code></pre>
+<pre class="r"><code>cmx_maxSSS &lt;- PresenceAbsence::cmx(DATA= thresh_dat, threshold=thresh[3,2])
+
+# performance measures
+perf_committee_prob &lt;- data.frame(
+  pcc = PresenceAbsence::pcc(cmx_maxSSS, st.dev=F),
+  sens = PresenceAbsence::sensitivity(cmx_maxSSS, st.dev=F),
+  spec = PresenceAbsence::specificity(cmx_maxSSS, st.dev=F),
+  TSS = TSS(cmx_maxSSS),
+  AUC = PresenceAbsence::auc(thresh_dat, st.dev=F),
+  D2 = d.square(thresh_dat$obs, thresh_dat$pred),
+   maxTSS = thresh[3,2])
+
+#---------------
+
+# Compare:
+(ens_perf &lt;- rbind(mean_prob = perf_mean_prob, median_prob = perf_median_prob, 
+                    wmean_prob = perf_mean_prob, committee_av = perf_committee_prob))</code></pre>
+<pre><code>##                    pcc   sens      spec       TSS       AUC         D2 maxTSS
+## mean_prob    0.8157895 0.9375 0.8014706 0.7389706 0.9090074  0.2871228  0.170
+## median_prob  0.8289474 0.9375 0.8161765 0.7536765 0.9126838  0.3942671  0.080
+## wmean_prob   0.8157895 0.9375 0.8014706 0.7389706 0.9090074  0.2871228  0.170
+## committee_av 0.8289474 0.9375 0.8161765 0.7536765 0.8846507 -2.1706735  0.185</code></pre>
+<div id="visualising-response-surfaces" class="section level2">
+<h2><span class="header-section-number">3.1</span> Visualising response surfaces</h2>
+<p>Let’s plot the response surfaces for the ensembles.</p>
+<pre class="r"><code>library(RColorBrewer)
+library(lattice)
+
+cls &lt;- colorRampPalette(rev(brewer.pal(11, &#39;RdYlBu&#39;)))(100)
+
+# We prepare our grid of environmental predictors:
+xyz &lt;- expand.grid(
+    seq(min(sp_train[,my_preds[1]]),max(sp_train[,my_preds[1]]),length=50),
+    seq(min(sp_train[,my_preds[2]]),max(sp_train[,my_preds[2]]),length=50))
+names(xyz) &lt;- my_preds
+
+# Make predictions of all models:
+xyz_preds &lt;- data.frame(
+  bc = predict(m_bc, xyz),
+  dom = predict(m_dom, xyz),
+  glm = predict(m_glm, xyz, type=&#39;response&#39;),
+  gamS = predict(m_gamS, xyz[,my_preds], type=&#39;response&#39;),
+  cart = predict(m_cart, xyz),
+  rf = predict(m_rf, xyz, type=&#39;prob&#39;)[,2],
+  brt = predict.gbm(m_brt, xyz, 
+                         n.trees=m_brt$gbm.call$best.trees, type=&quot;response&quot;),
+  maxent = predict(m_maxent, xyz, type=&quot;logistic&quot;)
+)
+
+# Make binary predictions
+xyz_bin &lt;- sapply(names(xyz_preds), FUN=function(alg){ 
+  ifelse(xyz_preds[,alg]&gt;=comp_perf[comp_perf$alg==alg,&#39;maxTSS&#39;],1,0)
+})
+
+# Make ensembles:
+xyz_ensemble &lt;- data.frame(
+  mean_prob = rowMeans(xyz_preds),
+  median_prob = apply(xyz_preds, 1, median),
+  wmean_prob = apply(xyz_preds, 1, weighted.mean, w=comp_perf[,&#39;TSS&#39;]),
+  committee_av = rowSums(xyz_bin)/ncol(xyz_bin),
+  sd_prob = apply(xyz_preds, 1, sd)
+)   
+
+# Plot ensemble of mean probabilities:
+xyz$z &lt;- xyz_ensemble[,&#39;mean_prob&#39;]
+wireframe(z ~ bio11 + bio8, data = xyz, zlab = list(&quot;Occurrence prob.&quot;, rot=90), 
+          drape = TRUE, col.regions = cls, scales = list(arrows = FALSE), 
+          zlim = c(0, 1), main=&#39;Ensemble: mean prob&#39;, xlab=&#39;bio11&#39;, 
+          ylab=&#39;bio8&#39;, screen=list(z = -120, x = -70, y = 3))</code></pre>
+<p><img src="7_SDM_ensembles_files/figure-html/unnamed-chunk-11-1.png" width="672" /></p>
+<pre class="r"><code># Plot ensemble of median probabilities:
+xyz$z &lt;- xyz_ensemble[,&#39;median_prob&#39;]
+wireframe(z ~ bio11 + bio8, data = xyz, zlab = list(&quot;Occurrence prob.&quot;, rot=90), 
+          drape = TRUE, col.regions = cls, scales = list(arrows = FALSE), 
+          zlim = c(0, 1), main=&#39;Ensemble: median prob&#39;, xlab=&#39;bio11&#39;, 
+          ylab=&#39;bio8&#39;, screen=list(z = -120, x = -70, y = 3))</code></pre>
+<p><img src="7_SDM_ensembles_files/figure-html/unnamed-chunk-11-2.png" width="672" /></p>
+<pre class="r"><code># Plot ensemble of weighted mean probabilities:
+xyz$z &lt;- xyz_ensemble[,&#39;wmean_prob&#39;]
+wireframe(z ~ bio11 + bio8, data = xyz, zlab = list(&quot;Occurrence prob.&quot;, rot=90), 
+          drape = TRUE, col.regions = cls, scales = list(arrows = FALSE), 
+          zlim = c(0, 1), main=&#39;Ensemble: weighted mean prob&#39;, xlab=&#39;bio11&#39;, 
+          ylab=&#39;bio8&#39;, screen=list(z = -120, x = -70, y = 3))</code></pre>
+<p><img src="7_SDM_ensembles_files/figure-html/unnamed-chunk-11-3.png" width="672" /></p>
+<pre class="r"><code># Plot ensemble of committee average:
+xyz$z &lt;- xyz_ensemble[,&#39;committee_av&#39;]
+wireframe(z ~ bio11 + bio8, data = xyz, zlab = list(&quot;Occurrence prob.&quot;, rot=90), 
+          drape = TRUE, col.regions = cls, scales = list(arrows = FALSE), 
+          zlim = c(0, 1), main=&#39;Ensemble: committee average&#39;, xlab=&#39;bio11&#39;, 
+          ylab=&#39;bio8&#39;, screen=list(z = -120, x = -70, y = 3))</code></pre>
+<p><img src="7_SDM_ensembles_files/figure-html/unnamed-chunk-11-4.png" width="672" /></p>
+<pre class="r"><code># Plot standard deviation of mean probabilities. This gives us an indication where in environmental space we have highest uncertainty:
+xyz$z &lt;- xyz_ensemble[,&#39;sd_prob&#39;]
+wireframe(z ~ bio11 + bio8, data = xyz, zlab = list(&quot;Occurrence prob.&quot;, rot=90), 
+          drape = TRUE, col.regions = cls, scales = list(arrows = FALSE), 
+          zlim = c(0, 1), main=&#39;Ensemble: sd&#39;, xlab=&#39;bio11&#39;, ylab=&#39;bio8&#39;, 
+          screen=list(z = -120, x = -70, y = 3))</code></pre>
+<p><img src="7_SDM_ensembles_files/figure-html/unnamed-chunk-11-5.png" width="672" /></p>
+</div>
+<div id="mapping-ensemble-predictions" class="section level2">
+<h2><span class="header-section-number">3.2</span> Mapping ensemble predictions</h2>
+<p>Finally, let’s do some mapping. We first map the occurrence probabilities predicted by the different algorithms as well as the potential presences.</p>
+<pre class="r"><code># Prepare data frame with environmental data
+bio_curr_df &lt;- data.frame(rasterToPoints(bio_curr[[my_preds]]))
+
+# We make predictions of all models:
+env_preds &lt;- data.frame(bio_curr_df[,1:2], 
+  bc = predict(m_bc, bio_curr_df),
+  dom = predict(m_dom, bio_curr_df),
+  glm = predict(m_glm, bio_curr_df, type=&#39;response&#39;),
+  gamS = predict(m_gamS, bio_curr_df[,my_preds], type=&#39;response&#39;),
+  cart = predict(m_cart, bio_curr_df),
+  rf = predict(m_rf, bio_curr_df, type=&#39;prob&#39;)[,2],
+  brt = predict.gbm(m_brt, bio_curr_df, 
+                         n.trees=m_brt$gbm.call$best.trees, type=&quot;response&quot;),
+  maxent = predict(m_maxent, bio_curr_df, type=&quot;logistic&quot;))
+                        
+
+# Binarise predictions of all algorithms
+env_preds_bin &lt;- data.frame(bio_curr_df[,1:2],
+  sapply(names(env_preds[,-c(1:2)]), FUN=function(alg){ 
+    ifelse(env_preds[,alg]&gt;=comp_perf[comp_perf$alg==alg,&#39;maxTSS&#39;],1,0)
+  }))
+
+# Make rasters from predictions:
+r_preds &lt;- rasterFromXYZ(env_preds, crs=crs(bg))
+r_preds_bin &lt;- rasterFromXYZ(env_preds_bin, crs=crs(bg))
+
+# Map predicted occurrence probabilities:
+spplot(r_preds)</code></pre>
+<p><img src="7_SDM_ensembles_files/figure-html/unnamed-chunk-12-1.png" width="672" /></p>
+<pre class="r"><code># Map predicted presences:
+spplot(r_preds_bin)</code></pre>
+<p><img src="7_SDM_ensembles_files/figure-html/unnamed-chunk-12-2.png" width="672" /></p>
+<p>Now, we map the ensemble predictions.</p>
+<pre class="r"><code># We make ensembles:    
+env_ensemble &lt;- data.frame(bio_curr_df[,1:2], 
+  mean_prob = rowMeans(env_preds[,-c(1:2)]),
+  median_prob = apply(env_preds[,-c(1:2)], 1, median),
+  wmean_prob = apply(env_preds[,-c(1:2)], 1, weighted.mean, w=comp_perf[,&#39;TSS&#39;]),
+  committee_av = rowSums(env_preds_bin[,-c(1:2)])/ncol(env_preds_bin[,-c(1:2)]),
+  sd_prob = apply(env_preds[,-c(1:2)], 1, sd))
+
+# Make rasters from ensemble predictions:
+r_ens &lt;- rasterFromXYZ(env_ensemble, crs=crs(bg))
+
+# Map continuous ensemble predictions:
+spplot(r_ens[[1:4]])</code></pre>
+<p><img src="7_SDM_ensembles_files/figure-html/unnamed-chunk-13-1.png" width="672" /></p>
+<p>Mapping the standard deviation of model predictions shows us the areas of highest deviation between model algorithms.</p>
+<pre class="r"><code># Map standard deviation across model algorithms:
+plot(r_ens[[&#39;sd_prob&#39;]])</code></pre>
+<p><img src="7_SDM_ensembles_files/figure-html/unnamed-chunk-14-1.png" width="672" /></p>
+<p>We can also derive binary ensemble predictions. We have already estimated the optimal thresholds when calculating the performance measures for the ensembles.</p>
+<pre class="r"><code># Binarise ensemble predictions
+env_ensemble_bin &lt;- data.frame(bio_curr_df[,1:2], 
+    sapply(c(&#39;mean_prob&#39;, &#39;median_prob&#39;, &#39;wmean_prob&#39;), 
+           FUN=function(x){ifelse(env_ensemble[,x]&gt;= ens_perf[x,&#39;maxTSS&#39;],1,0)}))
+
+# Make rasters:
+r_ens_bin &lt;- rasterFromXYZ(env_ensemble_bin, crs=crs(bg))
+
+# Map predicted presence from ensembles:
+spplot(r_ens_bin)   </code></pre>
+<p><img src="7_SDM_ensembles_files/figure-html/unnamed-chunk-15-1.png" width="672" /></p>
+<div class="alert alert-info">
+<p><em><strong>Exercise:</strong></em></p>
+<p>Use the species-climate data that you prepared for your own species (from practical 1 and 5), run at least three different algorithms and construct ensembles.</p>
+</div>
+</div>
+</div>
+<div id="references" class="section level1 unnumbered">
+<h1>References</h1>
+<div id="refs" class="references">
+<div id="ref-araujo2007">
+<p>Araujo, Miguel B., and Mark New. 2007. “Ensemble Forecasting of Species Distributions.” <em>Trends in Ecology and Evolution</em> 22: 42–47.</p>
+</div>
+<div id="ref-Dormann2018a">
+<p>Dormann, Carsten F., Justin M. Calabrese, Gurutzeta Guillera-Arroita, Eleni Matechou, Volker Bahn, Kamil Barton, Colin M. Beale, et al. 2018. “Model Averaging in Ecology: A Review of Bayesian, Information-Theoretic, and Tactical Approaches for Predictive Inference.” <em>Ecological Monographs</em> 88 (4): 485–504. <a href="https://doi.org/10.1002/ecm.1309">https://doi.org/10.1002/ecm.1309</a>.</p>
+</div>
+<div id="ref-elith2006">
+<p>Elith, J., C. H. Graham, R. P. Anderson, M. Dudik, S. Ferrier, A. Guisan, R. J. Hijmans, et al. 2006. “Novel Methods Improve Prediction of Species’ Distribution from Occurence Data.” <em>Ecography</em> 29: 129–51.</p>
+</div>
+<div id="ref-Gillings2019">
+<p>Gillings, Simon, Dawn E. Balmer, Brian J. Caffrey, Iain S. Downie, David W. Gibbons, Peter C. Lack, James B. Reid, J. Tim R. Sharrock, Robert L. Swann, and Robert J. Fuller. 2019. “Breeding and Wintering Bird Distributions in Britain and Ireland from Citizen Science Bird Atlases.” <em>Global Ecology and Biogeography</em> 28 (7): 866–74. <a href="https://doi.org/10.1111/geb.12906">https://doi.org/10.1111/geb.12906</a>.</p>
+</div>
+<div id="ref-Guisan2017">
+<p>Guisan, A., W. Thuiller, and N. E. Zimmermann. 2017. <em>Habitat Suitability and Distribution Models with Applications in R</em>. Cambride University Press.</p>
+</div>
+<div id="ref-Thuiller2019">
+<p>Thuiller, W., M. Guéguen, J. Renaud, D. N. Karger, and N. E. Zimmermann. 2019. “Uncertainty in Ensembles of Global Biodiversity Scenarios.” <em>Nature Communications</em> 10: 1446.</p>
+</div>
+<div id="ref-Thuiller2009">
+<p>Thuiller, W., B. Lafourcade, R. Engler, and M. B. Araujo. 2009. “BIOMOD - a Platform for Ensemble Forecasting of Species Distributions.” <em>Ecography</em> 32: 369–73.</p>
+</div>
+<div id="ref-Vuuren2013">
+<p>Vuuren, Detlef P. van, and Timothy R. Carter. 2013. “Climate and Socio-Economic Scenarios for Climate Change Research and Assessment: Reconciling the New with the Old.” <em>Climatic Change</em> 122 (November): 415–29.</p>
+</div>
+<div id="ref-Zurell2019">
+<p>Zurell, Damaris, Niklaus E. Zimmermann, Helge Gross, Andri Baltensweiler, Thomas Sattler, and Rafael O. Wüest. 2020. “Testing Species Assemblage Predictions from Stacked and Joint Species Distribution Models.” <em>Journal of Biogeography</em> 47 (1): 101–13. <a href="https://doi.org/10.1111/jbi.13608">https://doi.org/10.1111/jbi.13608</a>.</p>
+</div>
+</div>
+</div>
+
+<!DOCTYPE html>
+<html>
+
+<br>
+<hr />
+<div id="footer">
+<p>Damaris Zurell, 2020 <a href="http://creativecommons.org/licenses/by/4.0/" >(CC BY 4.0)</a>.  </p>
+</div>
+
+</html>
+
+
+</div>
+</div>
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open')
+  });
+});
+</script>
+
+<!-- code folding -->
+
+<script>
+$(document).ready(function ()  {
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_').toLowerCase();
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

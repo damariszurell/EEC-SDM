@@ -1,0 +1,896 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+
+
+
+<title>SDM assessment and prediction</title>
+
+<script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/bootstrap.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<script src="site_libs/jqueryui-1.11.4/jquery-ui.min.js"></script>
+<link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<link href="site_libs/highlightjs-9.12.0/textmate.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+<link href="site_libs/font-awesome-5.1.0/css/all.css" rel="stylesheet" />
+<link href="site_libs/font-awesome-5.1.0/css/v4-shims.css" rel="stylesheet" />
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+<style type="text/css">
+h1 {
+  font-size: 34px;
+}
+h1.title {
+  font-size: 38px;
+}
+h2 {
+  font-size: 30px;
+}
+h3 {
+  font-size: 24px;
+}
+h4 {
+  font-size: 18px;
+}
+h5 {
+  font-size: 16px;
+}
+h6 {
+  font-size: 12px;
+}
+.table th:not([align]) {
+  text-align: left;
+}
+</style>
+
+
+
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img {
+  max-width:100%;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+summary {
+  display: list-item;
+}
+</style>
+
+
+<style type="text/css">
+/* padding for bootstrap navbar */
+body {
+  padding-top: 51px;
+  padding-bottom: 40px;
+}
+/* offset scroll position for anchor links (for fixed navbar)  */
+.section h1 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h2 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h3 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h4 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h5 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h6 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.dropdown-submenu {
+  position: relative;
+}
+.dropdown-submenu>.dropdown-menu {
+  top: 0;
+  left: 100%;
+  margin-top: -6px;
+  margin-left: -1px;
+  border-radius: 0 6px 6px 6px;
+}
+.dropdown-submenu:hover>.dropdown-menu {
+  display: block;
+}
+.dropdown-submenu>a:after {
+  display: block;
+  content: " ";
+  float: right;
+  width: 0;
+  height: 0;
+  border-color: transparent;
+  border-style: solid;
+  border-width: 5px 0 5px 5px;
+  border-left-color: #cccccc;
+  margin-top: 5px;
+  margin-right: -10px;
+}
+.dropdown-submenu:hover>a:after {
+  border-left-color: #ffffff;
+}
+.dropdown-submenu.pull-left {
+  float: none;
+}
+.dropdown-submenu.pull-left>.dropdown-menu {
+  left: -100%;
+  margin-left: 10px;
+  border-radius: 6px 0 6px 6px;
+}
+</style>
+
+<script>
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark it active
+  menuAnchor.parent().addClass('active');
+
+  // if it's got a parent navbar menu mark it active as well
+  menuAnchor.closest('li.dropdown').addClass('active');
+});
+</script>
+
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "&#xe258;";
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+  background-color: transparent;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<!-- code folding -->
+
+
+
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+@media print {
+.toc-content {
+  /* see https://github.com/w3c/csswg-drafts/issues/4434 */
+  float: right;
+}
+}
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.90em;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+
+</style>
+
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
+
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row-fluid">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">Species distribution modelling</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="index.html">Home</a>
+</li>
+<li>
+  <a href="schedule.html">Course schedule</a>
+</li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+    R practicals
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li>
+      <a href="0_Intro.html">0. Introduction to R</a>
+    </li>
+    <li>
+      <a href="1_SpeciesData.html">1. Species data</a>
+    </li>
+    <li>
+      <a href="2_EnvData.html">2. Environmental data</a>
+    </li>
+    <li>
+      <a href="3_SDM_intro.html">3. SDMs: simple model fitting</a>
+    </li>
+    <li>
+      <a href="4_SDM_eval.html">4. SDMs: assessment and prediction</a>
+    </li>
+    <li>
+      <a href="5_pseudoabsence.html">5. Pseudo-absence and background data</a>
+    </li>
+    <li>
+      <a href="6_SDM_algorithms.html">6. SDMs: algorithms</a>
+    </li>
+    <li>
+      <a href="7_SDM_ensembles.html">7. SDMs: ensembles</a>
+    </li>
+  </ul>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        <li>
+  <a href="mailto:damaris@zurell.de">
+    <span class="fa fa-envelope"></span>
+     
+  </a>
+</li>
+<li>
+  <a href="https://damariszurell.github.io">
+    <span class="fa fa-home"></span>
+     
+  </a>
+</li>
+<li>
+  <a href="https://twitter.com/ZurellLab">
+    <span class="fa fa-twitter"></span>
+     
+  </a>
+</li>
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<div class="fluid-row" id="header">
+
+
+
+<h1 class="title toc-ignore">SDM assessment and prediction</h1>
+
+</div>
+
+
+<div id="introduction" class="section level1">
+<h1><span class="header-section-number">1</span> Introduction</h1>
+<p>We have already fitted simple species distribution models (SDMs) in the previous tutorial. Remember the five general model building steps: (i) conceptualisation, (ii) data preparation, (iii) model fitting, (iv) model assessment, and (v) prediction <span class="citation">(Zurell et al. 2020)</span>. In this practical, we will concentrate on steps (iv)-(v). We will learn how to validate SDMs, visualise the fitted species-environment relationships, and make predictions. For getting a deeper understanding of these single steps, I highly recommend studying more advanced reviews <span class="citation">(Guisan and Zimmermann 2000; Guisan and Thuiller 2005; Elith and Leathwick 2009)</span> and textbooks on SDMs <span class="citation">(Franklin 2010; Guisan, Thuiller, and Zimmermann 2017)</span>.</p>
+<div id="recap-of-last-session-data-and-models" class="section level2">
+<h2><span class="header-section-number">1.1</span> Recap of last session: data and models</h2>
+<p>We will continue to work on the Ring Ouzel example of the previous session, using data from the British breeding and wintering birds citizen science atlas <span class="citation">(Gillings et al. 2019)</span>. Let’s quickly repeat the main steps of data preparation and model fitting:</p>
+<pre class="r"><code>library(raster)
+bg &lt;- raster(&#39;data/Prac3_UK_mask.grd&#39;)
+sp_dat &lt;- read.table(&#39;data/Prac3_RingOuzel.txt&#39;,header=T)</code></pre>
+<pre class="r"><code>m1 &lt;- glm( Turdus_torquatus ~ bio11 + bio8, family=&#39;binomial&#39;, data=sp_dat)
+
+summary(m1)</code></pre>
+<pre><code>## 
+## Call:
+## glm(formula = Turdus_torquatus ~ bio11 + bio8, family = &quot;binomial&quot;, 
+##     data = sp_dat)
+## 
+## Deviance Residuals: 
+##      Min        1Q    Median        3Q       Max  
+## -1.78050  -0.27326  -0.17106  -0.08886   3.00796  
+## 
+## Coefficients:
+##             Estimate Std. Error z value Pr(&gt;|z|)    
+## (Intercept)  1.86289    0.47867   3.892 9.95e-05 ***
+## bio11       -0.11329    0.03107  -3.647 0.000266 ***
+## bio8        -0.03293    0.01949  -1.690 0.091051 .  
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+## (Dispersion parameter for binomial family taken to be 1)
+## 
+##     Null deviance: 294.43  on 506  degrees of freedom
+## Residual deviance: 172.20  on 504  degrees of freedom
+## AIC: 178.2
+## 
+## Number of Fisher Scoring iterations: 7</code></pre>
+</div>
+</div>
+<div id="model-assessment" class="section level1">
+<h1><span class="header-section-number">2</span> Model assessment</h1>
+<p>Before we can use our model for making predictions in space and time, we need to assess model behaviour and predictive performance.</p>
+<div id="visualising-response-curves" class="section level2">
+<h2><span class="header-section-number">2.1</span> Visualising response curves</h2>
+<p>When only looking at parameter estimates, it is sometimes difficult to envision how exactly the fitted response (the “niche” function) looks like. Also, for more complicated machine learning algorithms (that we will get to know later), there are no parameter estimates to look at, so we need different means to judge the plausibility of the fitted response.</p>
+<p>Response curves and response surfaces visualize the (mean) values that a model would predict for an environmental situation, meaning for specific values of the predictor variables. In the Ring Ouzel example, we have only two predictors, so we can simply construct a 3D surface that shows the predicted values along the two environmental gradients.</p>
+<p>We can get the predicted values using the <code>predict()</code> function.</p>
+<pre class="r"><code># If we do not provide &quot;newdata&quot;, then predict() should simply return the fitted values: 
+head(predict(m1, type=&#39;response&#39;))</code></pre>
+<pre><code>##            1            2            3            4            5            6 
+## 0.0058545208 0.0195547435 0.0321334029 0.0005566393 0.0007242014 0.0007471082</code></pre>
+<pre class="r"><code>head(m1$fitted)</code></pre>
+<pre><code>##            1            2            3            4            5            6 
+## 0.0058545208 0.0195547435 0.0321334029 0.0005566393 0.0007242014 0.0007471082</code></pre>
+<p>If we want to predict model response along the two environmental gradients, we first need to define a grid that contains all combinations of the two variables. For this, we use a combination of the <code>expand.grid()</code> and <code>seq()</code> functions.</p>
+<pre class="r"><code># Wwe want to make predictions for all combinations of the two predictor variables
+# and along their entire environmental gradients:
+xyz &lt;- expand.grid(
+  # We produce a sequence of environmental values within the predictor ranges:
+    bio11 = seq(min(sp_dat$bio11),max(sp_dat$bio11),length=50),
+    bio8 = seq(min(sp_dat$bio8),max(sp_dat$bio8),length=50)
+    )
+
+# Now we can make predictions to this new data frame
+xyz$z &lt;- predict(m1, newdata=xyz, type=&#39;response&#39;)
+summary(xyz)</code></pre>
+<pre><code>##      bio11              bio8              z            
+##  Min.   :-23.398   Min.   :-12.40   Min.   :0.0000497  
+##  1st Qu.: -3.752   1st Qu.: 30.31   1st Qu.:0.0077617  
+##  Median : 16.712   Median : 74.80   Median :0.0762859  
+##  Mean   : 16.712   Mean   : 74.80   Mean   :0.2590632  
+##  3rd Qu.: 37.177   3rd Qu.:119.29   3rd Qu.:0.4657836  
+##  Max.   : 56.823   Max.   :162.00   Max.   :0.9927687</code></pre>
+<pre class="r"><code># As result, we have a 3D data structure and want to visualise this.
+# Here, I first set a color palette
+library(RColorBrewer)
+cls &lt;- colorRampPalette(rev(brewer.pal(11, &#39;RdYlBu&#39;)))(100)
+
+# Finally, we plot the response surface using the wireframe function from the lattice package
+library(lattice)
+wireframe(z ~ bio11 + bio8, data = xyz, zlab = list(&quot;Occurrence prob.&quot;, rot=90), 
+          drape = TRUE, col.regions = cls, scales = list(arrows = FALSE), zlim = c(0, 1))</code></pre>
+<p><img src="4_SDM_eval_files/figure-html/unnamed-chunk-4-1.png" width="672" /></p>
+<pre class="r"><code># We can also rotate the axes to better see the surface
+wireframe(z ~ bio11 + bio8, data = xyz, zlab = list(&quot;Occurrence prob.&quot;, rot=90), 
+          drape = TRUE, col.regions = cls, scales = list(arrows = FALSE), zlim = c(0, 1), 
+          screen=list(z = -160, x = -70, y = 3))</code></pre>
+<p><img src="4_SDM_eval_files/figure-html/unnamed-chunk-4-2.png" width="672" /></p>
+<p>This looks very nice. However, if the model gets more complicated and contains more variables than just two, how can we then visualise it?</p>
+<p>One way is to cut the response surface into slices. Most often, we simply plot the response along one environmental gradient while keeping all other gradients constant at their mean. We call this <strong><em>partial response plots</em></strong>.</p>
+<pre class="r"><code># Again, we make a new data frame containing the two predictors. However, we only 
+# produce a sequence of environmental values for one of the predictors 
+# while keeping the other constant at its means.
+
+# We want two panels next to each other:
+par(mfrow=c(1,2))
+
+# Names of our variables:
+my_preds &lt;- c(&#39;bio11&#39;, &#39;bio8&#39;)
+
+# We loop over the two predictors and make a partial response plot for each:
+for (i in 1:2){
+  
+  # Create new data frame with predictor variables
+  xyz &lt;- data.frame(
+    # Make sequence for one predictor:
+    seq(min(sp_dat[,my_preds[i]]),max(sp_dat[,my_preds[i]]),length=50),
+    
+    # Calculate the mean of the other predictor:
+      mean(sp_dat[,my_preds[-i]]) 
+    )
+  
+  # Make sure the new data frame contains the correct predictor names
+  names(xyz) &lt;- c(my_preds[i], my_preds[-i])
+  
+  # Make prediction to new data
+  xyz$z &lt;- predict(m1, newdata=xyz, type=&#39;response&#39;)
+
+  # Plot the response curve
+  plot(xyz[,my_preds[i]],xyz$z,type=&#39;l&#39;, ylim=c(0,1), xlab=my_preds[i], ylab=&#39;Occurrence probability&#39;)
+}</code></pre>
+<p><img src="4_SDM_eval_files/figure-html/unnamed-chunk-5-1.png" width="672" /></p>
+<p>When you compare the response surface and the partial response curves, you see that the latter only give us an incomplete picture of what is going on as they are only “slicing” the response surface in the middle.</p>
+</div>
+<div id="assessing-sdm-performance" class="section level2">
+<h2><span class="header-section-number">2.2</span> Assessing SDM performance</h2>
+<p>In the previous session, we already learned about the measure “explained deviance” that tells us something about the goodness-of-fit, meaning how well the model fits the data.</p>
+<pre class="r"><code>library(ecospat)
+ecospat.adj.D2.glm(m1)</code></pre>
+<pre><code>## [1] 0.4128202</code></pre>
+<p>Here, our two-predictor model explains roughly 40% of the variance in the data. However, often we are not only interested in how well our model fits the data but how robust the model is against changes in the input data and, thus, how robust predictions to other places and times might be. This assessment of model performance is often referred to as validation or evaluation. Evaluating the model on the calibration or training data is often referred to as internal validation (“resubstitution”) <span class="citation">(Araujo et al. 2005)</span>. This generally gives a too optimistic picture of model performance. It is better to evaluate the model using data that have not been used for model fitting. One way is to split the data and only train the model on some proportion of the data and validate it on the hold-out data. Potential procedures are repeated split-samples (e.g. splitting into 70% training and 30% test data and repeat several times) and <em>k</em>-fold cross-validation (e.g. 5-fold or 10-fold), where the data are split into <em>k</em> portions, the <em>k</em>th portion is held out for validation and the procedure is repeated <em>k</em> times. If these folds are stratified in geographic or environmental space, we talk of spatial block cross-validation and environmental block cross-validation <span class="citation">(Roberts et al. 2017)</span>.</p>
+<p>Here, we will use 5-fold cross-validation as example. First, we build a small function for making predictions to 5-fold data.</p>
+<pre class="r"><code>library(dismo)
+
+# Build a function for cross-validation
+cross.val &lt;- function(model, k=5, data = model$data){
+    # Ensure the dismo package is loaded for &quot;kfold&quot; function:
+    require(dismo) 
+  
+  # This function returns a vector with group assignments, 
+  # meaning that each data point is assigned to a specific fold/group
+    ks &lt;- kfold(model$data, k = k, by = model$data[,as.character(formula(model)[2])])
+    
+    # We prepare an empty data frame for storing the predictions
+    crossval_preds &lt;- data.frame(row = row.names(data), 
+        crossval_preds = numeric(length = nrow(data))) 
+        
+    # We loop through the k folds
+    for(i in seq_len(k)){
+
+      # all data points belonging to fold i will be used as test data
+      test &lt;- data[ks==i,]    
+      
+      # all other data points (from the other folds) will serve as training data
+        train &lt;- data[ks!=i,]
+
+        # Now we re-estimate/update the model using the new training data
+        modtmp &lt;- update(model, data = train)
+        
+        # We make predictions to the hold-out test data and store these
+        crossval_preds[which(ks==i),2] &lt;- 
+            predict(modtmp, newdata = test, type = &#39;response&#39;)
+    }
+    
+    # The function outputs a vector of cross-validated predictions
+    return(crossval_preds) 
+    }</code></pre>
+<p>Now we can use this function to split our data into 5 folds, re-calibrate the model using only 4/5 of the original data and predict the model to the hold-out 1/5 of the data.</p>
+<pre class="r"><code>preds_cv &lt;- cross.val(m1)</code></pre>
+<p>We receive a data frame containing for each original row entry a cross-validated prediction.Out of curiosity, let us compare the fitted values on the training data and the predictions on the cross-validation data. You should see that the predictions are similar (this is good, otherwise our model would be very sensitive to changes in input data) but not identical - thus, we have basically added some noise.</p>
+<pre class="r"><code>plot(m1$fitted.values, preds_cv[,2], xlab=&#39;Fitted values&#39;, ylab=&#39;Predicted values from CV&#39;)
+abline(0,1,col=&#39;red&#39;,lwd=2)</code></pre>
+<p><img src="4_SDM_eval_files/figure-html/unnamed-chunk-9-1.png" width="672" /></p>
+<p>We will use these cross-validated predictions to assess model performance.</p>
+<div id="threshold-dependent-performance-measures" class="section level3">
+<h3><span class="header-section-number">2.2.1</span> Threshold-dependent performance measures</h3>
+<p>Now, we want to know how well our model predicts the observations. Different measures are available for quantifying this. A lot of these measures are threshold-dependent. You have probably realised that our model predicts a continuous response, the probability of occurrence, while our observations are binary. Many performance measures rely on comparisons like “How many presence observations does the model correctly predict as presence”. In order to answer that we first need to convert the continuous probabilities into binary predictions. Different thresholds are introduced in <span class="citation">Liu et al. (2005)</span>. Most of these are implemented in the <code>PresenceAbsence</code> package in the <code>optimal.thresholds</code> function.</p>
+<pre class="r"><code>library(PresenceAbsence)
+
+# We first prepare our data:
+# Prepare predictions on training data:
+thresh_dat_train &lt;- data.frame(
+  ID = seq_len(nrow(sp_dat)), 
+    obs = sp_dat$Turdus_torquatus,
+    pred = m1$fitted)
+
+# Prepare cross-validated predictions:
+thresh_dat_cv &lt;- data.frame(
+  ID = seq_len(nrow(sp_dat)), 
+    obs = sp_dat$Turdus_torquatus,
+    pred = preds_cv[,2])
+        
+# Then, we find the optimal thresholds:     
+thresh_train &lt;- PresenceAbsence::optimal.thresholds(DATA= thresh_dat_train)
+
+thresh_cv &lt;- PresenceAbsence::optimal.thresholds(DATA= thresh_dat_cv)</code></pre>
+<p>We can compare observed vs. predicted presences and absences based on these tresholds. For this, we take our predictions from the cross-validation. The comparison is easiest illustrated in a confusion matrix, for example using the function <code>cmx</code> in the <code>PresenceAbsence</code> package.</p>
+<p>Have a look at <span class="citation">Liu et al. (2005)</span> to see which thresholds they recommend. Here, we will use the threshold that maximises the sum of sensitivity and specificity (the third row in the thresholds data frame):</p>
+<pre class="r"><code>(cmx_maxSSS &lt;- PresenceAbsence::cmx(DATA= thresh_dat_cv, threshold=thresh_cv[3,2]))</code></pre>
+<pre><code>##          observed
+## predicted   1   0
+##         1  39  82
+##         0   4 382</code></pre>
+<p>From such a confusion matrix, we can calculate different evaluation criteria. For example,<br />
+- the proportion of correctly classified test observations <code>pcc</code><br />
+- the proportion of correctly classified presences, the sensitivity or true positive rate<br />
+- the proportion of correctly classified absences, the specificity or true negative rate</p>
+<pre class="r"><code>PresenceAbsence::pcc(cmx_maxSSS, st.dev=F)</code></pre>
+<pre><code>## [1] 0.8303748</code></pre>
+<pre class="r"><code>PresenceAbsence::sensitivity(cmx_maxSSS, st.dev=F)</code></pre>
+<pre><code>## [1] 0.9069767</code></pre>
+<pre class="r"><code>PresenceAbsence::specificity(cmx_maxSSS, st.dev=F)</code></pre>
+<pre><code>## [1] 0.8232759</code></pre>
+<p>Other measures are <em>Kappa</em> and <em>TSS</em> (the true skill statistic). <span class="citation">Allouche, Tsoar, and Kadmon (2006)</span> explain how to calculate these.</p>
+<pre class="r"><code>PresenceAbsence::Kappa(cmx_maxSSS, st.dev=F)</code></pre>
+<pre><code>## [1] 0.4005939</code></pre>
+<pre class="r"><code># TSS is not implemented. We write the function ourselves:
+TSS = function(cmx){
+    require(PresenceAbsence)
+    PresenceAbsence::sensitivity(cmx, st.dev=F) + PresenceAbsence::specificity(cmx, st.dev=F) - 1
+    }
+    
+TSS(cmx_maxSSS) </code></pre>
+<pre><code>## [1] 0.7302526</code></pre>
+<p>According to <span class="citation">Araujo et al. (2005)</span>, <em>Kappa</em>&gt;0.4 indicate good predictions. For TSS, we often assume TSS&gt;0.5 to indicate good predictions.</p>
+</div>
+<div id="threshold-independent-performance-measures" class="section level3">
+<h3><span class="header-section-number">2.2.2</span> Threshold-independent performance measures</h3>
+<p>The most common evaluation statistic that avoids thresholding the data is AUC - the area under the receiver-operating characteristic (ROC) curve. ROC curves are generated by calculating sensitivity (true positive rate) and specificity (true negative rate) for many thresholds along the entire range of predicted probabilities. Then, (1-specificity) is plotted on the x-axis against sensitivity on the y axis. The area under this curve is called the AUC. The further the generated curve deviates from the 1:1 line towards the upper-left corner, the better the model predicts presence/absence of a species. If we would take a random presence and a random absence from our observations and make predictions, than AUC can be interpeted as the chance of assigning a higher predicted occurrence probability to the presence compared to the absence point. Typically, we regard AUC&gt;0.7 as indicating fair predictions <span class="citation">(Araujo et al. 2005)</span>.</p>
+<pre class="r"><code>library(AUC)
+
+# Let&#39;s have a look a the ROC curve:
+roc_cv &lt;- roc(preds_cv[,2], as.factor(sp_dat$Turdus_torquatus))
+plot(roc_cv, col = &quot;grey70&quot;, lwd = 2)</code></pre>
+<p><img src="4_SDM_eval_files/figure-html/unnamed-chunk-14-1.png" width="672" /></p>
+<pre class="r"><code># Compute the AUC:
+auc(roc_cv)</code></pre>
+<pre><code>## [1] 0.9092322</code></pre>
+<p>It seems our model is performing pretty well on hold-out data. We can thus attempt making predictions in space and time.</p>
+<p>Please be aware that many packages contain functions for evaluatinng SDMs. As always you have to find your own way. Here, I provide merely examples.</p>
+</div>
+</div>
+</div>
+<div id="spatio-temporal-predictions" class="section level1">
+<h1><span class="header-section-number">3</span> Spatio-temporal predictions</h1>
+<p>We have already learned how to make predictions using the function <code>predict()</code> and also using the argument <code>newdata</code>. All we need for transferring our model to other places and times are the respective environmental variables.</p>
+<div id="prepare-the-environmental-layers" class="section level2">
+<h2><span class="header-section-number">3.1</span> Prepare the environmental layers</h2>
+<p>As you have learned in the previous sessions, we can download current and future climate layers from databases such as <a href="http://www.worldclim.org/">WorldClim</a> and [CHELSA](<a href="http://chelsa-climate.org/" class="uri">http://chelsa-climate.org/</a>. When making predictions, we have to take care that the target environmental layers match the scale of analysis. Our species data were available at a 10 km spatial resolution based on the British National Grid. We aim to predict our model to climate layers based on the worldclim data base, which offers the data at different resolutions in geographic (lon/lat) projection. The appropriate worldclim spatial resolution would be the 5 min resolution. As a necessary step, we need to reproject these climate layers to the British National Grid. Below, I show you how this could be done. Alternatively, you can also download the processed climate layers <a href="data/Prac4_climate.zip">here</a> (or from the moodle) and read them in using the <code>stack()</code> function.</p>
+<p>We use the <code>raster</code> package for downloading worldclim data.</p>
+<pre class="r"><code># First set your file path that you want to download climate data 
+# to or where you have stored climate data already.
+my_filepath &lt;- &#39;data/clim_data&#39;</code></pre>
+<p>We download data for the current climate as well as a future scenario for the year 2050.</p>
+<pre class="r"><code>library(raster)
+
+# Please note that you have to set download=T if you haven&#39;t downloaded the data before:
+bio_curr &lt;- getData(&#39;worldclim&#39;, var=&#39;bio&#39;, download=F, 
+                    lon=-5, lat=55, res=5, path=my_filepath)
+
+# Please note that you have to set download=T if you haven&#39;t downloaded the data before:
+bio_fut &lt;- getData(&#39;CMIP5&#39;, var=&#39;bio&#39;, download=F, res=5, 
+                   rcp=45, model=&#39;NO&#39;, year=50, path=my_filepath)</code></pre>
+<p>We will use the background mask of UK to clip the data. This mask is in the British National Grid, which is the target coordinate system, and we thus need to reproject the worldclim layers. To speed things up, we will first crop the climate layers.</p>
+<pre class="r"><code># the spatial extent of UK in lon/lat coordinates
+extent_uk &lt;- c(-12, 3, 48, 62)
+
+# Crop and reproject current climate
+bio_curr &lt;- crop(bio_curr, extent_uk)
+bio_curr &lt;- projectRaster(bio_curr, bg)
+bio_curr &lt;- resample(bio_curr, bg)
+bio_curr &lt;- mask(bio_curr, bg)
+
+# Crop and reproject current climate
+bio_fut &lt;- crop(bio_fut, extent_uk)
+bio_fut &lt;- projectRaster(bio_fut, bg)
+bio_fut &lt;- resample(bio_fut, bg)
+bio_fut &lt;- mask(bio_fut, bg)
+names(bio_fut) &lt;- names(bio_curr)</code></pre>
+<p>Store the layers for later use:</p>
+<pre class="r"><code>writeRaster(bio_curr, &#39;data/Prac4_UK_bio_curr.grd&#39;)
+writeRaster(bio_fut, &#39;data/Prac4_UK_bio_fut.grd&#39;)</code></pre>
+</div>
+<div id="make-predictions-to-the-environmental-layers" class="section level2">
+<h2><span class="header-section-number">3.2</span> Make predictions to the environmental layers</h2>
+<p>It is now straight forward to make continuous predictions to the current and the future climate:</p>
+<pre class="r"><code># Prepare data frames
+bio_curr_df &lt;- data.frame(rasterToPoints(bio_curr))
+bio_fut_df &lt;- data.frame(rasterToPoints(bio_fut))
+
+# Make continuous predictions:
+bio_curr_df$pred_glm &lt;- predict(m1, newdata= bio_curr_df, type=&quot;response&quot;)
+bio_fut_df$pred_glm &lt;- predict(m1, newdata= bio_fut_df, type=&quot;response&quot;)</code></pre>
+<p>Of course, we can also plot the predictions:</p>
+<pre class="r"><code>par(mfrow=c(1,2))
+
+# Make raster of predictions to current environment:
+r_pred_curr &lt;- rasterFromXYZ(bio_curr_df[,c(&#39;x&#39;,&#39;y&#39;,&#39;pred_glm&#39;)])
+plot(r_pred_curr, axes=F, main=&#39;Occ. prob. - today&#39;)
+
+# Make raster stack of predictions to future environment:
+r_pred_fut &lt;- rasterFromXYZ(bio_fut_df[,c(&#39;x&#39;,&#39;y&#39;,&#39;pred_glm&#39;)])
+plot(r_pred_fut, axes=F, main=&#39;Occ. prob. - 2050&#39;)</code></pre>
+<p><img src="4_SDM_eval_files/figure-html/unnamed-chunk-21-1.png" width="672" /> We see that ring ouzel is predicted to decline under the chosen climate scenario.</p>
+<p>Lastly, we can also translate the continuous predictions into binary predictions and plot the resulting maps.</p>
+<pre class="r"><code># Make binary predictions:
+bio_curr_df$bin_glm &lt;- ifelse(bio_curr_df$pred_glm &gt;= thresh_cv[3,2], 1, 0)
+bio_fut_df$bin_glm &lt;- ifelse(bio_fut_df$pred_glm &gt;= thresh_cv[3,2], 1, 0)
+
+# Make raster stack of predictions to current environment:
+r_pred_curr &lt;- rasterFromXYZ(bio_curr_df[,c(&#39;x&#39;,&#39;y&#39;,&#39;pred_glm&#39;,&#39;bin_glm&#39;)])
+plot(r_pred_curr, axes=F)</code></pre>
+<p><img src="4_SDM_eval_files/figure-html/unnamed-chunk-22-1.png" width="672" /></p>
+<pre class="r"><code># Make raster stack of predictions to future environment:
+r_pred_fut &lt;- rasterFromXYZ(bio_fut_df[,c(&#39;x&#39;,&#39;y&#39;,&#39;pred_glm&#39;,&#39;bin_glm&#39;)])
+plot(r_pred_fut, axes=F)</code></pre>
+<p><img src="4_SDM_eval_files/figure-html/unnamed-chunk-22-2.png" width="672" /></p>
+</div>
+<div id="assessing-novel-environments" class="section level2">
+<h2><span class="header-section-number">3.3</span> Assessing novel environments</h2>
+<p>Novel environments are conditions that were not realised in the sampled data but are realised in the projection data. For example, in the future it may be warmer than today. If the entire niche of the species is encompassed by data, then the model does not need to extrapolate even if the projection data contain some novel environments. Mostly, novel environments only prove problematic if the niche is truncated in the sampled data <span class="citation">(Zurell, Elith, and Schroeder 2012)</span>. Novel environments can be assessed in different ways. MESS (Multivariate environmental similarity surface) maps are contained in the <code>dismo</code> package and described in <span class="citation">Elith, Kearney, and Phillips (2010)</span>. They assess for each environmental variables separately whether the projection data contain novel conditions beyond the sampled range.</p>
+<pre class="r"><code># MESS maps from the dismo package:
+r.mess &lt;- mess(bio_fut[[my_preds]], sp_dat[,my_preds])
+plot(r.mess, axes=F)</code></pre>
+<p><img src="4_SDM_eval_files/figure-html/unnamed-chunk-23-1.png" width="672" /></p>
+<pre class="r"><code># Negative values indicate dissimilar=novel environments:
+r.mess.mask &lt;- r.mess&lt;0
+r.mess.mask &lt;- mask(r.mess.mask,bg)
+plot(r.mess.mask, axes=F)</code></pre>
+<p><img src="4_SDM_eval_files/figure-html/unnamed-chunk-23-2.png" width="672" /></p>
+<p>From these maps, we can already see that novel environments should not be any issue for the ring ouzel as novel environments could mainly arise in the South while the Ring Ouzel is a northern distributed species. Nevertheless, we can further explore model projections for analogous climates versus novel climates:</p>
+<pre class="r"><code># Predictions to analogous climates:
+r_analog_fut &lt;- r_pred_fut
+values(r_analog_fut)[values(r.mess)&lt;0] &lt;- NA
+plot(r_analog_fut, axes=F)</code></pre>
+<p><img src="4_SDM_eval_files/figure-html/unnamed-chunk-24-1.png" width="672" /></p>
+<pre class="r"><code># Predictions to novel climates:
+r_novel_fut &lt;- r_pred_fut
+values(r_novel_fut)[values(r.mess)&gt;=0] &lt;- NA
+plot(r_novel_fut, axes=F)</code></pre>
+<p><img src="4_SDM_eval_files/figure-html/unnamed-chunk-24-2.png" width="672" /></p>
+</div>
+</div>
+<div id="references" class="section level1 unnumbered">
+<h1>References</h1>
+<div id="refs" class="references">
+<div id="ref-allouche2006">
+<p>Allouche, Omri, Asaf Tsoar, and Ronen Kadmon. 2006. “Assessing the Accuracy of Species Distribution Models: Prevalence, Kappa and the True Skill Statistic (Tss).” <em>Journal of Applied Ecology</em> 43: 1223–32.</p>
+</div>
+<div id="ref-araujo2005">
+<p>Araujo, Miguel B., Richard G. Pearson, Wilfried Thuillers, and Markus Erhard. 2005. “Validation of Species-Climate Impact Models Under Climate Change.” <em>Global Change Biology</em> 11: 1504–13.</p>
+</div>
+<div id="ref-Elith2010">
+<p>Elith, J., M. Kearney, and S. Phillips. 2010. “The Art of Modelling Range-Shifting Species.” <em>Methods in Ecology and Evolution</em> 1: 330–42.</p>
+</div>
+<div id="ref-Elith2009">
+<p>Elith, J., and J. R. Leathwick. 2009. “Species Distribution Models: Ecological Explanation and Prediction Across Space and Time.” <em>Annual Review of Ecology, Evolution, and Systematics</em> 40: 677–97.</p>
+</div>
+<div id="ref-Franklin2010">
+<p>Franklin, J. 2010. <em>Mapping Species Distributions: Spatial Inference and Prediction</em>. Cambride University Press.</p>
+</div>
+<div id="ref-Gillings2019">
+<p>Gillings, Simon, Dawn E. Balmer, Brian J. Caffrey, Iain S. Downie, David W. Gibbons, Peter C. Lack, James B. Reid, J. Tim R. Sharrock, Robert L. Swann, and Robert J. Fuller. 2019. “Breeding and Wintering Bird Distributions in Britain and Ireland from Citizen Science Bird Atlases.” <em>Global Ecology and Biogeography</em> 28 (7): 866–74. <a href="https://doi.org/10.1111/geb.12906">https://doi.org/10.1111/geb.12906</a>.</p>
+</div>
+<div id="ref-guisan2005">
+<p>Guisan, A., and W. Thuiller. 2005. “Predicting Species Distribution: Offering More Than Simple Habitat Models.” <em>Ecology Letters</em> 8: 993–1009.</p>
+</div>
+<div id="ref-Guisan2017">
+<p>Guisan, A., W. Thuiller, and N. E. Zimmermann. 2017. <em>Habitat Suitability and Distribution Models with Applications in R</em>. Cambride University Press.</p>
+</div>
+<div id="ref-Guisan2000">
+<p>Guisan, A., and N. E. Zimmermann. 2000. “Predictive Habitat Distribution Models in Ecology.” <em>Ecological Modelling</em> 135: 147–86.</p>
+</div>
+<div id="ref-Liu2005">
+<p>Liu, C., P. M. Berry, T. P. Dawson, and R. G. Pearson. 2005. “Selecting Thresholds of Occurrence in the Prediction of Species Distributions.” <em>Ecography</em> 28: 385–93.</p>
+</div>
+<div id="ref-Roberts2017">
+<p>Roberts, D. R., V. Bahn, S. Ciuti, M. S. Boyce, J. Elith, G. Guillera-Arroita, S: Hauenstein, et al. 2017. “Cross-Validation Strategies for Data with Temporal, Spatial, Hierarchical, or Phylogenetic Structure.” <em>Ecography</em> 40: 913–29.</p>
+</div>
+<div id="ref-Zurell2020a">
+<p>Zurell, Damaris, Janet Franklin, Christian König, Phil J. Bouchet, Carsten F. Dormann, Jane Elith, Guillermo Fandos, et al. 2020. “A Standard Protocol for Reporting Species Distribution Models.” <em>Ecography</em> 43 (9): 1261–77. <a href="https://doi.org/10.1111/ecog.04960">https://doi.org/10.1111/ecog.04960</a>.</p>
+</div>
+<div id="ref-Zurell2012">
+<p>Zurell, D., J. Elith, and B. Schroeder. 2012. “Predicting to New Environments: Tools for Visualising Model Behaviour and Impacts on Mapped Distributions.” <em>Diversity and Distributions</em> 18: 628–34.</p>
+</div>
+</div>
+</div>
+
+<!DOCTYPE html>
+<html>
+
+<br>
+<hr />
+<div id="footer">
+<p>Damaris Zurell, 2020 <a href="http://creativecommons.org/licenses/by/4.0/" >(CC BY 4.0)</a>.  </p>
+</div>
+
+</html>
+
+
+</div>
+</div>
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open')
+  });
+});
+</script>
+
+<!-- code folding -->
+
+<script>
+$(document).ready(function ()  {
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_').toLowerCase();
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
