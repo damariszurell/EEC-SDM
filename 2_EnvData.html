@@ -440,7 +440,7 @@ clim</code></pre>
 ## dimensions : 900, 2160, 1944000, 19  (nrow, ncol, ncell, nlayers)
 ## resolution : 0.1666667, 0.1666667  (x, y)
 ## extent     : -180, 180, -60, 90  (xmin, xmax, ymin, ymax)
-## crs        : +proj=longlat +datum=WGS84 +ellps=WGS84 +towgs84=0,0,0 
+## crs        : +proj=longlat +datum=WGS84 +no_defs 
 ## names      :  bio1,  bio2,  bio3,  bio4,  bio5,  bio6,  bio7,  bio8,  bio9, bio10, bio11, bio12, bio13, bio14, bio15, ... 
 ## min values :  -269,     9,     8,    72,   -59,  -547,    53,  -251,  -450,   -97,  -488,     0,     0,     0,     0, ... 
 ## max values :   314,   211,    95, 22673,   489,   258,   725,   375,   364,   380,   289,  9916,  2088,   652,   261, ...</code></pre>
@@ -459,7 +459,7 @@ prec &lt;- getData(&quot;worldclim&quot;, var=&quot;prec&quot;, res=10, download
 <pre class="r"><code># Now, recalculate the bioclimatic variables:
 biovars(prec, tmin, tmax)</code></pre>
 <p>You can also write raster stacks to file:</p>
-<pre class="r"><code>writeRaster(clim,filename=&#39;data/clim_data/bioclim.grd&#39;,)</code></pre>
+<pre class="r"><code>writeRaster(clim,filename=&#39;data/clim_data/bioclim.grd&#39;)</code></pre>
 <p><em>*.grd</em> is the native file format of the <code>raster</code> package. It consists of two files, a data file and a header file (<em>*.gri</em>).</p>
 <p>Most standard GIS formats can be read in by <code>raster()</code> as well, for example data on land cover, other remote sensing-derived products, etc.</p>
 </div>
@@ -481,7 +481,7 @@ clim</code></pre>
 ## dimensions : 900, 2160, 1944000, 19  (nrow, ncol, ncell, nlayers)
 ## resolution : 0.1666667, 0.1666667  (x, y)
 ## extent     : -180, 180, -60, 90  (xmin, xmax, ymin, ymax)
-## crs        : +proj=longlat +datum=WGS84 +ellps=WGS84 +towgs84=0,0,0 
+## crs        : +proj=longlat +datum=WGS84 +no_defs 
 ## names      :  bio1,  bio2,  bio3,  bio4,  bio5,  bio6,  bio7,  bio8,  bio9, bio10, bio11, bio12, bio13, bio14, bio15, ... 
 ## min values :  -269,     9,     8,    72,   -59,  -547,    53,  -251,  -450,   -97,  -488,     0,     0,     0,     0, ... 
 ## max values :   314,   211,    95, 22673,   489,   258,   725,   375,   364,   380,   289,  9916,  2088,   652,   261, ...</code></pre>
@@ -610,7 +610,7 @@ $(document).ready(function ()  {
       theme: "bootstrap3",
       context: '.toc-content',
       hashGenerator: function (text) {
-        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_').toLowerCase();
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_');
       },
       ignoreSelector: ".toc-ignore",
       scrollTo: 0
