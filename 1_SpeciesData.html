@@ -474,7 +474,6 @@ points(gbif_shrew$decimalLongitude, gbif_shrew$decimalLatitude, col=&#39;red&#39
 <h1><span class="header-section-number">2</span> Cleaning and cross-checking GBIF data</h1>
 <p>You should always critically assess the quality of your data. This also holds true for GBIF data. Look at the map again, do all records look plausible?</p>
 <p>Not all coordinates seem to be correct, and we thus need to cross-check these. Robert Hijmans provides some code in his <code>dismo</code> <a href="http://rspatial.org">tutorials</a>. We will here use the new package <code>CoordinateCleaner</code> (<span class="citation">Zizka et al. (2019)</span>; see tutorials <a href="https://ropensci.github.io/CoordinateCleaner/">here</a>). The function <code>clean_coordinates()</code> allows cleaning geographic coordinates using different cross-checks. Here, we first compare whether the coordinates for each entry match the country code provided for each entry and are no outliers.</p>
-<p><img src="1_SpeciesData_files/figure-html/unnamed-chunk-5-1.png" width="672" /></p>
 <pre class="r"><code>library(CoordinateCleaner)
 
 # We use only those data entries with coordinate information
@@ -488,6 +487,7 @@ points(gbif_shrew$decimalLongitude, gbif_shrew$decimalLatitude, col=&#39;red&#39
 points(gbif_shrew$decimalLongitude[cl_gbif_shrew$.summary], gbif_shrew$decimalLatitude[cl_gbif_shrew$.summary], col=&#39;blue&#39;,  pch=18)
 
 gbif_shrew &lt;- gbif_shrew[cl_gbif_shrew$.summary,]</code></pre>
+<p><img src="1_SpeciesData_files/figure-html/unnamed-chunk-6-1.png" width="672" /></p>
 <div class="alert alert-info">
 <p><em><strong>Exercise:</strong></em></p>
 <p>Look up the options in <code>clean_coordinates()</code> and think about why I chose the specific tests and options.</p>
