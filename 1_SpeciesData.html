@@ -435,13 +435,13 @@ div.tocify {
 
 # Check out the number of occurrences found in GBIF:
 occ_count()</code></pre>
-<pre><code>## [1] 1584669346</code></pre>
+<pre><code>## [1] 1584642076</code></pre>
 <pre class="r"><code># number of observations:
 occ_count(basisOfRecord=&#39;OBSERVATION&#39;)</code></pre>
 <pre><code>## [1] 19488039</code></pre>
 <pre class="r"><code># number of occurrences reported for Germany:
 occ_count(country=isocodes[grep(&quot;Germany&quot;, isocodes$name), &quot;code&quot;])</code></pre>
-<pre><code>## [1] 40826089</code></pre>
+<pre><code>## [1] 40826098</code></pre>
 <pre class="r"><code># number of observations reported for Germany:
 occ_count(country=isocodes[grep(&quot;Germany&quot;, isocodes$name), &quot;code&quot;],basisOfRecord=&#39;OBSERVATION&#39;)</code></pre>
 <pre><code>## [1] 298002</code></pre>
@@ -481,14 +481,23 @@ points(gbif_shrew$decimalLongitude, gbif_shrew$decimalLatitude, col=&#39;red&#39
 gbif_shrew &lt;- subset(gbif_shrew, !is.na(decimalLatitude))
 
 # We now clean the coordinates and check for outliers - see ?clean_coordinates for more options
-cl_gbif_shrew &lt;- clean_coordinates(gbif_shrew, lon=&quot;decimalLongitude&quot;, lat=&quot;decimalLatitude&quot;, countries=&quot;countryCode&quot;, tests=c(&quot;centroids&quot;, &quot;outliers&quot;, &quot;duplicates&quot;, &quot;institutions&quot;), inst_rad = 10000)
-
-plot(wrld_simpl,xlim=c(5,130), ylim=c(40,55))
+cl_gbif_shrew &lt;- clean_coordinates(gbif_shrew, lon=&quot;decimalLongitude&quot;, lat=&quot;decimalLatitude&quot;, countries=&quot;countryCode&quot;, tests=c(&quot;centroids&quot;, &quot;outliers&quot;, &quot;duplicates&quot;, &quot;institutions&quot;), inst_rad = 10000)</code></pre>
+<pre><code>## Testing coordinate validity</code></pre>
+<pre><code>## Flagged 0 records.</code></pre>
+<pre><code>## Testing country centroids</code></pre>
+<pre><code>## Flagged 2 records.</code></pre>
+<pre><code>## Testing geographic outliers</code></pre>
+<pre><code>## Flagged 1 records.</code></pre>
+<pre><code>## Testing biodiversity institutions</code></pre>
+<pre><code>## Flagged 13 records.</code></pre>
+<pre><code>## Testing duplicates</code></pre>
+<pre><code>## Flagged 117 records.</code></pre>
+<pre><code>## Flagged 128 of 242 records, EQ = 0.53.</code></pre>
+<pre class="r"><code>plot(wrld_simpl,xlim=c(5,130), ylim=c(40,55))
 points(gbif_shrew$decimalLongitude, gbif_shrew$decimalLatitude, col=&#39;red&#39;,  pch=19)
-points(gbif_shrew$decimalLongitude[cl_gbif_shrew$.summary], gbif_shrew$decimalLatitude[cl_gbif_shrew$.summary], col=&#39;blue&#39;,  pch=18)
-
-gbif_shrew &lt;- gbif_shrew[cl_gbif_shrew$.summary,]</code></pre>
+points(gbif_shrew$decimalLongitude[cl_gbif_shrew$.summary], gbif_shrew$decimalLatitude[cl_gbif_shrew$.summary], col=&#39;blue&#39;,  pch=18)</code></pre>
 <p><img src="1_SpeciesData_files/figure-html/unnamed-chunk-6-1.png" width="672" /></p>
+<pre class="r"><code>gbif_shrew &lt;- gbif_shrew[cl_gbif_shrew$.summary,]</code></pre>
 <div class="alert alert-info">
 <p><em><strong>Exercise:</strong></em></p>
 <p>Look up the options in <code>clean_coordinates()</code> and think about why I chose the specific tests and options.</p>
