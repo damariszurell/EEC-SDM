@@ -429,8 +429,10 @@ div.tocify {
 <h2><span class="header-section-number">1.1</span> Recap of last session: data and model building steps</h2>
 <p>I will illustrate the different algorithms using the Ring Ouzel example of sessions 3-4, based on data from the British breeding and wintering birds citizen science atlas <span class="citation">(Gillings et al. 2019)</span>. The species presense/absence data and the bioclimatic variables at these locations are available from file. Also, remember that we have already tested the data for multicollinearity and identified bio11 and bio8 as weakly correlated variables with high univariate variable importance.</p>
 <pre class="r"><code>library(raster)
-bg &lt;- raster(&#39;data/Prac3_UK_mask.grd&#39;)
-sp_dat &lt;- read.table(&#39;data/Prac3_RingOuzel.txt&#39;,header=T)
+bg &lt;- raster(&#39;data/Prac3_UK_mask.grd&#39;)</code></pre>
+<pre><code>## Warning in showSRID(uprojargs, format = &quot;PROJ&quot;, multiline = &quot;NO&quot;): Discarded datum OSGB_1936 in CRS definition,
+##  but +towgs84= values preserved</code></pre>
+<pre class="r"><code>sp_dat &lt;- read.table(&#39;data/Prac3_RingOuzel.txt&#39;,header=T)
 
 my_preds &lt;- c(&#39;bio11&#39;,&#39;bio8&#39;)</code></pre>
 <p>In session 4 on model assessment, we learned that the models should be validated on indepedent validation data and we have learned how to run a 5-fold cross-validation and had constructed our own function for this. We could now easily adapt this function to run with other algorithms. However, to simplfy matters let’s rather split the data into training data and testing data once. For a proper validation this split-sample should be repeated many times. Nevertheless, this unique split-sample will still give us an idea of model performance and will allow us to compare the different algorithms.</p>
@@ -875,27 +877,27 @@ plot(stack(r_cart_pred, r_cart_bin),main=c(&#39;CART prob.&#39;,&#39;CART bin.&#
 <pre class="r"><code>library(randomForest)
 
 # Fit RF
-m_rf &lt;- randomForest( x=sp_train[,my_preds], y=as.factor(sp_train$Turdus_torquatus), 
+m_rf &lt;- randomForest( x=sp_train[,my_preds], y=sp_train$Turdus_torquatus, 
     ntree=1000, importance =T)
     
 # Variable importance:
 importance(m_rf,type=1)</code></pre>
-<pre><code>##       MeanDecreaseAccuracy
-## bio11             12.81683
-## bio8              18.47201</code></pre>
+<pre><code>##        %IncMSE
+## bio11 16.23018
+## bio8  19.96706</code></pre>
 <pre class="r"><code>varImpPlot(m_rf)</code></pre>
 <p><img src="6_SDM_algorithms_files/figure-html/unnamed-chunk-15-1.png" width="672" /></p>
 <pre class="r"><code># Look at single trees:
 head(getTree(m_rf,1,T))</code></pre>
 <pre><code>##   left daughter right daughter split var split point status prediction
-## 1             2              3      bio8    34.17421      1       &lt;NA&gt;
-## 2             4              5      bio8    10.38762      1       &lt;NA&gt;
-## 3             6              7      bio8    36.34882      1       &lt;NA&gt;
-## 4             0              0      &lt;NA&gt;     0.00000     -1          1
-## 5             8              9     bio11    22.32116      1       &lt;NA&gt;
-## 6            10             11     bio11    26.75610      1       &lt;NA&gt;</code></pre>
+## 1             2              3     bio11  20.9875069     -3 0.05915493
+## 2             4              5     bio11  -0.1018436     -3 0.38636364
+## 3             6              7     bio11  25.8310007     -3 0.01286174
+## 4             0              0      &lt;NA&gt;   0.0000000     -1 1.00000000
+## 5             8              9     bio11  20.7331389     -3 0.32500000
+## 6            10             11     bio11  25.4278305     -3 0.09090909</code></pre>
 <pre class="r"><code># Now, we plot the response surface:
-xyz$z &lt;- predict(m_rf, xyz, type=&#39;prob&#39;)[,2]
+xyz$z &lt;- predict(m_rf, xyz, type=&#39;response&#39;)
 wireframe(z ~ bio11 + bio8, data = xyz, zlab = list(&quot;Occurrence prob.&quot;, rot=90), 
           drape = TRUE, col.regions = cls, scales = list(arrows = FALSE), 
           zlim = c(0, 1), main=&#39;Random Forest&#39;, xlab=&#39;bio11&#39;, ylab=&#39;bio8&#39;, 
@@ -911,7 +913,7 @@ for (i in 1:2) {
       mean(sp_train[,my_preds[-i]]) 
     )
     names(xz) &lt;- c(my_preds[i], my_preds[-i])
-    xz$z &lt;- predict(m_rf, newdata=xz, type=&#39;prob&#39;)[,2]
+    xz$z &lt;- predict(m_rf, newdata=xz, type=&#39;response&#39;)
     plot(xz[,1],xz$z,type=&#39;l&#39;, xlab=my_preds[i], ylim=c(0,1),
          ylab=&#39;Occurrence probability&#39;, main=&#39;Random Forest&#39;)
     }</code></pre>
@@ -919,7 +921,7 @@ for (i in 1:2) {
 <pre class="r"><code># prepare validation:
 thresh_dat &lt;- data.frame(ID=seq_len(nrow(sp_test)), 
         obs= sp_test$Turdus_torquatus,
-        pred=predict(m_rf, sp_test[,my_preds], type=&#39;prob&#39;)[,2])
+        pred=predict(m_rf, sp_test[,my_preds], type=&#39;response&#39;))
         
 # optimal threshold:
 thresh &lt;- PresenceAbsence::optimal.thresholds(DATA= thresh_dat)
@@ -935,13 +937,15 @@ cmx_maxSSS &lt;- PresenceAbsence::cmx(DATA= thresh_dat, threshold=thresh[3,2])
   D2 = d.square(thresh_dat$obs, thresh_dat$pred),
    maxTSS = thresh[3,2]))</code></pre>
 <pre><code>##         pcc  sens      spec       TSS       AUC        D2 maxTSS
-## 1 0.8289474 0.875 0.8235294 0.6985294 0.9002757 0.2501537   0.09</code></pre>
+## 1 0.8355263 0.875 0.8308824 0.7058824 0.9037224 0.2391433   0.12</code></pre>
 <pre class="r"><code># Map predictions:
 r_rf_bin &lt;- r_rf_pred &lt;- rasterFromXYZ(cbind(bio_curr_df[,1:2],
-                                 predict(m_rf, bio_curr_df,type=&#39;prob&#39;)[,2]))
-values(r_rf_bin) &lt;- ifelse(values(r_rf_pred)&gt;=perf_rf$maxTSS, 1, 0)
-plot(stack(r_rf_pred, r_rf_bin),main=c(&#39;RF prob.&#39;,&#39;RF bin.&#39;), axes=F)   </code></pre>
-<p><img src="6_SDM_algorithms_files/figure-html/unnamed-chunk-15-4.png" width="672" /></p>
+                                 predict(m_rf, bio_curr_df,type=&#39;prob&#39;)[,2]))</code></pre>
+<pre><code>## Error in predict.randomForest(m_rf, bio_curr_df, type = &quot;prob&quot;): &#39;prob&#39; or &#39;vote&#39; not meaningful for regression</code></pre>
+<pre class="r"><code>values(r_rf_bin) &lt;- ifelse(values(r_rf_pred)&gt;=perf_rf$maxTSS, 1, 0)</code></pre>
+<pre><code>## Error in h(simpleError(msg, call)): Fehler bei der Auswertung des Argumentes &#39;x&#39; bei der Methodenauswahl für Funktion &#39;values&#39;: Objekt &#39;r_rf_pred&#39; nicht gefunden</code></pre>
+<pre class="r"><code>plot(stack(r_rf_pred, r_rf_bin),main=c(&#39;RF prob.&#39;,&#39;RF bin.&#39;), axes=F)   </code></pre>
+<pre><code>## Error in h(simpleError(msg, call)): Fehler bei der Auswertung des Argumentes &#39;x&#39; bei der Methodenauswahl für Funktion &#39;plot&#39;: Fehler bei der Auswertung des Argumentes &#39;x&#39; bei der Methodenauswahl für Funktion &#39;stack&#39;: Objekt &#39;r_rf_pred&#39; nicht gefunden</code></pre>
 </div>
 <div id="boosted-regression-trees-brts" class="section level3">
 <h3><span class="header-section-number">2.3.3</span> Boosted regression trees (BRTs)</h3>
@@ -974,16 +978,16 @@ m_brt &lt;- gbm.step(data = sp_train,
 <pre class="r"><code># Variable importance:
 m_brt$contributions</code></pre>
 <pre><code>##         var  rel.inf
-## bio8   bio8 58.26761
-## bio11 bio11 41.73239</code></pre>
+## bio8   bio8 57.27409
+## bio11 bio11 42.72591</code></pre>
 <pre class="r"><code># Interactions (not very meaningful here with only 2 predictors):
 gbm.interactions(m_brt)$interactions</code></pre>
 <pre><code>##       bio11  bio8
-## bio11     0 30.34
+## bio11     0 34.69
 ## bio8      0  0.00</code></pre>
 <pre class="r"><code>gbm.interactions(m_brt)$rank.list</code></pre>
 <pre><code>##   var1.index var1.names var2.index var2.names int.size
-## 1          2       bio8          1      bio11    30.34
+## 1          2       bio8          1      bio11    34.69
 ## 2          3       &lt;NA&gt;          0                0.00</code></pre>
 <pre class="r"><code># dismo provides some build-in functions for plotting response:
 gbm.plot(m_brt, n.plots=2, write.title = FALSE)</code></pre>
@@ -1032,7 +1036,7 @@ cmx_maxSSS &lt;- PresenceAbsence::cmx(DATA= thresh_dat, threshold=thresh[3,2])
   D2 = d.square(thresh_dat$obs, thresh_dat$pred),
    maxTSS = thresh[3,2]))</code></pre>
 <pre><code>##         pcc  sens      spec       TSS       AUC        D2 maxTSS
-## 1 0.8684211 0.875 0.8676471 0.7426471 0.9402574 0.3945727   0.13</code></pre>
+## 1 0.8618421 0.875 0.8602941 0.7352941 0.9388787 0.3974611   0.12</code></pre>
 <pre class="r"><code># Map predictions:
 r_brt_bin &lt;- r_brt_pred &lt;- rasterFromXYZ(cbind(bio_curr_df[,1:2],
                                   predict.gbm(m_brt, bio_curr_df,
@@ -1116,8 +1120,8 @@ plot(stack(r_maxent_pred, r_maxent_bin),main=c(&#39;Maxent prob.&#39;,&#39;Maxen
 ## glm    0.8618421 0.8750 0.8602941 0.7352941 0.9333640  0.4607125  0.120
 ## gamS   0.8486842 0.9375 0.8382353 0.7757353 0.9375000  0.4586095  0.100
 ## cart   0.8684211 0.7500 0.8823529 0.6323529 0.8244485  0.2546056  0.320
-## rf     0.8289474 0.8750 0.8235294 0.6985294 0.9002757  0.2501537  0.090
-## brt    0.8684211 0.8750 0.8676471 0.7426471 0.9402574  0.3945727  0.130
+## rf     0.8355263 0.8750 0.8308824 0.7058824 0.9037224  0.2391433  0.120
+## brt    0.8618421 0.8750 0.8602941 0.7352941 0.9388787  0.3974611  0.120
 ## maxent 0.8355263 0.9375 0.8235294 0.7610294 0.9384191  0.3160077  0.265</code></pre>
 <pre class="r"><code># Adapt the file path to your folder structure
 write.table(data.frame(alg=row.names(comp_perf),comp_perf), 
@@ -1242,7 +1246,7 @@ $(document).ready(function ()  {
       theme: "bootstrap3",
       context: '.toc-content',
       hashGenerator: function (text) {
-        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_').toLowerCase();
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_');
       },
       ignoreSelector: ".toc-ignore",
       scrollTo: 0

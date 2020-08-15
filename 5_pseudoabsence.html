@@ -571,7 +571,7 @@ points(bg_idw,pch=19,cex=0.3)</code></pre>
 </div>
 <div id="workflow-for-joining-presence-and-backgroundpseudo-absence-data" class="section level1">
 <h1><span class="header-section-number">4</span> Workflow for joining presence and background/pseudo-absence data</h1>
-<p>In session 2, we have already learned how to join species data and environmental data (at 10 min resolution) using the Alpine Shrew as example species. Here, we will revisit this example, sample random background data and join these with environmental data to come up with a datset containing presences and background data as well as the climatic predictors.</p>
+<p>In session 2, we have already learned how to join species data and environmental data (at 10 min resolution) using the Alpine Shrew as example species. Here, we will revisit this example, sample random background data and join these with environmental data to come up with a dataset containing presences and background data as well as the climatic predictors.</p>
 <pre class="r"><code># Load the species presence data (here, the data set from session 1):
 load(&#39;data/gbif_shrew.RData&#39;)
 
@@ -596,7 +596,7 @@ clim &lt;- getData(&quot;worldclim&quot;, var=&quot;bio&quot;, res=10, download=
 
 # Crop to Europe
 clim &lt;- crop(clim, c(-12,45,35,73))</code></pre>
-<p>What is important to consider is that you kind of arbitrarily chose a scale of analysis by chosing climate data (or other environmental data) at a certain spatial resolution. Here, we chose a spatial resolution of 10 minutes while the species data may actually ba at a finer resolution. So, we first make sure that our species data are fit to the spatial resolution, meaning we remove any duplicates within 10 minute cells. We do this by joining the species data with the environmental data (basically, repeating what we had already done at the end of session 2). Then, we can remove the duplicate cells.</p>
+<p>What is important to consider is that you kind of arbitrarily chose a scale of analysis by chosing climate data (or other environmental data) at a certain spatial resolution. Here, we chose a spatial resolution of 10 minutes while the species data may actually be at a finer resolution. So, we first make sure that our species data are fit to the spatial resolution, meaning we remove any duplicates within 10 minute cells. We do this by joining the species data with the environmental data (basically, repeating what we had already done at the end of session 2). Then, we can remove the duplicate cells.</p>
 <pre class="r"><code># Extract environmental data and raster cellnumbers for the species data
 gbif_shrew2 &lt;- cbind(gbif_shrew[,c(&#39;decimalLongitude&#39;,&#39;decimalLatitude&#39;)], raster::extract(x = clim[[1]], 
     y = data.frame(gbif_shrew[,c(&#39;decimalLongitude&#39;,&#39;decimalLatitude&#39;)]), cellnumbers=T ))
@@ -606,7 +606,7 @@ gbif_shrew2 &lt;- gbif_shrew2[!duplicated(gbif_shrew2$cells),]
 
 # Actually, we just need the new coordinates:
 gbif_shrew2 &lt;- gbif_shrew2[,c(&#39;decimalLongitude&#39;,&#39;decimalLatitude&#39;)]</code></pre>
-<p>We place a buffer of 200 km around the shrew records and sample background points randomly from within the buffer but excluding presence locations.</p>
+<p>We place a buffer of 200 km around the shrew records and sample background points randomly from within the buffer but excluding presence locations (please think about it for a moment whether a different pseudo-absence/background data strategy would be more appropriate for you).</p>
 <pre class="r"><code># Make SpatialPointsDataFrame:
 presences &lt;- gbif_shrew2
 coordinates(presences) &lt;- ~decimalLongitude + decimalLatitude
@@ -638,76 +638,76 @@ bg_dat &lt;- data.frame(bg_dat)
 summary(bg_dat)</code></pre>
 <pre><code>##        x                y        
 ##  Min.   : 3.083   Min.   :42.92  
-##  1st Qu.: 8.042   1st Qu.:45.75  
-##  Median :13.583   Median :47.58  
-##  Mean   :13.444   Mean   :47.42  
-##  3rd Qu.:18.083   3rd Qu.:48.92  
-##  Max.   :24.917   Max.   :51.92</code></pre>
+##  1st Qu.: 8.583   1st Qu.:45.75  
+##  Median :13.417   Median :47.42  
+##  Mean   :13.404   Mean   :47.36  
+##  3rd Qu.:17.750   3rd Qu.:48.92  
+##  Max.   :24.917   Max.   :52.08</code></pre>
 <pre class="r"><code>names(bg_dat) &lt;- c(&#39;decimalLongitude&#39;,&#39;decimalLatitude&#39;)
 bg_dat$occ &lt;- 0
 summary(bg_dat)</code></pre>
 <pre><code>##  decimalLongitude decimalLatitude      occ   
 ##  Min.   : 3.083   Min.   :42.92   Min.   :0  
-##  1st Qu.: 8.042   1st Qu.:45.75   1st Qu.:0  
-##  Median :13.583   Median :47.58   Median :0  
-##  Mean   :13.444   Mean   :47.42   Mean   :0  
-##  3rd Qu.:18.083   3rd Qu.:48.92   3rd Qu.:0  
-##  Max.   :24.917   Max.   :51.92   Max.   :0</code></pre>
+##  1st Qu.: 8.583   1st Qu.:45.75   1st Qu.:0  
+##  Median :13.417   Median :47.42   Median :0  
+##  Mean   :13.404   Mean   :47.36   Mean   :0  
+##  3rd Qu.:17.750   3rd Qu.:48.92   3rd Qu.:0  
+##  Max.   :24.917   Max.   :52.08   Max.   :0</code></pre>
 <pre class="r"><code># Third, we bind these two data sets
 sp_env &lt;- rbind(sp_env, bg_dat)
 summary(sp_env)</code></pre>
 <pre><code>##  decimalLongitude decimalLatitude      occ         
 ##  Min.   : 3.083   Min.   :42.92   Min.   :0.00000  
-##  1st Qu.: 7.750   1st Qu.:45.75   1st Qu.:0.00000  
-##  Median :12.958   Median :47.42   Median :0.00000  
-##  Mean   :13.176   Mean   :47.36   Mean   :0.09091  
-##  3rd Qu.:17.917   3rd Qu.:48.92   3rd Qu.:0.00000  
-##  Max.   :24.917   Max.   :51.92   Max.   :1.00000</code></pre>
+##  1st Qu.: 8.083   1st Qu.:45.75   1st Qu.:0.00000  
+##  Median :12.917   Median :47.25   Median :0.00000  
+##  Mean   :13.140   Mean   :47.31   Mean   :0.09091  
+##  3rd Qu.:17.583   3rd Qu.:48.75   3rd Qu.:0.00000  
+##  Max.   :24.917   Max.   :52.08   Max.   :1.00000</code></pre>
 <pre class="r"><code># Last, we join this combined data set with the climate data.
 sp_env &lt;- cbind(sp_env, raster::extract(x = clim, y = sp_env[,c(&#39;decimalLongitude&#39;,&#39;decimalLatitude&#39;)], cellnumbers=T) )
 summary(sp_env)</code></pre>
 <pre><code>##  decimalLongitude decimalLatitude      occ              cells      
-##  Min.   : 3.083   Min.   :42.92   Min.   :0.00000   Min.   :43280  
-##  1st Qu.: 7.750   1st Qu.:45.75   1st Qu.:0.00000   1st Qu.:49440  
-##  Median :12.958   Median :47.42   Median :0.00000   Median :52438  
-##  Mean   :13.176   Mean   :47.36   Mean   :0.09091   Mean   :52596  
-##  3rd Qu.:17.917   3rd Qu.:48.92   3rd Qu.:0.00000   3rd Qu.:55880  
-##  Max.   :24.917   Max.   :51.92   Max.   :1.00000   Max.   :61670  
-##       bio1             bio2            bio3            bio4     
-##  Min.   :-25.00   Min.   : 50.0   Min.   :25.00   Min.   :5047  
-##  1st Qu.: 70.00   1st Qu.: 83.0   1st Qu.:29.00   1st Qu.:6229  
-##  Median : 83.00   Median : 88.0   Median :31.00   Median :6862  
-##  Mean   : 82.54   Mean   : 87.3   Mean   :30.84   Mean   :6813  
-##  3rd Qu.:101.00   3rd Qu.: 94.0   3rd Qu.:32.00   3rd Qu.:7379  
-##  Max.   :159.00   Max.   :105.0   Max.   :39.00   Max.   :8390  
-##       bio5            bio6              bio7            bio8      
-##  Min.   : 78.0   Min.   :-120.00   Min.   :193.0   Min.   :-72.0  
-##  1st Qu.:218.0   1st Qu.: -74.00   1st Qu.:261.8   1st Qu.:115.0  
-##  Median :234.0   Median : -51.00   Median :281.0   Median :156.0  
-##  Mean   :230.9   Mean   : -48.29   Mean   :279.2   Mean   :135.3  
-##  3rd Qu.:254.0   3rd Qu.: -25.00   3rd Qu.:301.0   3rd Qu.:172.0  
-##  Max.   :297.0   Max.   :  57.00   Max.   :329.0   Max.   :204.0  
+##  Min.   : 3.083   Min.   :42.92   Min.   :0.00000   Min.   :42937  
+##  1st Qu.: 8.083   1st Qu.:45.75   1st Qu.:0.00000   1st Qu.:49718  
+##  Median :12.917   Median :47.25   Median :0.00000   Median :52796  
+##  Mean   :13.140   Mean   :47.31   Mean   :0.09091   Mean   :52702  
+##  3rd Qu.:17.583   3rd Qu.:48.75   3rd Qu.:0.00000   3rd Qu.:55880  
+##  Max.   :24.917   Max.   :52.08   Max.   :1.00000   Max.   :61728  
+##       bio1             bio2             bio3            bio4     
+##  Min.   :-26.00   Min.   : 50.00   Min.   :25.00   Min.   :5073  
+##  1st Qu.: 69.00   1st Qu.: 83.00   1st Qu.:30.00   1st Qu.:6226  
+##  Median : 82.00   Median : 88.00   Median :31.00   Median :6862  
+##  Mean   : 82.12   Mean   : 87.56   Mean   :30.89   Mean   :6812  
+##  3rd Qu.:100.25   3rd Qu.: 94.00   3rd Qu.:32.00   3rd Qu.:7384  
+##  Max.   :163.00   Max.   :106.00   Max.   :39.00   Max.   :8415  
+##       bio5            bio6             bio7            bio8      
+##  Min.   : 78.0   Min.   :-124.0   Min.   :193.0   Min.   :-72.0  
+##  1st Qu.:217.0   1st Qu.: -73.0   1st Qu.:261.0   1st Qu.:114.0  
+##  Median :234.0   Median : -51.0   Median :281.0   Median :156.0  
+##  Mean   :230.5   Mean   : -48.9   Mean   :279.4   Mean   :135.4  
+##  3rd Qu.:254.0   3rd Qu.: -28.0   3rd Qu.:302.0   3rd Qu.:172.0  
+##  Max.   :300.0   Max.   :  57.0   Max.   :329.0   Max.   :200.0  
 ##       bio9            bio10           bio11             bio12       
-##  Min.   :-86.00   Min.   : 41.0   Min.   :-86.000   Min.   : 520.0  
-##  1st Qu.:-15.00   1st Qu.:156.0   1st Qu.:-30.000   1st Qu.: 690.0  
-##  Median : 12.00   Median :171.0   Median : -9.000   Median : 827.0  
-##  Mean   : 31.77   Mean   :167.8   Mean   : -7.091   Mean   : 886.2  
-##  3rd Qu.: 52.00   3rd Qu.:187.0   3rd Qu.: 13.000   3rd Qu.:1028.5  
-##  Max.   :236.00   Max.   :236.0   Max.   : 97.000   Max.   :1941.0  
-##      bio13           bio14            bio15          bio16      
-##  Min.   : 63.0   Min.   :  9.00   Min.   : 7.0   Min.   :169.0  
-##  1st Qu.: 86.0   1st Qu.: 34.00   1st Qu.:18.0   1st Qu.:238.0  
-##  Median :100.0   Median : 46.00   Median :27.0   Median :278.0  
-##  Mean   :106.7   Mean   : 49.66   Mean   :26.4   Mean   :297.1  
-##  3rd Qu.:125.0   3rd Qu.: 60.00   3rd Qu.:35.0   3rd Qu.:348.0  
-##  Max.   :195.0   Max.   :141.00   Max.   :46.0   Max.   :561.0  
+##  Min.   :-86.00   Min.   : 40.0   Min.   :-89.000   Min.   : 520.0  
+##  1st Qu.:-12.00   1st Qu.:155.0   1st Qu.:-29.000   1st Qu.: 701.0  
+##  Median : 11.00   Median :171.0   Median : -8.000   Median : 831.5  
+##  Mean   : 31.86   Mean   :167.4   Mean   : -7.465   Mean   : 894.6  
+##  3rd Qu.: 50.00   3rd Qu.:187.0   3rd Qu.: 10.000   3rd Qu.:1044.0  
+##  Max.   :238.00   Max.   :238.0   Max.   : 95.000   Max.   :2121.0  
+##      bio13           bio14            bio15           bio16      
+##  Min.   : 62.0   Min.   : 11.00   Min.   : 7.00   Min.   :171.0  
+##  1st Qu.: 86.0   1st Qu.: 34.00   1st Qu.:19.00   1st Qu.:238.0  
+##  Median :102.0   Median : 46.00   Median :27.00   Median :281.0  
+##  Mean   :107.7   Mean   : 50.02   Mean   :26.39   Mean   :300.1  
+##  3rd Qu.:125.0   3rd Qu.: 61.00   3rd Qu.:34.00   3rd Qu.:351.0  
+##  Max.   :200.0   Max.   :153.00   Max.   :47.00   Max.   :580.0  
 ##      bio17           bio18           bio19      
-##  Min.   : 69.0   Min.   : 82.0   Min.   : 79.0  
-##  1st Qu.:111.8   1st Qu.:219.0   1st Qu.:120.8  
-##  Median :151.0   Median :260.0   Median :169.5  
-##  Mean   :162.3   Mean   :273.6   Mean   :182.3  
-##  3rd Qu.:193.0   3rd Qu.:322.2   3rd Qu.:220.2  
-##  Max.   :443.0   Max.   :561.0   Max.   :516.0</code></pre>
+##  Min.   : 72.0   Min.   : 72.0   Min.   : 80.0  
+##  1st Qu.:112.0   1st Qu.:219.8   1st Qu.:121.8  
+##  Median :151.0   Median :263.0   Median :169.0  
+##  Mean   :163.4   Mean   :275.4   Mean   :184.0  
+##  3rd Qu.:196.0   3rd Qu.:323.2   3rd Qu.:223.0  
+##  Max.   :474.0   Max.   :561.0   Max.   :541.0</code></pre>
 <div class="alert alert-info">
 <p><em><strong>Exercise:</strong></em></p>
 <p>Use the GBIF data for your own species (from practical 1), sample background data and prepare a data set with species and climate data. Use these data to run SDMs.</p>

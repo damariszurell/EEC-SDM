@@ -435,8 +435,10 @@ div.tocify {
 <div id="data" class="section level2">
 <h2><span class="header-section-number">2.1</span> Data</h2>
 <pre class="r"><code>library(raster)
-bg &lt;- raster(&#39;data/Prac3_UK_mask.grd&#39;)
-sp_dat &lt;- read.table(&#39;data/Prac3_RingOuzel.txt&#39;,header=T)</code></pre>
+bg &lt;- raster(&#39;data/Prac3_UK_mask.grd&#39;)</code></pre>
+<pre><code>## Warning in showSRID(uprojargs, format = &quot;PROJ&quot;, multiline = &quot;NO&quot;): Discarded datum OSGB_1936 in CRS definition,
+##  but +towgs84= values preserved</code></pre>
+<pre class="r"><code>sp_dat &lt;- read.table(&#39;data/Prac3_RingOuzel.txt&#39;,header=T)</code></pre>
 <p>Previously, we have used a simple split-sample to validate model performance:</p>
 <pre class="r"><code># Read the split-sample back in
 train_i &lt;- scan(&#39;data/indices_traindata.txt&#39;)
@@ -487,7 +489,7 @@ m_cart &lt;- rpart( Turdus_torquatus ~ bio11 + bio8,
 
 # Fit Random Forest (RF)
 library(randomForest)
-m_rf &lt;- randomForest( x=sp_train[,my_preds], y=as.factor(sp_train$Turdus_torquatus), 
+m_rf &lt;- randomForest( x=sp_train[,my_preds], y=sp_train$Turdus_torquatus, 
     ntree=1000, importance =T)
 
 # Fit boosted regression tree (BRT)
@@ -536,8 +538,8 @@ d.square &lt;- function(obs, pred, family=&#39;binomial&#39;){
 ## 3    glm 0.8618421 0.8750 0.8602941 0.7352941 0.9333640  0.4607125  0.120
 ## 4   gamS 0.8486842 0.9375 0.8382353 0.7757353 0.9375000  0.4586095  0.100
 ## 5   cart 0.8684211 0.7500 0.8823529 0.6323529 0.8244485  0.2546056  0.320
-## 6     rf 0.8289474 0.8750 0.8235294 0.6985294 0.9002757  0.2501537  0.090
-## 7    brt 0.8684211 0.8750 0.8676471 0.7426471 0.9402574  0.3945727  0.130
+## 6     rf 0.8355263 0.8750 0.8308824 0.7058824 0.9037224  0.2391433  0.120
+## 7    brt 0.8618421 0.8750 0.8602941 0.7352941 0.9388787  0.3974611  0.120
 ## 8 maxent 0.8355263 0.9375 0.8235294 0.7610294 0.9384191  0.3160077  0.265</code></pre>
 </div>
 <div id="predictions" class="section level2">
@@ -549,7 +551,7 @@ d.square &lt;- function(obs, pred, family=&#39;binomial&#39;){
   glm = predict(m_glm, sp_test[,my_preds], type=&#39;response&#39;),
   gamS = predict(m_gamS, sp_test[,my_preds], type=&#39;response&#39;),
   cart = predict(m_cart, sp_test[,my_preds]),
-  rf = predict(m_rf, sp_test[,my_preds], type=&#39;prob&#39;)[,2],
+  rf = predict(m_rf, sp_test[,my_preds], type=&#39;response&#39;),
   brt = predict.gbm(m_brt, sp_test[,my_preds], 
                          n.trees=m_brt$gbm.call$best.trees, type=&quot;response&quot;),
   maxent = predict(m_maxent, sp_test[,my_preds], type=&quot;logistic&quot;)
@@ -564,12 +566,12 @@ summary(pred_testdata)</code></pre>
 ##  3rd Qu.:0.22222   3rd Qu.:0.6937   3rd Qu.:0.0830426   3rd Qu.:0.0822473  
 ##  Max.   :0.96296   Max.   :0.8027   Max.   :0.7418596   Max.   :0.9988305  
 ##       cart               rf               brt              maxent         
-##  Min.   :0.00000   Min.   :0.00000   Min.   :0.02166   Min.   :0.0004466  
-##  1st Qu.:0.01351   1st Qu.:0.00000   1st Qu.:0.02166   1st Qu.:0.0238353  
-##  Median :0.01351   Median :0.00000   Median :0.02174   Median :0.0746837  
-##  Mean   :0.11415   Mean   :0.09518   Mean   :0.10233   Mean   :0.1998619  
-##  3rd Qu.:0.01351   3rd Qu.:0.07975   3rd Qu.:0.04399   3rd Qu.:0.2724494  
-##  Max.   :0.77778   Max.   :0.99700   Max.   :0.58043   Max.   :0.9999025</code></pre>
+##  Min.   :0.00000   Min.   :0.00000   Min.   :0.02430   Min.   :0.0004466  
+##  1st Qu.:0.01351   1st Qu.:0.00000   1st Qu.:0.02433   1st Qu.:0.0238353  
+##  Median :0.01351   Median :0.00000   Median :0.02435   Median :0.0746837  
+##  Mean   :0.11415   Mean   :0.09936   Mean   :0.10106   Mean   :0.1998619  
+##  3rd Qu.:0.01351   3rd Qu.:0.08013   3rd Qu.:0.04313   3rd Qu.:0.2724494  
+##  Max.   :0.77778   Max.   :0.97592   Max.   :0.55592   Max.   :0.9999025</code></pre>
 <p>As we have stored the maxTSS threshold for each model, we can also threshold the predictions to obtain predicted presences and absences.</p>
 <pre class="r"><code># We use the sapply function to apply the thresholding to all columns 
 # in the prediction data frame. You could also use a loop or construct
@@ -743,10 +745,10 @@ perf_committee_prob &lt;- data.frame(
 (ens_perf &lt;- rbind(mean_prob = perf_mean_prob, median_prob = perf_median_prob, 
                     wmean_prob = perf_mean_prob, committee_av = perf_committee_prob))</code></pre>
 <pre><code>##                    pcc   sens      spec       TSS       AUC         D2 maxTSS
-## mean_prob    0.8157895 0.9375 0.8014706 0.7389706 0.9090074  0.2871228  0.170
-## median_prob  0.8289474 0.9375 0.8161765 0.7536765 0.9126838  0.3942671  0.080
-## wmean_prob   0.8157895 0.9375 0.8014706 0.7389706 0.9090074  0.2871228  0.170
-## committee_av 0.8289474 0.9375 0.8161765 0.7536765 0.8846507 -2.1706735  0.185</code></pre>
+## mean_prob    0.8157895 0.9375 0.8014706 0.7389706 0.9117647  0.2885281  0.170
+## median_prob  0.8289474 0.9375 0.8161765 0.7536765 0.9131434  0.3964739  0.080
+## wmean_prob   0.8157895 0.9375 0.8014706 0.7389706 0.9117647  0.2885281  0.170
+## committee_av 0.8289474 0.9375 0.8161765 0.7536765 0.8821232 -2.3074817  0.185</code></pre>
 <div id="visualising-response-surfaces" class="section level2">
 <h2><span class="header-section-number">3.1</span> Visualising response surfaces</h2>
 <p>Let’s plot the response surfaces for the ensembles.</p>
@@ -768,7 +770,7 @@ xyz_preds &lt;- data.frame(
   glm = predict(m_glm, xyz, type=&#39;response&#39;),
   gamS = predict(m_gamS, xyz[,my_preds], type=&#39;response&#39;),
   cart = predict(m_cart, xyz),
-  rf = predict(m_rf, xyz, type=&#39;prob&#39;)[,2],
+  rf = predict(m_rf, xyz, type=&#39;response&#39;),
   brt = predict.gbm(m_brt, xyz, 
                          n.trees=m_brt$gbm.call$best.trees, type=&quot;response&quot;),
   maxent = predict(m_maxent, xyz, type=&quot;logistic&quot;)
@@ -837,7 +839,7 @@ env_preds &lt;- data.frame(bio_curr_df[,1:2],
   glm = predict(m_glm, bio_curr_df, type=&#39;response&#39;),
   gamS = predict(m_gamS, bio_curr_df[,my_preds], type=&#39;response&#39;),
   cart = predict(m_cart, bio_curr_df),
-  rf = predict(m_rf, bio_curr_df, type=&#39;prob&#39;)[,2],
+  rf = predict(m_rf, bio_curr_df, type=&#39;response&#39;),
   brt = predict.gbm(m_brt, bio_curr_df, 
                          n.trees=m_brt$gbm.call$best.trees, type=&quot;response&quot;),
   maxent = predict(m_maxent, bio_curr_df, type=&quot;logistic&quot;))
@@ -850,10 +852,13 @@ env_preds_bin &lt;- data.frame(bio_curr_df[,1:2],
   }))
 
 # Make rasters from predictions:
-r_preds &lt;- rasterFromXYZ(env_preds, crs=crs(bg))
-r_preds_bin &lt;- rasterFromXYZ(env_preds_bin, crs=crs(bg))
-
-# Map predicted occurrence probabilities:
+r_preds &lt;- rasterFromXYZ(env_preds, crs=crs(bg))</code></pre>
+<pre><code>## Warning in matrix(values, nrow = ncell(x), ncol = nlayers(x)): Datenlänge
+## [64359] ist kein Teiler oder Vielfaches der Anzahl der Zeilen [8052]</code></pre>
+<pre class="r"><code>r_preds_bin &lt;- rasterFromXYZ(env_preds_bin, crs=crs(bg))</code></pre>
+<pre><code>## Warning in matrix(values, nrow = ncell(x), ncol = nlayers(x)): Datenlänge
+## [64359] ist kein Teiler oder Vielfaches der Anzahl der Zeilen [8052]</code></pre>
+<pre class="r"><code># Map predicted occurrence probabilities:
 spplot(r_preds)</code></pre>
 <p><img src="7_SDM_ensembles_files/figure-html/unnamed-chunk-12-1.png" width="672" /></p>
 <pre class="r"><code># Map predicted presences:
@@ -869,9 +874,10 @@ env_ensemble &lt;- data.frame(bio_curr_df[,1:2],
   sd_prob = apply(env_preds[,-c(1:2)], 1, sd))
 
 # Make rasters from ensemble predictions:
-r_ens &lt;- rasterFromXYZ(env_ensemble, crs=crs(bg))
-
-# Map continuous ensemble predictions:
+r_ens &lt;- rasterFromXYZ(env_ensemble, crs=crs(bg))</code></pre>
+<pre><code>## Warning in matrix(values, nrow = ncell(x), ncol = nlayers(x)): Datenlänge
+## [40203] ist kein Teiler oder Vielfaches der Anzahl der Zeilen [8052]</code></pre>
+<pre class="r"><code># Map continuous ensemble predictions:
 spplot(r_ens[[1:4]])</code></pre>
 <p><img src="7_SDM_ensembles_files/figure-html/unnamed-chunk-13-1.png" width="672" /></p>
 <p>Mapping the standard deviation of model predictions shows us the areas of highest deviation between model algorithms.</p>
@@ -885,9 +891,10 @@ env_ensemble_bin &lt;- data.frame(bio_curr_df[,1:2],
            FUN=function(x){ifelse(env_ensemble[,x]&gt;= ens_perf[x,&#39;maxTSS&#39;],1,0)}))
 
 # Make rasters:
-r_ens_bin &lt;- rasterFromXYZ(env_ensemble_bin, crs=crs(bg))
-
-# Map predicted presence from ensembles:
+r_ens_bin &lt;- rasterFromXYZ(env_ensemble_bin, crs=crs(bg))</code></pre>
+<pre><code>## Warning in matrix(values, nrow = ncell(x), ncol = nlayers(x)): Datenlänge
+## [24099] ist kein Teiler oder Vielfaches der Anzahl der Zeilen [8052]</code></pre>
+<pre class="r"><code># Map predicted presence from ensembles:
 spplot(r_ens_bin)   </code></pre>
 <p><img src="7_SDM_ensembles_files/figure-html/unnamed-chunk-15-1.png" width="672" /></p>
 <div class="alert alert-info">
@@ -989,7 +996,7 @@ $(document).ready(function ()  {
       theme: "bootstrap3",
       context: '.toc-content',
       hashGenerator: function (text) {
-        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_').toLowerCase();
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_');
       },
       ignoreSelector: ".toc-ignore",
       scrollTo: 0
