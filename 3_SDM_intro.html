@@ -422,6 +422,14 @@ div.tocify {
 </div>
 
 
+<div class="alert alert-info">
+<p><strong>RStudio project</strong></p>
+<p>Open the RStudio project that we created in the first session. I recommend to use this RStudio project for the entire course and within the RStudio project create separate R scripts for each session.</p>
+<ul>
+<li>Create a new empty R script by going to the tab “File”, select “New File” and then “R script”</li>
+<li>In the new R script, type <code># Session 3: SDM introduction</code> and save the file in your folder “scripts” within your project folder, e.g. as “3_SDM_intro.R”</li>
+</ul>
+</div>
 <div id="introduction" class="section level1">
 <h1><span class="header-section-number">1</span> Introduction</h1>
 <p>This session will introduce you to simple species distribution models (SDMs). Species distribution models (SDMs) are a popular tool in quantitative ecology <span class="citation">(Franklin 2010; Peterson et al. 2011; Guisan, Thuiller, and Zimmermann 2017)</span> and constitute the most widely used modelling framework in global change impact assessments for projecting potential future range shifts of species <span class="citation">(IPBES 2016)</span>. There are several reasons that make them so popular: they are comparably easy to use because many software packages <span class="citation">(e.g. Thuiller et al. 2009; Phillips, Anderson, and Schapire 2006)</span> and guidelines <span class="citation">(e.g. Elith, Leathwick, and Hastie 2008; Elith et al. 2011; Merow, Smith, and Silander Jr 2013; Guisan, Thuiller, and Zimmermann 2017)</span> are available, and they have comparably low data requirements.</p>
@@ -475,8 +483,10 @@ A male ring ouzel. Copyright Ruedi Aeschlimann. Downloaded from www.vogelwarte.c
 <p>The ring ouzel occurrence records were obtained from the British breeding and wintering birds citizen science atlas <span class="citation">(Gillings et al. 2019)</span>. The atlas contains breeding bird records in 20-year cycles (1968-1972, 1988-1991, 2008-2011 and) wintering bird records in 30-year cycles (1981/1982-1983-1984, 2007/2008-2010/2011) at a 10 km spatial resolution throughout Britain, Ireland, the Isle of Man and the Channel Islands. The entire atlas data are available through the British Trust of Ornithology (www.bto.org) and can be downloaded <a href="https://www.bto.org/sites/default/files/atlas_open_data_files.zip">here</a>. I already extracted the confirmed breeding occurrences of the ring ouzel for the most recent atlas period 2008-2011. As absence data I used those locations where no ring ouzel occurrence was reported. Afterwards I spatially thinned the data such that all presence and absence locations are at least 20 km apart. This is important to avoid problems with spatial autocorrelation. The 19 bioclimatic variables were extracted from the worldclim data base (see detail on the variables <a href="https://www.worldclim.org/data/bioclim.html">here</a>).</p>
 <p>Read in the data table:</p>
 <pre class="r"><code>library(raster)
-bg &lt;- raster(&#39;data/Prac3_UK_mask.grd&#39;)
-sp_dat &lt;- read.table(&#39;data/Prac3_RingOuzel.txt&#39;,header=T)</code></pre>
+bg &lt;- raster(&#39;data/Prac3_UK_mask.grd&#39;)</code></pre>
+<pre><code>## Warning in showSRID(uprojargs, format = &quot;PROJ&quot;, multiline = &quot;NO&quot;): Discarded datum OSGB_1936 in CRS definition,
+##  but +towgs84= values preserved</code></pre>
+<pre class="r"><code>sp_dat &lt;- read.table(&#39;data/Prac3_RingOuzel.txt&#39;,header=T)</code></pre>
 <p>Inspect the data, and plot the presence and absence locations:</p>
 <pre class="r"><code>summary(sp_dat)</code></pre>
 <pre><code>##     EASTING          NORTHING       Turdus_torquatus       bio1       
@@ -633,7 +643,6 @@ corrplot.mixed(cor_mat, tl.pos=&#39;lt&#39;, tl.cex=0.6, number.cex=0.5, addCoef
 <p>This deviance is an important measure used for comparing models. For example, it serves for the calculation of <em>Information criteria</em> that are used for comparing models containing different numbers of parameters. Here, we will use the <em>Akaike Information Criterion</em>, usually abbreviated as AIC. It is defined as: <span class="math display">\[AIC = -2 \times L + 2 \times (p+1) = D + 2 \times (p+1)\]</span></p>
 <p>where <span class="math inline">\(p\)</span> is the number of regression coefficients in the model. AIC thus takes into account model complexity. In general, lower values of AIC are preferable.</p>
 <p>We can also use the deviance to calculate the <em>Explained deviance</em> <span class="math inline">\(D^2\)</span>, which is the amount of variation explained by the model compared to the null expectation: <span class="math display">\[D^2 = 1 - \frac{D(model)}{D(Null.model)}\]</span></p>
-<p>Strictly, <span class="math inline">\(D^2\)</span> should also be adjusted for the number of terms in the model: <span class="math display">\[D^2_{adj} = 1 - \left( \frac{(1-D^2)(n-1)}{n-p-1} \right)\]</span> where <span class="math inline">\(n\)</span> is the number of observations and <span class="math inline">\(p\)</span> is the number of regression coefficients (excluding the intercept).</p>
 </div>
 <div id="univariate-variable-importance" class="section level3">
 <h3><span class="header-section-number">4.4.3</span> Univariate variable importance</h3>
@@ -643,72 +652,33 @@ corrplot.mixed(cor_mat, tl.pos=&#39;lt&#39;, tl.cex=0.6, number.cex=0.5, addCoef
 <pre><code>## [1] 180.3946</code></pre>
 <pre class="r"><code>AIC(m1_q)</code></pre>
 <pre><code>## [1] 181.8804</code></pre>
-<p>Including the possibility of a quadratic (unimodal) relationship seems sensible. We now want to estimate such a model for each potential predictor and rank the variables according to the AIC values obtained in the univariate models. For this, we write a little function:</p>
-<pre class="r"><code>var.imp &lt;- function (predictor, response)
-    {
-      AIC(glm(response ~ predictor + I(predictor^2), binomial))
-    }</code></pre>
-<p>We can now apply this function to all predictor variables in our data. Check out the help page <code>?apply</code>:</p>
-<pre class="r"><code>aic_imp &lt;- apply(sp_dat[,-c(1:3)], 2, var.imp, response= sp_dat$Turdus_torquatus)
-
-# Sort the predictors; the lower the AIC the better:
-sort(aic_imp)</code></pre>
-<pre><code>##    bio11     bio8     bio1     bio6    bio17    bio14    bio18    bio10 
-## 181.8804 187.1906 191.3175 195.6144 222.8050 223.3270 228.8005 234.2906 
-##     bio5    bio12    bio19    bio16    bio13     bio2     bio9     bio7 
-## 246.0518 246.9359 251.4709 256.2490 256.3487 280.2667 281.5242 282.2154 
-##     bio4    bio15     bio3 
-## 284.9733 285.8583 297.3832</code></pre>
+<p>Including the possibility of a quadratic (unimodal) relationship seems sensible.</p>
 </div>
 <div id="variable-selection-removing-highly-correlated-variables" class="section level3">
 <h3><span class="header-section-number">4.4.4</span> Variable selection: removing highly correlated variables</h3>
-<p>Now, it’s getting a bit more complicated. We need to identify all pairs of variables that have correlation |r|&gt;0.7 and remove the less important variable. <span class="citation">Dormann et al. (2013)</span> call this the <em>select07</em> method and also provide code.</p>
-<p>Here is my adapted function:</p>
-<pre class="r"><code>select07 &lt;- function(predictor_dat, response_dat, cor_mat=NULL, threshold=0.7){
+<p>Now, it’s getting a bit more complicated. We need to identify all pairs of variables that have correlation |r|&gt;0.7 and remove the less important variable. <span class="citation">Dormann et al. (2013)</span> call this the <em>select07</em> method.</p>
+<p>A <code>select07()</code> function is implemented in the package <code>mecofun</code> along with some other useful functions for the entire <em>Macroecology</em> module. We first have to install the package from the Univ. Potsdam gitlab:</p>
+<pre class="r"><code>library(devtools)
+devtools::install_git(&quot;https://gitup.uni-potsdam.de/macroecology/mecofun.git&quot;)</code></pre>
+<p>Now, you can load the package and try out the function. Also, check out the help pages for <code>?select07</code>.</p>
+<pre class="r"><code>library(mecofun)
 
-    # Function for calculating AIC - we use univariate GLMs with linear and quadratic terms
-    var.imp &lt;- function (predictor, response)
-    {
-      AIC(glm(response ~ predictor + I(predictor^2), binomial))
-    }
-    
-  # Calculate AIC for all predictor variables
-  aic_imp &lt;- apply(predictor_dat, 2, var.imp, response= response_dat)
-  
-  # Names of sorted variables
-    sort_imp &lt;- names(sort(aic_imp))
-    
-    # Calculate correlation matrix if not provided in function call
-    if (is.null(cor_mat)) {
-        cor_mat &lt;- cor(predictor_dat, method=&#39;spearman&#39;)
-    }
-    
-    # Identifies correlated variable pairs:
-    diag(cor_mat)=NA
-    pairs &lt;- which(abs(cor_mat)&gt;= threshold, arr.ind=T) 
-    
-    # Identify which variables should be excluded
-    exclude &lt;- NULL
-    for (i in 1:length(sort_imp))
-    {
-        if ((sort_imp[i] %in% row.names(pairs))&amp;
-            ((sort_imp[i] %in% exclude)==F)) {
-                cv &lt;- cor_mat[setdiff(row.names(cor_mat),exclude),sort_imp[i]]
-                cv &lt;- cv[setdiff(names(cv),sort_imp[1:i])]
-                exclude &lt;- c(exclude,names(which((abs(cv)&gt;=threshold)))) 
-            }
-    }
-    
-    # Select set of weakly correlated predictors:
-    pred_sel &lt;- sort_imp[!(sort_imp %in% exclude)]
-    
-    # Return list with AIC, correlation matrix, and final predictors:
-    return(list(AIC=sort(aic_imp), cor_mat=cor_mat, pred_sel=pred_sel))
-}</code></pre>
-<p>Let’s try out the function:</p>
-<pre class="r"><code>var_sel &lt;- select07(predictor_dat=sp_dat[,-c(1:3)], 
-                    response_dat=sp_dat$Turdus_torquatus, 
-                    cor_mat=cor_mat, threshold=0.7)
+# Run select07()
+var_sel &lt;- select07(X=sp_dat[,-c(1:3)], 
+                    y=sp_dat$Turdus_torquatus, 
+                    threshold=0.7)
+
+# Check out the structure of the resulting object:
+str(var_sel)</code></pre>
+<pre><code>## List of 3
+##  $ AIC     : Named num [1:19] 182 187 191 196 223 ...
+##   ..- attr(*, &quot;names&quot;)= chr [1:19] &quot;bio11&quot; &quot;bio8&quot; &quot;bio1&quot; &quot;bio6&quot; ...
+##  $ cor_mat : num [1:19, 1:19] 1 0.265 -0.259 0.444 0.844 ...
+##   ..- attr(*, &quot;dimnames&quot;)=List of 2
+##   .. ..$ : chr [1:19] &quot;bio1&quot; &quot;bio2&quot; &quot;bio3&quot; &quot;bio4&quot; ...
+##   .. ..$ : chr [1:19] &quot;bio1&quot; &quot;bio2&quot; &quot;bio3&quot; &quot;bio4&quot; ...
+##  $ pred_sel: chr [1:8] &quot;bio11&quot; &quot;bio8&quot; &quot;bio17&quot; &quot;bio10&quot; ...</code></pre>
+<pre class="r"><code># We extract the names of the weakly correlated predictors ordered by the univariate variable importance in terms of AIC:
 pred_sel &lt;- var_sel$pred_sel</code></pre>
 <p>So, we have now reduced our set of 19 bioclimatic variables to 8 predictors that are only weakly correlated. Now, we need to decide whether all of these should be included in the final model, or if we select only a few, for example the two most important variables in terms of univariate AIC. As a rule of thumb, we should have ten presence points per parameter fitted in the model <span class="citation">(Guisan, Thuiller, and Zimmermann 2017)</span>.</p>
 <pre class="r"><code># How many presence points do we have?
@@ -752,11 +722,11 @@ summary(m_full)</code></pre>
 ## AIC: 181.71
 ## 
 ## Number of Fisher Scoring iterations: 8</code></pre>
-<p>How much deviance is explained by our model?</p>
+<p>How much deviance is explained by our model? The function <code>expl_deviance()</code> is also contained in the <code>mecofun</code> package. As explained earlier, we can calculate explained deviance by quantifying how closely the model predictions fit the data in relation to the null model predictions.</p>
 <pre class="r"><code># Explained deviance:
-library(ecospat)
-ecospat.adj.D2.glm(m_full)</code></pre>
-<pre><code>## [1] 0.4121715</code></pre>
+expl_deviance(obs = sp_dat$Turdus_torquatus,
+              pred = m_full$fitted)</code></pre>
+<pre><code>## [1] 0.4168184</code></pre>
 <p>We can simplify the model further by using stepwise variable selection. The function <code>step()</code> uses the AIC to compare different subsets of the model. Specifically, it will iteratively drop variables and add variables until the AIC cannot be improved further (meaning it will not decrease further).</p>
 <pre class="r"><code>m_step &lt;- step(m_full) </code></pre>
 <pre class="r"><code># Inspect the model:
@@ -786,9 +756,10 @@ summary(m_step)</code></pre>
 ## 
 ## Number of Fisher Scoring iterations: 7</code></pre>
 <pre class="r"><code># Explained deviance:
-ecospat.adj.D2.glm(m_step)</code></pre>
-<pre><code>## [1] 0.4128202</code></pre>
-<p>The final model only selected the linear terms for bio11 and bio8. It’s only a tiny bit better in terms of explained deviance, but more parsimonious.</p>
+expl_deviance(obs = sp_dat$Turdus_torquatus,
+              pred = m_step$fitted)</code></pre>
+<pre><code>## [1] 0.4151411</code></pre>
+<p>The final model only selected the linear terms for bio11 and bio8. The explained deviance is a tiny bit lower than for the quadratic model, but the linear model is more parsimonious.</p>
 </div>
 </div>
 <div id="references" class="section level1 unnumbered">
@@ -908,7 +879,7 @@ $(document).ready(function ()  {
       theme: "bootstrap3",
       context: '.toc-content',
       hashGenerator: function (text) {
-        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_').toLowerCase();
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_');
       },
       ignoreSelector: ".toc-ignore",
       scrollTo: 0

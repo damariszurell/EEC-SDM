@@ -424,7 +424,12 @@ div.tocify {
 
 <hr />
 <div class="alert alert-info">
-<p>Before we start into this series of practicals, you should spend a minute thinking about your folder structures. I recommend having separate folders for your R scripts and for your data, potentially also a results folder. Today, we will learn about different kinds of data we need for species distribution modelling and will download different data. For improved overview, you may consider to make different subfolders within your data folder to structure this further.</p>
+<p><strong>RStudio project</strong></p>
+<p>Create an RStudio project as described in the practical <a href="https://damariszurell.github.io/EEC-SDM/0_Intro.html"><strong><em>0. Introduction to R</em></strong></a>. I recommend to use this RStudio project for the entire block course and within the RStudio project create separate R scripts for each session.</p>
+<ul>
+<li>Create a new empty R script by going to the tab “File”, select “New File” and then “R script”</li>
+<li>In the new R script, type <code># Session 1: Species data</code> and save the file in your folder “scripts” within your project folder, e.g. as “1_SpeciesData.R”</li>
+</ul>
 </div>
 <p>Many different types of biodiversity data exist, e.g. from standardised monitoring schemes, citizen science platforms, or expert knowledge. Each comes with own challenges. Here, we will concentrate on GBIF as publicly available source for terrestrial species occurrence data.</p>
 <p>GBIF stands for <em>Global Biodiversity Information Facility</em>. GBIF defines itself as “an international network and research infrastructure funded by the world’s governments and aimed at providing anyone, anywhere, open access to data about all types of life on Earth”. GBIF contains worldwide point records from observations as well as museum records or other contributions. The data are thus not standardised and often it is unclear which spatial resolution the data represent. To understand this, let’s look at some example under <a href="https://www.gbif.org/" class="uri">https://www.gbif.org/</a>.</p>
@@ -435,16 +440,16 @@ div.tocify {
 
 # Check out the number of occurrences found in GBIF:
 occ_count()</code></pre>
-<pre><code>## [1] 1584642076</code></pre>
+<pre><code>## [1] 1622110032</code></pre>
 <pre class="r"><code># number of observations:
 occ_count(basisOfRecord=&#39;OBSERVATION&#39;)</code></pre>
-<pre><code>## [1] 19488039</code></pre>
+<pre><code>## [1] 19491559</code></pre>
 <pre class="r"><code># number of occurrences reported for Germany:
 occ_count(country=isocodes[grep(&quot;Germany&quot;, isocodes$name), &quot;code&quot;])</code></pre>
-<pre><code>## [1] 40826098</code></pre>
+<pre><code>## [1] 39657842</code></pre>
 <pre class="r"><code># number of observations reported for Germany:
 occ_count(country=isocodes[grep(&quot;Germany&quot;, isocodes$name), &quot;code&quot;],basisOfRecord=&#39;OBSERVATION&#39;)</code></pre>
-<pre><code>## [1] 298002</code></pre>
+<pre><code>## [1] 246614</code></pre>
 <p>As example, I picked the Alpine shrew (<em>Sorex alpinus</em>) for today, a small mammal species occurring in Central and Suuth-Eastern European mountain ranges. Its conservation status is near threatened (<a href="https://www.iucnredlist.org/species/29660/9514588">Link to IUCN redlist</a>).</p>
 <div class="figure">
 <img src="figures/shrew.png" alt="**Figure 1. The Alpine shrew (*Sorex alpinus*). Picture by Dr. Richard Kraft, downloaded from https://kleinsaeuger.at/sorex-alpinus.html.**" width="50%" />
@@ -485,14 +490,14 @@ cl_gbif_shrew &lt;- clean_coordinates(gbif_shrew, lon=&quot;decimalLongitude&quo
 <pre><code>## Testing coordinate validity</code></pre>
 <pre><code>## Flagged 0 records.</code></pre>
 <pre><code>## Testing country centroids</code></pre>
-<pre><code>## Flagged 2 records.</code></pre>
+<pre><code>## Flagged 0 records.</code></pre>
 <pre><code>## Testing geographic outliers</code></pre>
 <pre><code>## Flagged 1 records.</code></pre>
 <pre><code>## Testing biodiversity institutions</code></pre>
-<pre><code>## Flagged 13 records.</code></pre>
+<pre><code>## Flagged 26 records.</code></pre>
 <pre><code>## Testing duplicates</code></pre>
-<pre><code>## Flagged 117 records.</code></pre>
-<pre><code>## Flagged 128 of 242 records, EQ = 0.53.</code></pre>
+<pre><code>## Flagged 188 records.</code></pre>
+<pre><code>## Flagged 210 of 479 records, EQ = 0.44.</code></pre>
 <pre class="r"><code>plot(wrld_simpl,xlim=c(5,130), ylim=c(40,55))
 points(gbif_shrew$decimalLongitude, gbif_shrew$decimalLatitude, col=&#39;red&#39;,  pch=19)
 points(gbif_shrew$decimalLongitude[cl_gbif_shrew$.summary], gbif_shrew$decimalLatitude[cl_gbif_shrew$.summary], col=&#39;blue&#39;,  pch=18)</code></pre>

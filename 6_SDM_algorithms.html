@@ -422,6 +422,14 @@ div.tocify {
 </div>
 
 
+<div class="alert alert-info">
+<p><strong>RStudio project</strong></p>
+<p>Open the RStudio project that we created in the first session. I recommend to use this RStudio project for the entire course and within the RStudio project create separate R scripts for each session.</p>
+<ul>
+<li>Create a new empty R script by going to the tab “File”, select “New File” and then “R script”</li>
+<li>In the new R script, type <code># Session 6: SDM algorithms</code> and save the file in your folder “scripts” within your project folder, e.g. as “6_SDM_algorithms.R”</li>
+</ul>
+</div>
 <div id="introduction" class="section level1">
 <h1><span class="header-section-number">1</span> Introduction</h1>
 <p>So far, we have learnt to fit GLMs to species presence-absence data. GLMs are only one, very simple parametric method for fitting SDMs. There are many more algorithms out there <span class="citation">(Elith et al. 2006; Thuiller et al. 2009; Guisan, Thuiller, and Zimmermann 2017)</span>. Here, we will get to know a few of them. Remember the five general model building steps: (i) conceptualisation, (ii) data preparation, (iii) model fitting, (iv) assessment and (v) predictions <span class="citation">(Zurell et al. 2020)</span>. These are the same for all SDMs independent of the particular algorithm used. In this tutorial, we will concentrate on model fitting again but will also run model assessments and make predictions in order to compare the different algorithms.</p>
@@ -435,7 +443,7 @@ bg &lt;- raster(&#39;data/Prac3_UK_mask.grd&#39;)</code></pre>
 <pre class="r"><code>sp_dat &lt;- read.table(&#39;data/Prac3_RingOuzel.txt&#39;,header=T)
 
 my_preds &lt;- c(&#39;bio11&#39;,&#39;bio8&#39;)</code></pre>
-<p>In session 4 on model assessment, we learned that the models should be validated on indepedent validation data and we have learned how to run a 5-fold cross-validation and had constructed our own function for this. We could now easily adapt this function to run with other algorithms. However, to simplfy matters let’s rather split the data into training data and testing data once. For a proper validation this split-sample should be repeated many times. Nevertheless, this unique split-sample will still give us an idea of model performance and will allow us to compare the different algorithms.</p>
+<p>In session 4 on model assessment, we learned that the models should be validated on indepedent validation data and we have learned how to run a 5-fold cross-validation. The <code>crossvalSDM()</code> function could also be used with the algorithms introduced in this practical. However, to simplfy matters let’s rather split the data into training data and testing data once. For a proper validation this split-sample should be repeated many times. Nevertheless, this unique split-sample will still give us an idea of model performance and will allow us to compare the different algorithms.</p>
 <pre class="r"><code># First, we randomly select 70% of the rows that will be used as training data
 train_i &lt;- sample(seq_len(nrow(sp_dat)), size=round(0.7*nrow(sp_dat)))
 
@@ -488,87 +496,27 @@ wireframe(z ~ bio11 + bio8, data = xyz, zlab = list(&quot;Occurrence prob.&quot;
           screen=list(z = -120, x = -70, y = 3))</code></pre>
 <p><img src="6_SDM_algorithms_files/figure-html/unnamed-chunk-6-1.png" width="672" /></p>
 <p>We nicely see the median as the peak of the surface, representing the median environmental conditions in presence locations. Let’s look at the corresponding partial response plots.</p>
-<pre class="r"><code># Plot partial response curves:
+<pre class="r"><code>library(mecofun)
+
+# Plot partial response curves:
 par(mfrow=c(1,2)) 
-for (i in 1:2) {
-  xz &lt;- data.frame(
-    # Sequence for one predictor:
-    seq(min(sp_train[,my_preds[i]]),max(sp_train[,my_preds[i]]),length=50),
-    # Calculate the mean of the other predictor:
-      mean(sp_train[,my_preds[-i]]) 
-    )
-    names(xz) &lt;- c(my_preds[i], my_preds[-i])
-    # make predictions:
-    xz$z &lt;- predict(m_bc, xz)
-    plot(xz[,1],xz$z,type=&#39;l&#39;, xlab=my_preds[i], ylim=c(0,1),
-         ylab=&#39;Occurrence probability&#39;, main=&#39;BIOCLIM&#39;)
-    }</code></pre>
+partial_response(m_bc, predictors = sp_train[,my_preds], main=&#39;BIOCLIM&#39;)</code></pre>
 <p><img src="6_SDM_algorithms_files/figure-html/unnamed-chunk-7-1.png" width="672" /></p>
-<p>Last, we validate model performance on the hold-out test data. When fitting simple GLMs, we have used the <code>ecospat.adj.D2.glm()</code> function from the <code>ecospat</code> package to calculate the explained deviance. Unfortunately, this will not work with al algorithms, so we have to define our own function.</p>
-<pre class="r"><code># We define some useful functions for evaluation:
-# True Skill Statistic
-TSS = function(cmx){
-    require(PresenceAbsence)
-    PresenceAbsence::sensitivity(cmx, st.dev=F) + PresenceAbsence::specificity(cmx, st.dev=F) - 1
-    }
-
-# Calculate explained deviance: null prediction is equivalent to the mean prevalence
-d.square &lt;- function(obs, pred, family=&#39;binomial&#39;){
-    require(dismo)  
-  
-    if (family==&#39;binomial&#39;) {
-      # To avoid dividing by zeros:
-      pred &lt;- ifelse(pred&lt;.00001,.00001,ifelse(pred&gt;.9999,.9999,pred))
-    }
-  # the null model prediction is simply the prevalence of the species:
-    null.pred &lt;- rep(mean(obs), length(obs))
-    
-    # Calculate explained deviance:
-    1 - (calc.deviance(obs, pred, family=family)/
-           calc.deviance(obs, null.pred, family=family))
-}</code></pre>
-<p>Now, we can start validating the BIOCLIM model.</p>
-<pre class="r"><code>library(PresenceAbsence)
-
-# We prepare the data frame for the optimal threshold selection:
-thresh_dat &lt;- data.frame(ID=seq_len(nrow(sp_test)), 
-        obs= sp_test$Turdus_torquatus,
-        pred=predict(m_bc, sp_test[,my_preds]))
-    
-# We find the optimal threshold:    
-thresh &lt;- PresenceAbsence::optimal.thresholds(DATA= thresh_dat)
-
-# We compute the confusion matrix:
-cmx_maxSSS &lt;- PresenceAbsence::cmx(DATA= thresh_dat, threshold=thresh[3,2])
-
-# We compute the performance measures and store them for later:
-(perf_bc = data.frame(
-  # Overall accuracy = percent correct classifications
-  pcc = PresenceAbsence::pcc(cmx_maxSSS, st.dev=F), 
-  # True positive rate / sensitity
-  sens = PresenceAbsence::sensitivity(cmx_maxSSS, st.dev=F), 
-  # True negative rate / specificity
-  spec = PresenceAbsence::specificity(cmx_maxSSS, st.dev=F),
-  # True skill statistic - TSS
-  TSS = TSS(cmx_maxSSS), 
-  # Area under ROC curve - AUC
-  AUC = PresenceAbsence::auc(thresh_dat, st.dev=F),
-  # Explained deviance
-  D2 = d.square(thresh_dat$obs, thresh_dat$pred),
-  # Let&#39;s also save the optimal threshold
-  maxTSS = thresh[3,2]))</code></pre>
-<pre><code>##         pcc sens      spec       TSS      AUC         D2 maxTSS
-## 1 0.8486842 0.75 0.8602941 0.6102941 0.794807 -0.4583228   0.26</code></pre>
+<p>Last, we validate model performance on the hold-out test data.</p>
+<pre class="r"><code># We use the default MaxSens+Spec threshold:
+(perf_bc &lt;- evalSDM(sp_test$Turdus_torquatus, predict(m_bc, sp_test[,my_preds])))</code></pre>
+<pre><code>##        AUC       TSS     Kappa Sens      Spec       PCC         D2 thresh
+## 1 0.794807 0.6102941 0.4317295 0.75 0.8602941 0.8486842 -0.4583228   0.26</code></pre>
 <p>Finally, let’s map the predicted occurrence probabilities across Britain and the predicted presence/absence.</p>
 <pre class="r"><code># Map predictions:
 r_bc_pred &lt;- r_bc_bin &lt;- predict(m_bc,bio_curr)
 
 # Threshold predictions using the maxTSS threshold (max sens+spec)
-values(r_bc_bin) &lt;- ifelse(values(r_bc_pred)&gt;=perf_bc$maxTSS, 1, 0)
+values(r_bc_bin) &lt;- ifelse(values(r_bc_pred)&gt;=perf_bc$thresh, 1, 0)
 
 # plot the maps
 plot(stack(r_bc_pred, r_bc_bin),main=c(&#39;BIOCLIM prob.&#39;,&#39;BIOCLIM bin.&#39;), axes=F) </code></pre>
-<p><img src="6_SDM_algorithms_files/figure-html/unnamed-chunk-10-1.png" width="672" /></p>
+<p><img src="6_SDM_algorithms_files/figure-html/unnamed-chunk-9-1.png" width="672" /></p>
 </div>
 <div id="domain" class="section level3">
 <h3><span class="header-section-number">2.1.2</span> Domain</h3>
@@ -584,47 +532,20 @@ wireframe(z ~ bio11 + bio8, data = xyz, zlab = list(&quot;Occurrence prob.&quot;
           drape = TRUE, col.regions = cls, scales = list(arrows = FALSE), 
           zlim = c(0, 1), main=&#39;Domain&#39;, xlab=&#39;bio11&#39;, ylab=&#39;bio8&#39;, 
           screen=list(z = -120, x = -70, y = 3))</code></pre>
-<p><img src="6_SDM_algorithms_files/figure-html/unnamed-chunk-11-1.png" width="672" /></p>
+<p><img src="6_SDM_algorithms_files/figure-html/unnamed-chunk-10-1.png" width="672" /></p>
 <pre class="r"><code># Plot partial response curves:
 par(mfrow=c(1,2)) 
-for (i in 1:2) {
-  xz &lt;- data.frame(
-    # Sequence for one predictor:
-    seq(min(sp_train[,my_preds[i]]),max(sp_train[,my_preds[i]]),length=50),
-    # Calculate the mean of the other predictor:
-      mean(sp_train[,my_preds[ -i ]]) 
-    )
-    names(xz) &lt;- c(my_preds[i], my_preds[-i])
-    xz$z &lt;- predict(m_dom, xz)
-    plot(xz[,1],xz$z,type=&#39;l&#39;, xlab=my_preds[i], ylim=c(0,1),
-         ylab=&#39;Occurrence probability&#39;, main=&#39;Domain&#39;)
-    }</code></pre>
-<p><img src="6_SDM_algorithms_files/figure-html/unnamed-chunk-11-2.png" width="672" /></p>
-<pre class="r"><code># Prepare validation:
-thresh_dat &lt;- data.frame(ID=seq_len(nrow(sp_test)), 
-        obs= sp_test$Turdus_torquatus,
-        pred=predict(m_dom, sp_test[,my_preds]))
-        
-# Find optimal threshold and compute confusion matrix
-thresh &lt;- PresenceAbsence::optimal.thresholds(DATA= thresh_dat)
-cmx_maxSSS &lt;- PresenceAbsence::cmx(DATA= thresh_dat, threshold=thresh[3,2])
-
-# Performance measures
-(perf_dom &lt;- data.frame(
-  pcc = PresenceAbsence::pcc(cmx_maxSSS, st.dev=F),
-  sens = PresenceAbsence::sensitivity(cmx_maxSSS, st.dev=F),
-  spec = PresenceAbsence::specificity(cmx_maxSSS, st.dev=F),
-  TSS = TSS(cmx_maxSSS),
-  AUC = PresenceAbsence::auc(thresh_dat, st.dev=F),
-  D2 = d.square(thresh_dat$obs, thresh_dat$pred),
-  maxTSS = thresh[3,2]))</code></pre>
-<pre><code>##         pcc sens      spec       TSS       AUC        D2 maxTSS
-## 1 0.7894737 0.75 0.7941176 0.5441176 0.7821691 -1.085684   0.68</code></pre>
+partial_response(m_dom, predictors = sp_train[,my_preds], main=&#39;DOMAIN&#39;)</code></pre>
+<p><img src="6_SDM_algorithms_files/figure-html/unnamed-chunk-10-2.png" width="672" /></p>
+<pre class="r"><code># Performance measures
+(perf_dom &lt;- evalSDM(sp_test$Turdus_torquatus, predict(m_dom, sp_test[,my_preds])))</code></pre>
+<pre><code>##         AUC       TSS     Kappa Sens      Spec       PCC        D2 thresh
+## 1 0.7821691 0.5441176 0.3274336 0.75 0.7941176 0.7894737 -1.085684   0.68</code></pre>
 <pre class="r"><code># Map predictions:
 r_dom_pred &lt;- r_dom_bin &lt;- predict(m_dom,bio_curr[[my_preds]])
-values(r_dom_bin) &lt;- ifelse(values(r_dom_pred)&gt;=perf_dom$maxTSS, 1, 0)
+values(r_dom_bin) &lt;- ifelse(values(r_dom_pred)&gt;=perf_dom$thresh, 1, 0)
 plot(stack(r_dom_pred, r_dom_bin),main=c(&#39;Domain prob.&#39;,&#39;Domain bin.&#39;), axes=F) </code></pre>
-<p><img src="6_SDM_algorithms_files/figure-html/unnamed-chunk-11-3.png" width="672" /></p>
+<p><img src="6_SDM_algorithms_files/figure-html/unnamed-chunk-10-3.png" width="672" /></p>
 </div>
 </div>
 <div id="regression-based-methods" class="section level2">
@@ -668,49 +589,22 @@ wireframe(z ~ bio11 + bio8, data = xyz, zlab = list(&quot;Occurrence prob.&quot;
           drape = TRUE, col.regions = cls, scales = list(arrows = FALSE), 
           zlim = c(0, 1), main=&#39;GLM&#39;, xlab=&#39;bio11&#39;, ylab=&#39;bio8&#39;, 
           screen=list(z = -120, x = -70, y = 3))</code></pre>
-<p><img src="6_SDM_algorithms_files/figure-html/unnamed-chunk-12-1.png" width="672" /></p>
+<p><img src="6_SDM_algorithms_files/figure-html/unnamed-chunk-11-1.png" width="672" /></p>
 <pre class="r"><code># Plot partial response curves:
 par(mfrow=c(1,2)) 
-for (i in 1:2) {
-  xz &lt;- data.frame(
-    # Sequence for one predictor:
-    seq(min(sp_train[,my_preds[i]]),max(sp_train[,my_preds[i]]),length=50),
-    # Calculate the mean of the other predictor:
-      mean(sp_train[,my_preds[ -i ]]) 
-    )
-    names(xz) &lt;- c(my_preds[i], my_preds[-i])
-    xz$z &lt;- predict(m_glm, xz, type=&#39;response&#39;)
-    plot(xz[,1],xz$z,type=&#39;l&#39;, xlab=my_preds[i], ylim=c(0,1),
-         ylab=&#39;Occurrence probability&#39;, main=&#39;GLM&#39;)
-    }</code></pre>
-<p><img src="6_SDM_algorithms_files/figure-html/unnamed-chunk-12-2.png" width="672" /></p>
-<pre class="r"><code># Prepare validation:
-thresh_dat &lt;- data.frame(ID=seq_len(nrow(sp_test)), 
-        obs= sp_test$Turdus_torquatus,
-        pred=predict(m_glm, sp_test[,my_preds], type=&#39;response&#39;))
-        
-# optimal threshold:
-thresh &lt;- PresenceAbsence::optimal.thresholds(DATA= thresh_dat)
-cmx_maxSSS &lt;- PresenceAbsence::cmx(DATA= thresh_dat, threshold=thresh[3,2])
-
-# performance measures:
-(perf_glm &lt;- data.frame(
-  pcc = PresenceAbsence::pcc(cmx_maxSSS, st.dev=F),
-  sens = PresenceAbsence::sensitivity(cmx_maxSSS, st.dev=F),
-  spec = PresenceAbsence::specificity(cmx_maxSSS, st.dev=F),
-  TSS = TSS(cmx_maxSSS),
-  AUC = PresenceAbsence::auc(thresh_dat, st.dev=F),
-  D2 = d.square(thresh_dat$obs, thresh_dat$pred),
-  maxTSS = thresh[3,2]))</code></pre>
-<pre><code>##         pcc  sens      spec       TSS      AUC        D2 maxTSS
-## 1 0.8618421 0.875 0.8602941 0.7352941 0.933364 0.4607125   0.12</code></pre>
+partial_response(m_glm, predictors = sp_train[,my_preds], main=&#39;GLM&#39;)</code></pre>
+<p><img src="6_SDM_algorithms_files/figure-html/unnamed-chunk-11-2.png" width="672" /></p>
+<pre class="r"><code># Performance measures
+(perf_glm &lt;- evalSDM(sp_test$Turdus_torquatus, predict(m_glm, sp_test[,my_preds], type=&#39;response&#39;) ))</code></pre>
+<pre><code>##        AUC       TSS     Kappa  Sens      Spec       PCC        D2 thresh
+## 1 0.933364 0.7352941 0.5006258 0.875 0.8602941 0.8618421 0.4607125   0.12</code></pre>
 <pre class="r"><code># Map predictions:
 bio_curr_df &lt;- data.frame(rasterToPoints(bio_curr[[my_preds]]))
 r_glm_bin &lt;- r_glm_pred &lt;- rasterFromXYZ(cbind(bio_curr_df[,1:2],
                                   predict(m_glm, bio_curr_df, type=&#39;response&#39;)))
-values(r_glm_bin) &lt;- ifelse(values(r_glm_pred)&gt;=perf_glm$maxTSS, 1, 0)
+values(r_glm_bin) &lt;- ifelse(values(r_glm_pred)&gt;=perf_glm$thresh, 1, 0)
 plot(stack(r_glm_pred, r_glm_bin),main=c(&#39;GLM prob.&#39;,&#39;GLM bin.&#39;), axes=F)   </code></pre>
-<p><img src="6_SDM_algorithms_files/figure-html/unnamed-chunk-12-3.png" width="672" /></p>
+<p><img src="6_SDM_algorithms_files/figure-html/unnamed-chunk-11-3.png" width="672" /></p>
 </div>
 <div id="generalised-additive-models-gams" class="section level3">
 <h3><span class="header-section-number">2.2.2</span> Generalised additive models (GAMs)</h3>
@@ -732,60 +626,32 @@ wireframe(z ~ bio11 + bio8, data = xyz, zlab = list(&quot;Occurrence prob.&quot;
           drape = TRUE, col.regions = cls, scales = list(arrows = FALSE), 
           zlim = c(0, 1), main=&#39;GAM (splines)&#39;, xlab=&#39;bio11&#39;, ylab=&#39;bio8&#39;, 
           screen=list(z = -120, x = -70, y = 3))</code></pre>
-<p><img src="6_SDM_algorithms_files/figure-html/unnamed-chunk-13-1.png" width="672" /></p>
+<p><img src="6_SDM_algorithms_files/figure-html/unnamed-chunk-12-1.png" width="672" /></p>
 <pre class="r"><code>xyz$z &lt;- predict(m_gamL, xyz[,1:2], type=&#39;response&#39;)
 wireframe(z ~ bio11 + bio8, data = xyz, zlab = list(&quot;Occurrence prob.&quot;, rot=90), 
           drape = TRUE, col.regions = cls, scales = list(arrows = FALSE), 
           zlim = c(0, 1), main=&#39;GAM (loess)&#39;, xlab=&#39;bio11&#39;, ylab=&#39;bio8&#39;, 
           screen=list(z = -120, x = -70, y = 3))</code></pre>
-<p><img src="6_SDM_algorithms_files/figure-html/unnamed-chunk-13-2.png" width="672" /></p>
+<p><img src="6_SDM_algorithms_files/figure-html/unnamed-chunk-12-2.png" width="672" /></p>
 <pre class="r"><code># Plot partial response curves:
-par(mfrow=c(1,2)) 
-for (i in 1:2) {
-  xz &lt;- data.frame(
-    # Sequence for one predictor:
-    seq(min(sp_train[,my_preds[i]]),max(sp_train[,my_preds[i]]),length=50),
-    # Calculate the mean of the other predictor:
-      mean(sp_train[,my_preds[-i]]) 
-    )
-    names(xz) &lt;- c(my_preds[i], my_preds[-i])
-    xz$z &lt;- predict(m_gamS, newdata=xz, type=&#39;response&#39;)
-    
-    plot(xz[,1],xz$z,type=&#39;l&#39;, xlab=my_preds[i], 
-        ylab=&#39;Occurrence probability&#39;,ylim=c(0,1), main=&#39;GAM&#39;)
-    
-    xz$z &lt;- predict(m_gamL, newdata=xz, type=&#39;response&#39;)
-    lines(xz[,1],xz$z,col=&#39;red&#39;)
-    legend(&#39;topleft&#39;,legend=c(&#39;spline&#39;,&#39;loess&#39;),lty=&#39;solid&#39;,col=c(&#39;black&#39;,&#39;red&#39;),bty=&#39;n&#39;)
-    }</code></pre>
-<p><img src="6_SDM_algorithms_files/figure-html/unnamed-chunk-13-3.png" width="672" /></p>
-<pre class="r"><code># Prepare validation:
-thresh_dat &lt;- data.frame(ID=seq_len(nrow(sp_test)), 
-        obs= sp_test$Turdus_torquatus,
-        pred=predict(m_gamS, sp_test[,my_preds], type=&#39;response&#39;))
-        
-# Set optimal threshold
-thresh &lt;- PresenceAbsence::optimal.thresholds(DATA= thresh_dat)
-cmx_maxSSS &lt;- PresenceAbsence::cmx(DATA= thresh_dat, threshold=thresh[3,2])
-
-# Performance measures
-(perf_gamS &lt;- data.frame(
-  pcc = PresenceAbsence::pcc(cmx_maxSSS, st.dev=F),
-  sens = PresenceAbsence::sensitivity(cmx_maxSSS, st.dev=F),
-  spec = PresenceAbsence::specificity(cmx_maxSSS, st.dev=F),
-  TSS = TSS(cmx_maxSSS),
-  AUC = PresenceAbsence::auc(thresh_dat, st.dev=F),
-  D2 = d.square(thresh_dat$obs, thresh_dat$pred),
-  maxTSS = thresh[3,2]))</code></pre>
-<pre><code>##         pcc   sens      spec       TSS    AUC        D2 maxTSS
-## 1 0.8486842 0.9375 0.8382353 0.7757353 0.9375 0.4586095    0.1</code></pre>
+par(mfrow=c(2,2)) 
+partial_response(m_gamS, predictors = sp_train[,my_preds], main=&#39;GAM (splines)&#39;)
+partial_response(m_gamL, predictors = sp_train[,my_preds], main=&#39;GAM (loess)&#39;)</code></pre>
+<p><img src="6_SDM_algorithms_files/figure-html/unnamed-chunk-12-3.png" width="672" /></p>
+<pre class="r"><code># Performance measures
+(perf_gamS &lt;- evalSDM(sp_test$Turdus_torquatus, predict(m_gamS, sp_test[,my_preds], type=&#39;response&#39;) ))</code></pre>
+<pre><code>##      AUC       TSS     Kappa   Sens      Spec       PCC        D2 thresh
+## 1 0.9375 0.7757353 0.4912689 0.9375 0.8382353 0.8486842 0.4586095    0.1</code></pre>
+<pre class="r"><code>(perf_gamL &lt;- evalSDM(sp_test$Turdus_torquatus, predict(m_gamL, sp_test[,my_preds], type=&#39;response&#39;) ))</code></pre>
+<pre><code>##         AUC       TSS     Kappa   Sens      Spec       PCC        D2 thresh
+## 1 0.9214154 0.7757353 0.4912689 0.9375 0.8382353 0.8486842 0.4508137   0.09</code></pre>
 <pre class="r"><code># Map predictions:
 r_gamS_bin &lt;- r_gamS_pred &lt;- rasterFromXYZ(cbind(bio_curr_df[,1:2],
                                    predict(m_gamS, bio_curr_df, type=&#39;response&#39;)))
-values(r_gamS_bin) &lt;- ifelse(values(r_gamS_pred)&gt;=perf_gamS$maxTSS, 1, 0)
+values(r_gamS_bin) &lt;- ifelse(values(r_gamS_pred)&gt;=perf_gamS$thresh, 1, 0)
 plot(stack(r_gamS_pred, r_gamS_bin),
      main=c(&#39;GAM (splines) prob.&#39;,&#39;GAM (splines) bin.&#39;), axes=F)    </code></pre>
-<p><img src="6_SDM_algorithms_files/figure-html/unnamed-chunk-13-4.png" width="672" /></p>
+<p><img src="6_SDM_algorithms_files/figure-html/unnamed-chunk-12-4.png" width="672" /></p>
 </div>
 </div>
 <div id="machine-learning-methods" class="section level2">
@@ -821,55 +687,28 @@ print(m_cart)</code></pre>
 ##      7) bio8&lt; 15.52276 9  1.555556 0.77777780 *</code></pre>
 <pre class="r"><code>plot(m_cart, margin=0.1)
 text(m_cart, cex = 0.8)</code></pre>
-<p><img src="6_SDM_algorithms_files/figure-html/unnamed-chunk-14-1.png" width="672" /></p>
+<p><img src="6_SDM_algorithms_files/figure-html/unnamed-chunk-13-1.png" width="672" /></p>
 <pre class="r"><code># Now, we plot the response surface:
 xyz$z &lt;- predict(m_cart, xyz)
 wireframe(z ~ bio11 + bio8, data = xyz, zlab = list(&quot;Occurrence prob.&quot;, rot=90), 
           drape = TRUE, col.regions = cls, scales = list(arrows = FALSE), 
           zlim = c(0, 1), main=&#39;CART&#39;, xlab=&#39;bio11&#39;, ylab=&#39;bio8&#39;, 
           screen=list(z = -120, x = -70, y = 3))</code></pre>
-<p><img src="6_SDM_algorithms_files/figure-html/unnamed-chunk-14-2.png" width="672" /></p>
+<p><img src="6_SDM_algorithms_files/figure-html/unnamed-chunk-13-2.png" width="672" /></p>
 <pre class="r"><code># Plot partial response curves:
 par(mfrow=c(1,2)) 
-for (i in 1:2) {
-  xz &lt;- data.frame(
-    # Sequence for one predictor:
-    seq(min(sp_train[,my_preds[i]]),max(sp_train[,my_preds[i]]),length=50),
-    # Calculate the mean of the other predictor:
-      mean(sp_train[,my_preds[-i]]) 
-    )
-    names(xz) &lt;- c(my_preds[i], my_preds[-i])
-    xz$z &lt;- predict(m_cart, newdata=xz)
-    plot(xz[,1],xz$z,type=&#39;l&#39;, xlab=my_preds[i], ylim=c(0,1),
-         ylab=&#39;Occurrence probability&#39;, main=&#39;CART&#39;)
-    }</code></pre>
-<p><img src="6_SDM_algorithms_files/figure-html/unnamed-chunk-14-3.png" width="672" /></p>
-<pre class="r"><code># Prepare validation
-thresh_dat &lt;- data.frame(ID=seq_len(nrow(sp_test)), 
-        obs= sp_test$Turdus_torquatus,
-        pred=predict(m_cart, sp_test[,my_preds]))
-        
-# Optimal threshold
-thresh &lt;- PresenceAbsence::optimal.thresholds(DATA= thresh_dat)
-cmx_maxSSS &lt;- PresenceAbsence::cmx(DATA= thresh_dat, threshold=thresh[3,2])
-
-# Performance measures
-(perf_cart &lt;- data.frame(
-  pcc = PresenceAbsence::pcc(cmx_maxSSS, st.dev=F),
-  sens = PresenceAbsence::sensitivity(cmx_maxSSS, st.dev=F),
-  spec = PresenceAbsence::specificity(cmx_maxSSS, st.dev=F),
-  TSS = TSS(cmx_maxSSS),
-  AUC = PresenceAbsence::auc(thresh_dat, st.dev=F),
-  D2 = d.square(thresh_dat$obs, thresh_dat$pred),
-   maxTSS = thresh[3,2]))</code></pre>
-<pre><code>##         pcc sens      spec       TSS       AUC        D2 maxTSS
-## 1 0.8684211 0.75 0.8823529 0.6323529 0.8244485 0.2546056   0.32</code></pre>
+partial_response(m_cart, predictors = sp_train[,my_preds], main=&#39;CART&#39;)</code></pre>
+<p><img src="6_SDM_algorithms_files/figure-html/unnamed-chunk-13-3.png" width="672" /></p>
+<pre class="r"><code># Performance measures of GAM with spline-smoother 
+(perf_cart &lt;- evalSDM(sp_test$Turdus_torquatus, predict(m_cart, sp_test[,my_preds]) ))</code></pre>
+<pre><code>##         AUC       TSS     Kappa Sens      Spec       PCC        D2 thresh
+## 1 0.8244485 0.6323529 0.4751381 0.75 0.8823529 0.8684211 0.2546056   0.32</code></pre>
 <pre class="r"><code># Map predictions:
 r_cart_bin &lt;- r_cart_pred &lt;- rasterFromXYZ(cbind(bio_curr_df[,1:2],
                                    predict(m_cart, bio_curr_df)))
-values(r_cart_bin) &lt;- ifelse(values(r_cart_pred)&gt;=perf_cart$maxTSS, 1, 0)
+values(r_cart_bin) &lt;- ifelse(values(r_cart_pred)&gt;=perf_cart$thresh, 1, 0)
 plot(stack(r_cart_pred, r_cart_bin),main=c(&#39;CART prob.&#39;,&#39;CART bin.&#39;), axes=F)   </code></pre>
-<p><img src="6_SDM_algorithms_files/figure-html/unnamed-chunk-14-4.png" width="672" /></p>
+<p><img src="6_SDM_algorithms_files/figure-html/unnamed-chunk-13-4.png" width="672" /></p>
 </div>
 <div id="random-forests-rfs" class="section level3">
 <h3><span class="header-section-number">2.3.2</span> Random Forests (RFs)</h3>
@@ -883,69 +722,40 @@ m_rf &lt;- randomForest( x=sp_train[,my_preds], y=sp_train$Turdus_torquatus,
 # Variable importance:
 importance(m_rf,type=1)</code></pre>
 <pre><code>##        %IncMSE
-## bio11 16.23018
-## bio8  19.96706</code></pre>
+## bio11 17.24741
+## bio8  22.91273</code></pre>
 <pre class="r"><code>varImpPlot(m_rf)</code></pre>
-<p><img src="6_SDM_algorithms_files/figure-html/unnamed-chunk-15-1.png" width="672" /></p>
+<p><img src="6_SDM_algorithms_files/figure-html/unnamed-chunk-14-1.png" width="672" /></p>
 <pre class="r"><code># Look at single trees:
 head(getTree(m_rf,1,T))</code></pre>
 <pre><code>##   left daughter right daughter split var split point status prediction
-## 1             2              3     bio11  20.9875069     -3 0.05915493
-## 2             4              5     bio11  -0.1018436     -3 0.38636364
-## 3             6              7     bio11  25.8310007     -3 0.01286174
-## 4             0              0      &lt;NA&gt;   0.0000000     -1 1.00000000
-## 5             8              9     bio11  20.7331389     -3 0.32500000
-## 6            10             11     bio11  25.4278305     -3 0.09090909</code></pre>
+## 1             2              3      bio8   25.530595     -3 0.07605634
+## 2             4              5     bio11    9.372776     -3 0.66666667
+## 3             6              7     bio11   23.319794     -3 0.04451039
+## 4             8              9      bio8    7.460640     -3 1.00000000
+## 5            10             11     bio11   10.475868     -3 0.50000000
+## 6            12             13     bio11   23.231469     -3 0.29411765</code></pre>
 <pre class="r"><code># Now, we plot the response surface:
 xyz$z &lt;- predict(m_rf, xyz, type=&#39;response&#39;)
 wireframe(z ~ bio11 + bio8, data = xyz, zlab = list(&quot;Occurrence prob.&quot;, rot=90), 
           drape = TRUE, col.regions = cls, scales = list(arrows = FALSE), 
           zlim = c(0, 1), main=&#39;Random Forest&#39;, xlab=&#39;bio11&#39;, ylab=&#39;bio8&#39;, 
           screen=list(z = -120, x = -70, y = 3))</code></pre>
-<p><img src="6_SDM_algorithms_files/figure-html/unnamed-chunk-15-2.png" width="672" /></p>
+<p><img src="6_SDM_algorithms_files/figure-html/unnamed-chunk-14-2.png" width="672" /></p>
 <pre class="r"><code># Plot partial response curves:
 par(mfrow=c(1,2)) 
-for (i in 1:2) {
-  xz &lt;- data.frame(
-    # Sequence for one predictor:
-    seq(min(sp_train[,my_preds[i]]),max(sp_train[,my_preds[i]]),length=50),
-    # Calculate the mean of the other predictor:
-      mean(sp_train[,my_preds[-i]]) 
-    )
-    names(xz) &lt;- c(my_preds[i], my_preds[-i])
-    xz$z &lt;- predict(m_rf, newdata=xz, type=&#39;response&#39;)
-    plot(xz[,1],xz$z,type=&#39;l&#39;, xlab=my_preds[i], ylim=c(0,1),
-         ylab=&#39;Occurrence probability&#39;, main=&#39;Random Forest&#39;)
-    }</code></pre>
-<p><img src="6_SDM_algorithms_files/figure-html/unnamed-chunk-15-3.png" width="672" /></p>
-<pre class="r"><code># prepare validation:
-thresh_dat &lt;- data.frame(ID=seq_len(nrow(sp_test)), 
-        obs= sp_test$Turdus_torquatus,
-        pred=predict(m_rf, sp_test[,my_preds], type=&#39;response&#39;))
-        
-# optimal threshold:
-thresh &lt;- PresenceAbsence::optimal.thresholds(DATA= thresh_dat)
-cmx_maxSSS &lt;- PresenceAbsence::cmx(DATA= thresh_dat, threshold=thresh[3,2])
-
-# performance measures:
-(perf_rf &lt;- data.frame(
-  pcc = PresenceAbsence::pcc(cmx_maxSSS, st.dev=F),
-  sens = PresenceAbsence::sensitivity(cmx_maxSSS, st.dev=F),
-  spec = PresenceAbsence::specificity(cmx_maxSSS, st.dev=F),
-  TSS = TSS(cmx_maxSSS),
-  AUC = PresenceAbsence::auc(thresh_dat, st.dev=F),
-  D2 = d.square(thresh_dat$obs, thresh_dat$pred),
-   maxTSS = thresh[3,2]))</code></pre>
-<pre><code>##         pcc  sens      spec       TSS       AUC        D2 maxTSS
-## 1 0.8355263 0.875 0.8308824 0.7058824 0.9037224 0.2391433   0.12</code></pre>
+partial_response(m_rf, predictors = sp_train[,my_preds], main=&#39;Random Forest&#39;)</code></pre>
+<p><img src="6_SDM_algorithms_files/figure-html/unnamed-chunk-14-3.png" width="672" /></p>
+<pre class="r"><code># Performance measures of GAM with spline-smoother 
+(perf_rf &lt;- evalSDM(sp_test$Turdus_torquatus, predict(m_rf, sp_test[,my_preds],  type=&#39;response&#39;) ))</code></pre>
+<pre><code>##        AUC       TSS     Kappa  Sens      Spec       PCC        D2 thresh
+## 1 0.904182 0.7132353 0.4597156 0.875 0.8382353 0.8421053 0.2339337   0.12</code></pre>
 <pre class="r"><code># Map predictions:
 r_rf_bin &lt;- r_rf_pred &lt;- rasterFromXYZ(cbind(bio_curr_df[,1:2],
-                                 predict(m_rf, bio_curr_df,type=&#39;prob&#39;)[,2]))</code></pre>
-<pre><code>## Error in predict.randomForest(m_rf, bio_curr_df, type = &quot;prob&quot;): &#39;prob&#39; or &#39;vote&#39; not meaningful for regression</code></pre>
-<pre class="r"><code>values(r_rf_bin) &lt;- ifelse(values(r_rf_pred)&gt;=perf_rf$maxTSS, 1, 0)</code></pre>
-<pre><code>## Error in h(simpleError(msg, call)): Fehler bei der Auswertung des Argumentes &#39;x&#39; bei der Methodenauswahl für Funktion &#39;values&#39;: Objekt &#39;r_rf_pred&#39; nicht gefunden</code></pre>
-<pre class="r"><code>plot(stack(r_rf_pred, r_rf_bin),main=c(&#39;RF prob.&#39;,&#39;RF bin.&#39;), axes=F)   </code></pre>
-<pre><code>## Error in h(simpleError(msg, call)): Fehler bei der Auswertung des Argumentes &#39;x&#39; bei der Methodenauswahl für Funktion &#39;plot&#39;: Fehler bei der Auswertung des Argumentes &#39;x&#39; bei der Methodenauswahl für Funktion &#39;stack&#39;: Objekt &#39;r_rf_pred&#39; nicht gefunden</code></pre>
+                                 predict(m_rf, bio_curr_df,type=&#39;response&#39;)))
+values(r_rf_bin) &lt;- ifelse(values(r_rf_pred)&gt;=perf_rf$thresh, 1, 0)
+plot(stack(r_rf_pred, r_rf_bin),main=c(&#39;RF prob.&#39;,&#39;RF bin.&#39;), axes=F)   </code></pre>
+<p><img src="6_SDM_algorithms_files/figure-html/unnamed-chunk-14-4.png" width="672" /></p>
 </div>
 <div id="boosted-regression-trees-brts" class="section level3">
 <h3><span class="header-section-number">2.3.3</span> Boosted regression trees (BRTs)</h3>
@@ -974,77 +784,49 @@ m_brt &lt;- gbm.step(data = sp_train,
 ## total mean deviance =  0.5381 
 ## tolerance is fixed at  5e-04 
 ## now adding trees...</code></pre>
-<p><img src="6_SDM_algorithms_files/figure-html/unnamed-chunk-16-1.png" width="672" /></p>
+<p><img src="6_SDM_algorithms_files/figure-html/unnamed-chunk-15-1.png" width="672" /></p>
 <pre class="r"><code># Variable importance:
 m_brt$contributions</code></pre>
 <pre><code>##         var  rel.inf
-## bio8   bio8 57.27409
-## bio11 bio11 42.72591</code></pre>
+## bio8   bio8 59.00576
+## bio11 bio11 40.99424</code></pre>
 <pre class="r"><code># Interactions (not very meaningful here with only 2 predictors):
 gbm.interactions(m_brt)$interactions</code></pre>
 <pre><code>##       bio11  bio8
-## bio11     0 34.69
+## bio11     0 34.66
 ## bio8      0  0.00</code></pre>
 <pre class="r"><code>gbm.interactions(m_brt)$rank.list</code></pre>
 <pre><code>##   var1.index var1.names var2.index var2.names int.size
-## 1          2       bio8          1      bio11    34.69
+## 1          2       bio8          1      bio11    34.66
 ## 2          3       &lt;NA&gt;          0                0.00</code></pre>
 <pre class="r"><code># dismo provides some build-in functions for plotting response:
 gbm.plot(m_brt, n.plots=2, write.title = FALSE)</code></pre>
-<p><img src="6_SDM_algorithms_files/figure-html/unnamed-chunk-16-2.png" width="672" /></p>
+<p><img src="6_SDM_algorithms_files/figure-html/unnamed-chunk-15-2.png" width="672" /></p>
 <pre class="r"><code>gbm.plot.fits(m_brt)</code></pre>
-<p><img src="6_SDM_algorithms_files/figure-html/unnamed-chunk-16-3.png" width="672" /></p>
+<p><img src="6_SDM_algorithms_files/figure-html/unnamed-chunk-15-3.png" width="672" /></p>
 <pre class="r"><code># Now, we plot the response surface:
 xyz$z &lt;- predict.gbm(m_brt, xyz, n.trees=m_brt$gbm.call$best.trees, type=&quot;response&quot;)
 wireframe(z ~ bio11 + bio8, data = xyz, zlab = list(&quot;Occurrence prob.&quot;, rot=90), 
           drape = TRUE, col.regions = cls, scales = list(arrows = FALSE), 
           zlim = c(0, 1), main=&#39;Boosted regression trees&#39;, xlab=&#39;bio11&#39;, 
           ylab=&#39;bio8&#39;, screen=list(z = -120, x = -70, y = 3))</code></pre>
-<p><img src="6_SDM_algorithms_files/figure-html/unnamed-chunk-16-4.png" width="672" /></p>
+<p><img src="6_SDM_algorithms_files/figure-html/unnamed-chunk-15-4.png" width="672" /></p>
 <pre class="r"><code># Plot partial response curves:
 par(mfrow=c(1,2)) 
-for (i in 1:2) {
-  xz &lt;- data.frame(
-    # Sequence for one predictor:
-    seq(min(sp_train[,my_preds[i]]),max(sp_train[,my_preds[i]]),length=50),
-    # Calculate the mean of the other predictor:
-      mean(sp_train[,my_preds[-i]]) 
-    )
-    names(xz) &lt;- c(my_preds[i], my_preds[-i])
-    xz$z &lt;- predict.gbm(m_brt, xz, n.trees=m_brt$gbm.call$best.trees, type=&quot;response&quot;)
-    plot(xz[,1],xz$z,type=&#39;l&#39;, xlab=my_preds[i], ylim=c(0,1),
-         ylab=&#39;Occurrence probability&#39;, main=&#39;Boosted regression tree&#39;)
-    }</code></pre>
-<p><img src="6_SDM_algorithms_files/figure-html/unnamed-chunk-16-5.png" width="672" /></p>
-<pre class="r"><code># prepare validation
-thresh_dat &lt;- data.frame(ID=seq_len(nrow(sp_test)), 
-        obs= sp_test$Turdus_torquatus,
-        pred=predict.gbm(m_brt, sp_test[,my_preds], 
-                         n.trees=m_brt$gbm.call$best.trees, type=&quot;response&quot;))
-        
-# optimal threshold:
-thresh &lt;- PresenceAbsence::optimal.thresholds(DATA= thresh_dat)
-cmx_maxSSS &lt;- PresenceAbsence::cmx(DATA= thresh_dat, threshold=thresh[3,2])
-
-# performance measures:
-(perf_brt &lt;- data.frame(
-  pcc = PresenceAbsence::pcc(cmx_maxSSS, st.dev=F),
-  sens = PresenceAbsence::sensitivity(cmx_maxSSS, st.dev=F),
-  spec = PresenceAbsence::specificity(cmx_maxSSS, st.dev=F),
-  TSS = TSS(cmx_maxSSS),
-  AUC = PresenceAbsence::auc(thresh_dat, st.dev=F),
-  D2 = d.square(thresh_dat$obs, thresh_dat$pred),
-   maxTSS = thresh[3,2]))</code></pre>
-<pre><code>##         pcc  sens      spec       TSS       AUC        D2 maxTSS
-## 1 0.8618421 0.875 0.8602941 0.7352941 0.9388787 0.3974611   0.12</code></pre>
+partial_response(m_brt, predictors = sp_train[,my_preds], main=&#39;BRT&#39;)</code></pre>
+<p><img src="6_SDM_algorithms_files/figure-html/unnamed-chunk-15-5.png" width="672" /></p>
+<pre class="r"><code># Performance measures of GAM with spline-smoother 
+(perf_brt &lt;- evalSDM(sp_test$Turdus_torquatus, predict.gbm(m_brt, sp_test[,my_preds], n.trees=m_brt$gbm.call$best.trees, type=&#39;response&#39;) ))</code></pre>
+<pre><code>##         AUC       TSS     Kappa  Sens      Spec       PCC        D2 thresh
+## 1 0.9370404 0.7352941 0.5006258 0.875 0.8602941 0.8618421 0.3995577  0.125</code></pre>
 <pre class="r"><code># Map predictions:
 r_brt_bin &lt;- r_brt_pred &lt;- rasterFromXYZ(cbind(bio_curr_df[,1:2],
                                   predict.gbm(m_brt, bio_curr_df,
                                               n.trees=m_brt$gbm.call$best.trees, 
                                               type=&quot;response&quot;)))
-values(r_brt_bin) &lt;- ifelse(values(r_brt_pred)&gt;=perf_brt$maxTSS, 1, 0)
+values(r_brt_bin) &lt;- ifelse(values(r_brt_pred)&gt;=perf_brt$thresh, 1, 0)
 plot(stack(r_brt_pred, r_brt_bin),main=c(&#39;BRT prob.&#39;,&#39;BRT bin.&#39;), axes=F)   </code></pre>
-<p><img src="6_SDM_algorithms_files/figure-html/unnamed-chunk-16-6.png" width="672" /></p>
+<p><img src="6_SDM_algorithms_files/figure-html/unnamed-chunk-15-6.png" width="672" /></p>
 </div>
 <div id="maxent" class="section level3">
 <h3><span class="header-section-number">2.3.4</span> Maxent</h3>
@@ -1065,48 +847,21 @@ wireframe(z ~ bio11 + bio8, data = xyz, zlab = list(&quot;Occurrence prob.&quot;
           drape = TRUE, col.regions = cls, scales = list(arrows = FALSE), 
           zlim = c(0, 1), main=&#39;Maxent&#39;, xlab=&#39;bio11&#39;, ylab=&#39;bio17&#39;, 
           screen=list(z = -120, x = -70, y = 3))</code></pre>
-<p><img src="6_SDM_algorithms_files/figure-html/unnamed-chunk-17-1.png" width="672" /></p>
+<p><img src="6_SDM_algorithms_files/figure-html/unnamed-chunk-16-1.png" width="672" /></p>
 <pre class="r"><code># Plot partial response curves:
 par(mfrow=c(1,2)) 
-for (i in 1:2) {
-  xz &lt;- data.frame(
-    # Sequence for one predictor:
-    seq(min(sp_train[,my_preds[i]]),max(sp_train[,my_preds[i]]),length=50),
-    # Calculate the mean of the other predictor:
-      mean(sp_train[,my_preds[-i]]) 
-    )
-    names(xz) &lt;- c(my_preds[i], my_preds[-i])
-    xz$z &lt;- predict(m_maxent, xz,  type=&quot;logistic&quot;)
-    plot(xz[,1],xz$z,type=&#39;l&#39;, xlab=my_preds[i], ylim=c(0,1),
-         ylab=&#39;Occurrence probability&#39;, main=&#39;Maxent&#39;)
-    }</code></pre>
-<p><img src="6_SDM_algorithms_files/figure-html/unnamed-chunk-17-2.png" width="672" /></p>
-<pre class="r"><code># Prepare validation:
-thresh_dat &lt;- data.frame(ID=seq_len(nrow(sp_test)), 
-        obs= sp_test$Turdus_torquatus,
-        pred=predict(m_maxent, sp_test[,my_preds], type=&quot;logistic&quot;))
-        
-# optimal threshold
-thresh &lt;- PresenceAbsence::optimal.thresholds(DATA= thresh_dat)
-cmx_maxSSS &lt;- PresenceAbsence::cmx(DATA= thresh_dat, threshold=thresh[3,2])
-
-# performance measures
-(perf_maxent &lt;- data.frame(
-  pcc = PresenceAbsence::pcc(cmx_maxSSS, st.dev=F),
-  sens = PresenceAbsence::sensitivity(cmx_maxSSS, st.dev=F),
-  spec = PresenceAbsence::specificity(cmx_maxSSS, st.dev=F),
-  TSS = TSS(cmx_maxSSS),
-  AUC = PresenceAbsence::auc(thresh_dat, st.dev=F),
-  D2 = d.square(thresh_dat$obs, thresh_dat$pred),
-   maxTSS = thresh[3,2]))</code></pre>
-<pre><code>##         pcc   sens      spec       TSS       AUC        D2 maxTSS
-## 1 0.8355263 0.9375 0.8235294 0.7610294 0.9384191 0.3160077  0.265</code></pre>
+partial_response(m_maxent, predictors = sp_train[,my_preds], main=&#39;Maxent&#39;)</code></pre>
+<p><img src="6_SDM_algorithms_files/figure-html/unnamed-chunk-16-2.png" width="672" /></p>
+<pre class="r"><code># Performance measures of GAM with spline-smoother 
+(perf_maxent &lt;- evalSDM(sp_test$Turdus_torquatus, predict(m_maxent, sp_test[,my_preds],  type=&#39;logistic&#39;) ))</code></pre>
+<pre><code>##         AUC       TSS     Kappa   Sens      Spec       PCC        D2 thresh
+## 1 0.9384191 0.7610294 0.4656918 0.9375 0.8235294 0.8355263 0.3160077  0.265</code></pre>
 <pre class="r"><code># Map predictions:
 r_maxent_bin &lt;- r_maxent_pred &lt;- rasterFromXYZ(cbind(bio_curr_df[,1:2],
                                      predict(m_maxent, bio_curr_df, type=&quot;logistic&quot;)))
-values(r_maxent_bin) &lt;- ifelse(values(r_maxent_pred)&gt;=perf_maxent$maxTSS, 1, 0)
+values(r_maxent_bin) &lt;- ifelse(values(r_maxent_pred)&gt;=perf_maxent$thresh, 1, 0)
 plot(stack(r_maxent_pred, r_maxent_bin),main=c(&#39;Maxent prob.&#39;,&#39;Maxent bin.&#39;), axes=F)   </code></pre>
-<p><img src="6_SDM_algorithms_files/figure-html/unnamed-chunk-17-3.png" width="672" /></p>
+<p><img src="6_SDM_algorithms_files/figure-html/unnamed-chunk-16-3.png" width="672" /></p>
 </div>
 </div>
 <div id="comparing-all-algorithms" class="section level2">
@@ -1114,15 +869,24 @@ plot(stack(r_maxent_pred, r_maxent_bin),main=c(&#39;Maxent prob.&#39;,&#39;Maxen
 <p>We can now compare the performance of all algorithms on our independent data. Also, we store this information for running the ensembles in the next tutorial.</p>
 <pre class="r"><code>(comp_perf &lt;- rbind(bc = perf_bc, dom = perf_dom, glm = perf_glm, gamS = perf_gamS,
       cart = perf_cart, rf = perf_rf, brt = perf_brt, maxent = perf_maxent))</code></pre>
-<pre><code>##              pcc   sens      spec       TSS       AUC         D2 maxTSS
-## bc     0.8486842 0.7500 0.8602941 0.6102941 0.7948070 -0.4583228  0.260
-## dom    0.7894737 0.7500 0.7941176 0.5441176 0.7821691 -1.0856837  0.680
-## glm    0.8618421 0.8750 0.8602941 0.7352941 0.9333640  0.4607125  0.120
-## gamS   0.8486842 0.9375 0.8382353 0.7757353 0.9375000  0.4586095  0.100
-## cart   0.8684211 0.7500 0.8823529 0.6323529 0.8244485  0.2546056  0.320
-## rf     0.8355263 0.8750 0.8308824 0.7058824 0.9037224  0.2391433  0.120
-## brt    0.8618421 0.8750 0.8602941 0.7352941 0.9388787  0.3974611  0.120
-## maxent 0.8355263 0.9375 0.8235294 0.7610294 0.9384191  0.3160077  0.265</code></pre>
+<pre><code>##              AUC       TSS     Kappa   Sens      Spec       PCC         D2
+## bc     0.7948070 0.6102941 0.4317295 0.7500 0.8602941 0.8486842 -0.4583228
+## dom    0.7821691 0.5441176 0.3274336 0.7500 0.7941176 0.7894737 -1.0856837
+## glm    0.9333640 0.7352941 0.5006258 0.8750 0.8602941 0.8618421  0.4607125
+## gamS   0.9375000 0.7757353 0.4912689 0.9375 0.8382353 0.8486842  0.4586095
+## cart   0.8244485 0.6323529 0.4751381 0.7500 0.8823529 0.8684211  0.2546056
+## rf     0.9041820 0.7132353 0.4597156 0.8750 0.8382353 0.8421053  0.2339337
+## brt    0.9370404 0.7352941 0.5006258 0.8750 0.8602941 0.8618421  0.3995577
+## maxent 0.9384191 0.7610294 0.4656918 0.9375 0.8235294 0.8355263  0.3160077
+##        thresh
+## bc      0.260
+## dom     0.680
+## glm     0.120
+## gamS    0.100
+## cart    0.320
+## rf      0.120
+## brt     0.125
+## maxent  0.265</code></pre>
 <pre class="r"><code># Adapt the file path to your folder structure
 write.table(data.frame(alg=row.names(comp_perf),comp_perf), 
             file=&#39;data/SDM_alg_performances.txt&#39;, row.names=F)</code></pre>

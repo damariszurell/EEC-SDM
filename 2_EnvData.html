@@ -423,6 +423,14 @@ div.tocify {
 
 
 <hr />
+<div class="alert alert-info">
+<p><strong>RStudio project</strong></p>
+<p>Open the RStudio project that we created in the first session. I recommend to use this RStudio project for the entire course and within the RStudio project create separate R scripts for each session.</p>
+<ul>
+<li>Create a new empty R script by going to the tab “File”, select “New File” and then “R script”</li>
+<li>In the new R script, type <code># Session 2: Environmental data</code> and save the file in your folder “scripts” within your project folder, e.g. as “2_EnvData.R”</li>
+</ul>
+</div>
 <p>In species distribution modelling, we aim to understand how species’ occurrence arise related to environment. Thus, additional to our species data, we need environmental information. Many environmental data are now available at very high spatial resolution, e.g. lidar data <span class="citation">(Bakx et al. 2019)</span>. However, often, high resolution data are not necessarily available globally - although the data are constantly improving. I can’t give you a full overview over all available data sets. Rather, you should get an idea how you process the data to make best use of them for your biodiversity models.</p>
 <div id="climate-data" class="section level1">
 <h1><span class="header-section-number">1</span> Climate data</h1>
@@ -493,19 +501,19 @@ clim</code></pre>
 head(raster::extract(x = clim, 
     y = data.frame(gbif_shrew2[,c(&#39;decimalLongitude&#39;,&#39;decimalLatitude&#39;)]), cellnumbers=T ))</code></pre>
 <pre><code>##       cells bio1 bio2 bio3 bio4 bio5 bio6 bio7 bio8 bio9 bio10 bio11 bio12
-## [1,] 547643   47   94   33 6777  196  -88  284  132    1   132   -42  1495
-## [2,] 543289   74   80   32 6125  209  -41  250  151   30   151    -5  1147
-## [3,] 564903   14   64   28 5644  134  -90  224   85  -55    85   -55  1022
-## [4,] 569225   65   82   30 6522  211  -60  271  145  -19   148   -19   768
-## [5,] 564903   14   64   28 5644  134  -90  224   85  -55    85   -55  1022
-## [6,] 567068   85   94   31 6971  242  -55  297  172   -7   172    -7   786
+## [1,] 569230   62   83   30 6512  207  -64  271  144  -22   144   -22   850
+## [2,] 547643   47   94   33 6777  196  -88  284  132    1   132   -42  1495
+## [3,] 543289   74   80   32 6125  209  -41  250  151   30   151    -5  1147
+## [4,] 549799   42   93   33 6582  188  -91  279  125  -33   125   -44  1370
+## [5,] 549799   42   93   33 6582  188  -91  279  125  -33   125   -44  1370
+## [6,] 564903   14   64   28 5644  134  -90  224   85  -55    85   -55  1022
 ##      bio13 bio14 bio15 bio16 bio17 bio18 bio19
-## [1,]   183    89    26   529   293   529   324
-## [2,]   120    77    15   342   250   342   270
-## [3,]   127    52    28   355   169   355   169
-## [4,]    98    32    35   268   102   266   102
-## [5,]   127    52    28   355   169   355   169
-## [6,]    99    33    34   274   104   274   104</code></pre>
+## [1,]   105    37    34   304   113   304   113
+## [2,]   183    89    26   529   293   529   324
+## [3,]   120    77    15   342   250   342   270
+## [4,]   168    77    27   490   255   490   272
+## [5,]   168    77    27   490   255   490   272
+## [6,]   127    52    28   355   169   355   169</code></pre>
 <pre class="r"><code># Our new data frame:
 gbif_shrew2 &lt;- cbind(gbif_shrew2, raster::extract(x = clim, y = data.frame(gbif_shrew2[,c(&#39;decimalLongitude&#39;,&#39;decimalLatitude&#39;)]), cellnumbers=T ))</code></pre>
 <p>We now have to inspect the data again to see whether we have any missing values or any other issues.</p>
@@ -513,16 +521,29 @@ gbif_shrew2 &lt;- cbind(gbif_shrew2, raster::extract(x = clim, y = data.frame(gb
 <p>Because we superimposed an arbitrary resolution now when joining the GBIF and environmental data, we could potentially have multiple records in a single raster cell. As we have extracted the cell numbers from the raster layer, checking for duplicates is very simple.</p>
 <pre class="r"><code># Check for duplicates
 duplicated(gbif_shrew2$cells)</code></pre>
-<pre><code>##   [1] FALSE FALSE FALSE FALSE  TRUE FALSE FALSE FALSE FALSE FALSE FALSE FALSE
-##  [13] FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE  TRUE FALSE FALSE  TRUE
-##  [25] FALSE FALSE  TRUE FALSE  TRUE  TRUE FALSE FALSE FALSE  TRUE FALSE FALSE
-##  [37] FALSE  TRUE FALSE FALSE FALSE FALSE FALSE  TRUE FALSE FALSE FALSE FALSE
-##  [49] FALSE FALSE FALSE FALSE  TRUE  TRUE  TRUE FALSE  TRUE FALSE FALSE FALSE
-##  [61] FALSE FALSE FALSE FALSE  TRUE  TRUE FALSE  TRUE FALSE FALSE FALSE FALSE
-##  [73] FALSE FALSE FALSE FALSE  TRUE FALSE FALSE  TRUE FALSE FALSE FALSE FALSE
-##  [85] FALSE FALSE FALSE  TRUE  TRUE FALSE FALSE FALSE FALSE FALSE  TRUE  TRUE
-##  [97] FALSE FALSE FALSE  TRUE FALSE  TRUE  TRUE  TRUE FALSE  TRUE  TRUE FALSE
-## [109] FALSE FALSE FALSE  TRUE  TRUE FALSE</code></pre>
+<pre><code>##   [1] FALSE FALSE FALSE FALSE  TRUE FALSE FALSE FALSE FALSE  TRUE FALSE FALSE
+##  [13] FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE
+##  [25] FALSE FALSE FALSE  TRUE FALSE FALSE  TRUE FALSE FALSE  TRUE FALSE  TRUE
+##  [37] FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE  TRUE FALSE
+##  [49] FALSE FALSE  TRUE FALSE FALSE FALSE  TRUE  TRUE FALSE  TRUE FALSE  TRUE
+##  [61]  TRUE FALSE FALSE  TRUE FALSE FALSE  TRUE FALSE FALSE  TRUE  TRUE FALSE
+##  [73] FALSE FALSE  TRUE  TRUE FALSE FALSE FALSE FALSE  TRUE FALSE FALSE  TRUE
+##  [85] FALSE  TRUE FALSE FALSE  TRUE FALSE  TRUE  TRUE FALSE FALSE FALSE  TRUE
+##  [97] FALSE FALSE  TRUE  TRUE  TRUE FALSE  TRUE FALSE  TRUE FALSE FALSE  TRUE
+## [109]  TRUE FALSE FALSE  TRUE FALSE  TRUE FALSE  TRUE FALSE  TRUE  TRUE FALSE
+## [121]  TRUE  TRUE FALSE FALSE  TRUE  TRUE FALSE  TRUE FALSE  TRUE  TRUE  TRUE
+## [133] FALSE FALSE  TRUE  TRUE FALSE FALSE FALSE FALSE  TRUE  TRUE  TRUE FALSE
+## [145]  TRUE  TRUE  TRUE FALSE  TRUE  TRUE FALSE  TRUE FALSE  TRUE FALSE  TRUE
+## [157] FALSE  TRUE  TRUE  TRUE  TRUE  TRUE FALSE  TRUE  TRUE  TRUE FALSE FALSE
+## [169]  TRUE  TRUE  TRUE  TRUE  TRUE FALSE FALSE  TRUE  TRUE  TRUE FALSE  TRUE
+## [181] FALSE  TRUE FALSE FALSE FALSE  TRUE  TRUE FALSE  TRUE  TRUE  TRUE  TRUE
+## [193]  TRUE  TRUE FALSE  TRUE  TRUE  TRUE FALSE FALSE  TRUE FALSE  TRUE  TRUE
+## [205]  TRUE FALSE  TRUE  TRUE FALSE FALSE  TRUE FALSE  TRUE  TRUE  TRUE  TRUE
+## [217] FALSE  TRUE  TRUE  TRUE FALSE  TRUE  TRUE FALSE  TRUE FALSE FALSE  TRUE
+## [229]  TRUE FALSE FALSE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE FALSE FALSE  TRUE
+## [241]  TRUE FALSE FALSE FALSE FALSE FALSE  TRUE  TRUE FALSE FALSE FALSE  TRUE
+## [253] FALSE  TRUE  TRUE  TRUE FALSE  TRUE  TRUE FALSE FALSE FALSE FALSE FALSE
+## [265] FALSE FALSE  TRUE  TRUE FALSE</code></pre>
 <pre class="r"><code># Only retain non-duplicated cells:
 gbif_shrew_env &lt;- gbif_shrew2[!duplicated(gbif_shrew2$cells),]</code></pre>
 <p>Remember to save your resulting data frames!</p>

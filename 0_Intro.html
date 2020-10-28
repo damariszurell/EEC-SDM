@@ -425,7 +425,15 @@ div.tocify {
 <hr />
 <div id="getting-started-in-r" class="section level1">
 <h1><span class="header-section-number">1</span> Getting started in R</h1>
-<p>This tutorial provides a very brief recap of R basics. The materials are prerequisite for the remainder of the course. I highly recommend looking also at other tutorials (e.g. by <a href="http://adamwilson.us/SpatialDataScience/02_graphics.html">Adam Wilson</a>, by <a href="https://datacarpentry.org/R-ecology-lesson/04-visualization-ggplot2.html">Data carpentry</a>, or by <a href="https://cran.r-project.org/doc/contrib/Torfs+Brauer-Short-R-Intro.pdf">Paul Torfs and Claudia Brauer</a>) and books (e.g. <a href="http://r4ds.had.co.nz/">R for Data Science</a>, or <span class="citation">Crawley (2007)</span>). The RStudio <a href="https://www.rstudio.com/resources/cheatsheets/">cheat sheets</a> are also very helpful!</p>
+<p>This tutorial provides a very brief recap of R basics. The materials are prerequisite for the remainder of the course. I highly recommend looking also at other tutorial, for example:</p>
+<ul>
+<li>Tutorial by <a href="http://adamwilson.us/SpatialDataScience/02_graphics.html">Adam Wilson</a></li>
+<li><a href="https://datacarpentry.org/R-ecology-lesson/04-visualization-ggplot2.html">Data carpentry</a></li>
+<li>Introduction by <a href="https://cran.r-project.org/doc/contrib/Torfs+Brauer-Short-R-Intro.pdf">Paul Torfs and Claudia Brauer</a></li>
+<li>R for Beginners by <a href="https://rbasicsworkshop.weebly.com/uploads/1/8/6/0/18603232/paradis_2005_r-forbeginners.pdf">Emmanuel Paradis</a></li>
+<li>Books <a href="http://r4ds.had.co.nz/">R for Data Science</a>, or <span class="citation">Crawley (2007)</span>)</li>
+</ul>
+<p>The RStudio <a href="https://www.rstudio.com/resources/cheatsheets/">cheat sheets</a> are also very helpful!</p>
 <p><strong>What is R?</strong></p>
 <ul>
 <li>a very flexible, open source programming environment for (statistical) data analyses and visualisation (www.r-project.org)<br />
@@ -444,11 +452,27 @@ div.tocify {
 <li>scripts are the first step for automatizing your data manipulation and analyses</li>
 <li>R has a built-in editor, but many people nowadays use R Studio (<a href="http://rstudio.org/" class="uri">http://rstudio.org/</a>) or other text editors</li>
 </ul>
+<div id="create-a-new-project-in-rstudio" class="section level2">
+<h2><span class="header-section-number">1.1</span> Create a new project in RStudio</h2>
+<p>I recommend using RStudio throughout the course. If you have not already done so, please visit the RStudio website (<a href="http://rstudio.org/" class="uri">http://rstudio.org/</a>) and download and install RStudio for your operating system.</p>
+<p>I also recommend setting up an RStudio project for the entire course (UP students can watch video tutorial in Moodle) and within the RStudio project separate R scripts for each session. To do so:</p>
+<ul>
+<li>Open RStudio</li>
+<li>Go to the tab “File” and select “New Project”</li>
+<li>Select either “New Directory” if you haven’t set up a course folder yet, or select “Existing Directory” to point towards an existing folder. This directory will be the working folder for the course. Navigate to the path of the project folder on your machine (e.g. ’~Documents/Courses/SDMs)</li>
+<li>Name your project<br />
+</li>
+<li>Use your file explorer on your machine, find your project folder, and create four sub-folders: data, scripts, results, and figures</li>
+<li>Create a new empty R script by going to the tab “File”, select “New File” and then “R script”</li>
+<li>In the new R script, type <code># Session 0: R introduction</code> and save the file in your folder “scripts” within your project folder, e.g. as “0_RIntro.R”</li>
+</ul>
+</div>
 <div id="console-and-prompt" class="section level2">
-<h2><span class="header-section-number">1.1</span> Console and prompt</h2>
+<h2><span class="header-section-number">1.2</span> Console and prompt</h2>
 <p>In the R console you will find the symbol <code>&gt;</code>:</p>
 <pre class="r"><code>&gt;</code></pre>
-<p>This is the so-called <em>prompt</em>, which asks you for the next command. If you see a <code>+</code> instead, then the former command is not completed yet, and R waits for further arguments (maybe you have forgotten the closing bracket?).</p>
+<p>This is the so-called <em>prompt</em>, which asks you for the next command.</p>
+<p>The most basic thing you can do now is typing some mathematical calculations. If you see a <code>+</code> instead, then the former command is not completed yet, and R waits for further arguments (maybe you have forgotten the closing bracket?).</p>
 <pre class="r"><code>20 * (5 - 3
 )</code></pre>
 <p>A line break or a semicolon (;) separates commands.</p>
@@ -456,14 +480,29 @@ div.tocify {
 <p>Anything following a hashmark <code>#</code>, will be interpreted as comment and will, thus, not be executed.</p>
 <pre class="r"><code>1 + 3
 # 1 + 3</code></pre>
-<p>Upon opening a new R session, some useful information will be printed to the console, mainly on version number and copyright. You can also extract this and other useful information by typing commands, e.g.</p>
-<pre class="r"><code>sessionInfo()
-citation()</code></pre>
-<p>The last command is important for citing the correct packages in your theses or any other publication.</p>
 <p>You could type all code examples that are listed here, directly into your R console. You can access them by the cursor keys. However, I highly recommend storing everything into a script file.</p>
 </div>
+<div id="grammar-functions-and-arguments" class="section level2">
+<h2><span class="header-section-number">1.3</span> Grammar: functions and arguments</h2>
+<p>R comes with a huge list of commands, which we call function. In order to execute a function, it needs to be followed by brackets <code>()</code>.</p>
+<pre class="r"><code>sum()</code></pre>
+<pre><code>## [1] 0</code></pre>
+<pre class="r"><code>sum(1,3)</code></pre>
+<pre><code>## [1] 4</code></pre>
+<p>Within the brackets, we can provide additional arguments to the function. Some functions always expect additional arguments, and some functions don’t. In the above example, <code>sum()</code> also works without additional arguments. The function’s default assumes that we have provided a zero vector and thus the output is a <code>0</code>. If we provide a vector of numeric values, the function will return the sum of these values.</p>
+<p>Some functions have named arguments, for example the function <code>rep()</code>, which creates a vector of replicates.</p>
+<pre class="r"><code>rep(x=2,times=10)</code></pre>
+<pre><code>##  [1] 2 2 2 2 2 2 2 2 2 2</code></pre>
+<pre class="r"><code>rep(2,10)</code></pre>
+<pre><code>##  [1] 2 2 2 2 2 2 2 2 2 2</code></pre>
+<p>In this example, both expression give the same results because we provided the arguments in the same order as the function expects. With named arguments, we can also change the order.</p>
+<pre class="r"><code>rep(times=10,x=2)</code></pre>
+<pre><code>##  [1] 2 2 2 2 2 2 2 2 2 2</code></pre>
+<pre class="r"><code>rep(10,2)</code></pre>
+<pre><code>## [1] 10 10</code></pre>
+</div>
 <div id="working-directory" class="section level2">
-<h2><span class="header-section-number">1.2</span> Working directory</h2>
+<h2><span class="header-section-number">1.4</span> Working directory</h2>
 <p>R is always pointed at a specific directory on your computer, the working directory. You can check the current working directory by typing:</p>
 <pre class="r"><code>getwd()</code></pre>
 <p>The command for setting a working directory is <code>setwd()</code>. Check out the help page:</p>
@@ -476,10 +515,10 @@ citation()</code></pre>
 <pre class="r"><code>dir()</code></pre>
 </div>
 <div id="workspace" class="section level2">
-<h2><span class="header-section-number">1.3</span> Workspace</h2>
+<h2><span class="header-section-number">1.5</span> Workspace</h2>
 <p>You can list all objects in your workspace by typing <code>ls()</code>.</p>
 <pre class="r"><code>ls()</code></pre>
-<p>Probably you workspace does not list any objects yet. We can remove objects from the workspace using <code>rm()</code>.</p>
+<p>Probably your workspace does not list any objects yet. We can remove objects from the workspace using <code>rm()</code>.</p>
 <pre class="r"><code>x &lt;- 20
 y &lt;- 30
 z &lt;- 40
@@ -491,18 +530,18 @@ rm(x) # removes one or more objects
 rm(list=ls()) #removes all objects from workspace</code></pre>
 </div>
 <div id="load-and-install-packages" class="section level2">
-<h2><span class="header-section-number">1.4</span> Load and install packages</h2>
+<h2><span class="header-section-number">1.6</span> Load and install packages</h2>
 <p>There are thousands of additional packages available for R. You can see the list of installed packages by typing: <code>library()</code></p>
 <p>The same command is used for loading a specific package into the workspace = make it available for this session:</p>
 <pre class="r"><code># loads the package raster:
-library(raster)
+library(ggplot2)
 # removes package from current workspace:
-detach(package:raster)</code></pre>
-<p>If you don’t have the packages above, install them in the package manager or by running</p>
-<pre class="r"><code>install.packages(&quot;raster&quot;, dependencies=T)</code></pre>
+detach(package:ggplot2)</code></pre>
+<p>If you don’t have the packages above, install them in the package manager or by running the command</p>
+<pre class="r"><code>install.packages(&quot;ggplot2&quot;, dependencies=T)</code></pre>
 </div>
 <div id="getting-help" class="section level2">
-<h2><span class="header-section-number">1.5</span> Getting help</h2>
+<h2><span class="header-section-number">1.7</span> Getting help</h2>
 <p>R comes with an extensive, built-in help system, and several manuals, help pages for every available function and many additional documents.</p>
 <p>You can access the built-in manuals by typing:</p>
 <pre class="r"><code>help.start()</code></pre>
@@ -528,8 +567,12 @@ help(mean)
 <pre class="r"><code># list all available vignettes of the installed(!) packages:
 vignette()
 
-# opens the vignette as pdf:
-vignette(&quot;Raster&quot;)</code></pre>
+# opens the vignette as pdf or html:
+vignette(&quot;ggplot2-specs&quot;)</code></pre>
+<p>Upon opening a new R session, some useful information will be printed to the console, mainly on version number and copyright. You can also extract this and other useful information by typing commands, e.g.</p>
+<pre class="r"><code>sessionInfo()
+citation()</code></pre>
+<p>The last command is important for citing the correct packages in your theses or any other publication.</p>
 </div>
 </div>
 <div id="operators-and-objects" class="section level1">
@@ -551,7 +594,7 @@ sin(pi/2)
 <li><code>+</code> / <code>-</code> : addition / subtraction</li>
 <li><code>%/%</code> / <code>%%</code> : integer division / modulo</li>
 </ul>
-<p>Useful mathematic functions:</p>
+<p>Useful mathematical functions:</p>
 <ul>
 <li><code>max()</code>, <code>min()</code>, <code>range()</code> : extreme values</li>
 <li><code>abs()</code> : absolute values</li>
@@ -608,7 +651,7 @@ FALSE &amp;&amp; TRUE
 TRUE || FALSE
 FALSE || FALSE
 (3 &lt; 2) &amp;&amp; (4 == (2^2))</code></pre>
-<p>Examples help understanding the difference between the operators <code>&amp;&amp;</code> resp. <code>||</code> and <code>&amp;</code> resp. <code>|</code>. The shorter form performs elementwise comparisons in much the same way as arithmetic operators. The longer form evaluates left to right examining only the first element of each vector. Evaluation proceeds only until the result is determined. The longer form is appropriate for programming control-flow and typically preferred in if clauses.</p>
+<p>Examples help understanding the difference between the operators <code>&amp;&amp;</code> resp. <code>||</code> and <code>&amp;</code> resp. <code>|</code>. The shorter form performs elementwise comparisons in much the same way as arithmetic operators. The longer form evaluates left to right examining only the first element of each vector. Evaluation proceeds only until the result is determined. The longer form is appropriate for programming control-flow and typically preferred in if-clauses.</p>
 <pre class="r"><code>c(TRUE,TRUE) # c() means &#39;concatenate&#39; and combines arguments into a vector
 c(TRUE,TRUE) &amp; c(FALSE, TRUE)
 c(TRUE,TRUE) &amp; c(TRUE,FALSE)
@@ -634,7 +677,7 @@ sum(x &lt; 0) # How many elements of x are smaller than 0?</code></pre>
 <p><em>Integer:</em></p>
 <pre class="r"><code>(shoe_size &lt;- 41)</code></pre>
 <p><em>Numeric:</em></p>
-<pre class="r"><code>(working_hours &lt;- 39.4)</code></pre>
+<pre class="r"><code>(seminar_hours &lt;- 1.5)</code></pre>
 <p><em>Factor:</em></p>
 <pre class="r"><code>(lunch_today &lt;- factor(&#39;mensa&#39;,levels=c(&#39;mensa&#39;,&#39;bakery&#39;,&#39;chinese&#39;)))</code></pre>
 <p><em>Boolean:</em></p>
@@ -658,19 +701,22 @@ sum(x &lt; 0) # How many elements of x are smaller than 0?</code></pre>
 <p><em>Sequences:</em></p>
 <pre class="r"><code>1:5
 5:1
-seq(5,10,by=.5)
-seq(5,10,length=21)
-seq_len(5)</code></pre>
+seq(5,10,by=0.5)  # create a sequence between 5 and 10 with an interval of 0.5
+seq(5,10,length=21) # create a sequence between 5 and 10 with total length of 21
+seq_len(5)  # create a sequence of integers between 1 and 5</code></pre>
 <p><em>Replicates:</em></p>
-<pre class="r"><code>rep(2,10)
-rep(c(1,6,5),2)
-rep(c(1,6,5),each=2)</code></pre>
+<pre class="r"><code>rep(x=2,times=10) 
+rep(2,10)
+rep(c(1,6,5),2) # replicate the vector (1,6,5) twice
+rep(c(1,6,5),each=2)  # replicate each element of the vector (1,6,5) twice</code></pre>
 <p><em><strong>Matrices:</strong></em></p>
-<pre class="r"><code>(x_mat &lt;- matrix(1:4,2))
+<pre class="r"><code>(x_mat &lt;- matrix(data=1:4, nrow=2)) # create a matrix with the numbers (1,2,3,4) ordered in two rows. The function automatically fills up the columns first.
+(x_mat &lt;- matrix(1:4,2))  # same
 x_mat[2,1]
-matrix(1:4,2,byrow=T)</code></pre>
+matrix(1:4,2,byrow=T) # create a matrix with the numbers (1,2,3,4) ordered in two rows but fills up the rows first.</code></pre>
 <p><em><strong>Array:</strong></em></p>
-<pre class="r"><code>(x_arr &lt;- array(1:24,c(4,3,2)))
+<pre class="r"><code>(x_arr &lt;- array(1:24,c(4,3,2)) # create a three-dimensional array with with four indices in first dimension, three indices in second dimension, and 2 indices in third dimension
+ )
 x_arr[3,2,2]</code></pre>
 <p><em><strong>Data frame:</strong></em></p>
 <pre class="r"><code>(veggy_shopping &lt;- data.frame(grams=c(500,1000,1000,300,200),
@@ -713,8 +759,8 @@ str(gcib_course)</code></pre>
 <p>The character vector ‘fun_factor’ in <code>gcib_schedule</code> was automatically converted to factors. This is ok here, but one may want to change this behaviour for other purposes. See the help page <code>?data.frame</code> to find out how.</p>
 </div>
 </div>
-<div id="loops-and-functions" class="section level1">
-<h1><span class="header-section-number">3</span> Loops and functions</h1>
+<div id="writing-loops-and-functions" class="section level1">
+<h1><span class="header-section-number">3</span> Writing loops and functions</h1>
 <div id="control-flows" class="section level2">
 <h2><span class="header-section-number">3.1</span> Control flows</h2>
 <p>Control-flow constructs are among the most important <em>building blocks</em> in programming because they help structuring the workflow. We use loops for repeating workflows, and conditional expressions and switch statements for making choices between alternative control flows based on some conditions.</p>
@@ -748,7 +794,7 @@ ifelse(x&lt;=10,0,1)</code></pre>
 </div>
 <div id="for-loops" class="section level2">
 <h2><span class="header-section-number">3.2</span> For-Loops</h2>
-<p>You will often here that loops should be avoided in R codes wherever possible as they tend to make your codes slower. Nevertheless, they are an important element in programming. We use them, for example, for iterating (parts of) code blocks with different parameters or initial values. R offers three different loop structures: <code>repeat</code>, <code>while</code> and <code>for</code>, where the latter is the most commonly used.</p>
+<p>You will often hear that loops should be avoided in R codes wherever possible as they tend to make your codes slower. Nevertheless, they are an important element in programming. We use them, for example, for iterating (parts of) code blocks with different parameters or initial values. R offers three different loop structures: <code>repeat</code>, <code>while</code> and <code>for</code>, where the latter is the most commonly used.</p>
 <p>The <code>for</code> loop iterates through all elements of a provided vector: <code>for (i in M) {command block}</code>. See the help page <code>?&quot;for&quot;</code>.</p>
 <pre class="r"><code>x &lt;- c(3,6,2,5,10)
 
@@ -891,7 +937,7 @@ dnorm(0,2,2) </code></pre>
 <pre><code>## [1] 0.1209854</code></pre>
 <pre class="r"><code>arrows(0,0,0,dnorm(0,2,2),col=&quot;green&quot;) 
 arrows(0,dnorm(0,2,2),-3,dnorm(0,2,2),col=&quot;green&quot;)</code></pre>
-<p><img src="0_Intro_files/figure-html/unnamed-chunk-66-1.png" width="672" /></p>
+<p><img src="0_Intro_files/figure-html/unnamed-chunk-69-1.png" width="672" /></p>
 <p>The cumulative density function:</p>
 <pre class="r"><code>curve(pnorm(x),-3,6,lwd=2,xaxs=&quot;i&quot;,yaxs=&quot;i&quot;) 
 curve(pnorm(x,2),-3,6,col=&quot;red&quot;,lwd=2,add=T) 
@@ -912,7 +958,7 @@ pnorm(0,2,2) </code></pre>
 <pre><code>## [1] 0.1586553</code></pre>
 <pre class="r"><code>arrows(0,0,0,pnorm(0,2,2),col=&quot;green&quot;) 
 arrows(0,pnorm(0,2,2),-3,pnorm(0,2,2),col=&quot;green&quot;)</code></pre>
-<p><img src="0_Intro_files/figure-html/unnamed-chunk-67-1.png" width="672" /></p>
+<p><img src="0_Intro_files/figure-html/unnamed-chunk-70-1.png" width="672" /></p>
 <p>The quantile function is the inverse of the cumulative distribution function. So, we ask the other way around: which value of the random variable x corresponds to probability p? For example, when we look at the 50% quantile (meaning the lower 50% of all possible values of the random variable x), what is the maximum value x may reach?</p>
 <pre class="r"><code>curve(pnorm(x),-3,6,lwd=2,xaxs=&quot;i&quot;,yaxs=&quot;i&quot;)
 curve(pnorm(x,2),-3,6,col=&quot;red&quot;,lwd=2,add=T) 
@@ -945,7 +991,7 @@ sample(letters,10)</code></pre>
 </div>
 <div id="statistical-tests" class="section level2">
 <h2><span class="header-section-number">5.4</span> Statistical tests</h2>
-<p>For the sake of completeness, I thought to mention statistical tests here although I cannot treat them in detail and this is not a stats class <em>per se</em>. For more information, have a look at introductory statistics books with R, e.g. <span class="citation">Crawley (2007)</span>, and <span class="citation">Dormann (2013)</span> (in German but really good).</p>
+<p>For the sake of completeness, I mention statistical tests here although I cannot treat them in detail and this is not a stats class <em>per se</em>. For more information, have a look at introductory statistics books with R, e.g. <span class="citation">Crawley (2007)</span>, and <span class="citation">Dormann (2013)</span> (in German but really good).</p>
 <div id="one-sample-tests" class="section level3">
 <h3><span class="header-section-number">5.4.1</span> One-sample tests</h3>
 <p>The Shapiro-Wilk-Test tests for normality of a sample:</p>
@@ -1014,18 +1060,30 @@ merge(prices_market, shopping_list, by=&#39;product&#39;, all=T)</code></pre>
 <h2><span class="header-section-number">6.3</span> Family <code>apply</code></h2>
 <p>If you want to do complex operations on matrices, data frames or lists, <code>apply()</code> and its derivates are most often the tool of choice as they run a lot faster than loops. This is what is often termed <em>vectorizing</em> your code.</p>
 <p><code>apply()</code> allows row-wise and column-wise execution of functions over matrices, data.frames and arrays. Thereby, the argument <code>MARGIN</code> refers to the dimension you want the operation to run over (1 means row-wise, 2 column-wise). Also you have to provide an argument <code>FUN</code> that specifies which function you want to run over the array. In the following examples, we calculate the mean.</p>
-<pre class="r"><code>(Xmat=matrix(1:12,nrow=4)) 
+<pre class="r"><code># Build a numeric matrix
+(Xmat=matrix(1:12,nrow=4)) 
 
+# Calculate the mean of all rows
 apply(Xmat,1,mean) 
-rowMeans(Xmat) #identical 
 
-apply(Xmat,2,mean) 
-colMeans(Xmat) #identical</code></pre>
+# Calculate the mean of all columns
+apply(Xmat,2,mean) </code></pre>
 <p>You can also define own <em>anonymous</em> functions in the form <code>FUN=function(x){...}</code>.</p>
 <pre class="r"><code>(Xdf &lt;- data.frame(x=rep(1,10), y=rep (3,10)))
 
 apply(Xdf,1,FUN=function(x){sum(x)^2}) </code></pre>
 <p>Also check out `<code>lapply()</code> and <code>sapply()</code> that are useful functions for operations over vectors or lists.</p>
+<div id="rowsums-rowmeans-etc" class="section level3">
+<h3><span class="header-section-number">6.3.1</span> rowSums(), rowMeans() etc</h3>
+<p>There are some convenient and fast implementations to form row and column sums and means for numeric matrices (or arrays) and data frames. They are equivalent to using the function <code>mean</code> or <code>sum</code> with <code>apply()</code> as above but probably easier to handle for you.</p>
+<pre class="r"><code># Calculate the mean and sum of all rows
+rowMeans(Xmat)
+rowSums(Xmat)
+
+# Calculate the mean and sum of all columns
+colMeans(Xmat)
+colSums(Xmat)</code></pre>
+</div>
 </div>
 </div>
 <div id="visualising-data" class="section level1">
@@ -1047,7 +1105,7 @@ plot(weight~height, data=pop)</code></pre>
 <pre class="r"><code>plot(x=pop$height, y=pop$weight, pch=19, col=&#39;salmon&#39;,
     xlab=&#39;Body height [cm]&#39;, ylab=&#39;Body weight [km]&#39;,
     main=&#39;Relationship between body size and weight&#39;)</code></pre>
-<p><img src="0_Intro_files/figure-html/unnamed-chunk-85-1.png" width="672" /></p>
+<p><img src="0_Intro_files/figure-html/unnamed-chunk-89-1.png" width="672" /></p>
 <p>You can change the plot type using the <code>type</code> argument.</p>
 <pre class="r"><code>plot(pop$height, type=&#39;l&#39;)</code></pre>
 <p>Histograms and boxplots:</p>
@@ -1078,7 +1136,7 @@ axis(4,at=pretty(range(pop$age)),col.axis=&#39;CornFlowerBlue&#39;)
 
 # add axis label
 mtext(&#39;Age&#39;,side=4,col=&#39;CornFlowerBlue&#39;, line=2.5)</code></pre>
-<p><img src="0_Intro_files/figure-html/unnamed-chunk-88-1.png" width="672" /></p>
+<p><img src="0_Intro_files/figure-html/unnamed-chunk-92-1.png" width="672" /></p>
 </div>
 <div id="plotting-with-ggplot2" class="section level2">
 <h2><span class="header-section-number">7.2</span> Plotting with <code>ggplot2</code></h2>
@@ -1107,13 +1165,14 @@ p + geom_point(aes(color=sex))
 p + geom_point(aes(color=sex, shape=factor(round(age/10)*10)))</code></pre>
 <pre class="r"><code># assign different point sizes to age:
 p + geom_point(aes(color=sex, size=age))</code></pre>
-<p><img src="0_Intro_files/figure-html/unnamed-chunk-94-1.png" width="672" /></p>
+<p><img src="0_Intro_files/figure-html/unnamed-chunk-98-1.png" width="672" /></p>
 <p>Add a linear model or Loess smoother:</p>
 <pre class="r"><code># regression line:
 p + geom_point() + geom_smooth(method=&quot;lm&quot;)</code></pre>
 <pre class="r"><code># smoother:
 p + geom_point() + geom_smooth(method=&quot;loess&quot;)</code></pre>
-<p><img src="0_Intro_files/figure-html/unnamed-chunk-96-1.png" width="672" /></p>
+<pre><code>## `geom_smooth()` using formula &#39;y ~ x&#39;</code></pre>
+<p><img src="0_Intro_files/figure-html/unnamed-chunk-100-1.png" width="672" /></p>
 <p>Boxplot:</p>
 <pre class="r"><code>ggplot(data = pop, mapping = aes(x = sex, y = weight)) +
     geom_boxplot()</code></pre>
@@ -1191,7 +1250,7 @@ $(document).ready(function ()  {
       theme: "bootstrap3",
       context: '.toc-content',
       hashGenerator: function (text) {
-        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_').toLowerCase();
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_');
       },
       ignoreSelector: ".toc-ignore",
       scrollTo: 0

@@ -422,6 +422,14 @@ div.tocify {
 </div>
 
 
+<div class="alert alert-info">
+<p><strong>RStudio project</strong></p>
+<p>Open the RStudio project that we created in the first session. I recommend to use this RStudio project for the entire course and within the RStudio project create separate R scripts for each session.</p>
+<ul>
+<li>Create a new empty R script by going to the tab “File”, select “New File” and then “R script”</li>
+<li>In the new R script, type <code># Session 7: SDM ensembles</code> and save the file in your folder “scripts” within your project folder, e.g. as “7_SDM_ensembles.R”</li>
+</ul>
+</div>
 <div id="introduction" class="section level1">
 <h1><span class="header-section-number">1</span> Introduction</h1>
 <p>In the previous session, we got to know several SDM algorithms <span class="citation">(Elith et al. 2006; Thuiller et al. 2009; Guisan, Thuiller, and Zimmermann 2017)</span>. But how do we proceed with all these models now? In the end, it would be handy to just work with a single, general prediction. One way to achive a single prediction would be to select the best performing algorithm. However, we have also seen that different models make different assumptions and extrapolate differently to new environments. <em>A priori</em>, it is difficult to judge which of the algorithms will perform best in new situations. Ensemble models have been introduced as an alternative <span class="citation">(Araujo and New 2007)</span>. These combine different models and provide information about the overall trend and the uncertainty around this trend <span class="citation">(Guisan, Thuiller, and Zimmermann 2017; Thuiller et al. 2019)</span>. Sometimes, the term ensembles is used synonymously with model averaging <span class="citation">(Dormann et al. 2018)</span> when only different model algorithms are combined. According to <span class="citation">Araujo and New (2007)</span>, ensembles could also take into account varying initial and boundary conditions (e.g. different data inputs, and different future scenarios).</p>
@@ -506,41 +514,27 @@ m_brt &lt;- gbm.step(data = sp_train,
 </div>
 <div id="model-assessment" class="section level2">
 <h2><span class="header-section-number">2.3</span> Model assessment</h2>
-<p>We have already validated model performance on the hold-out test data in last session. Remember that we have defined two own functions for this, which we will also need later in this tutorial:</p>
-<pre class="r"><code># We define some useful functions for evaluation:
-# True Skill Statistic
-TSS = function(cmx){
-    require(PresenceAbsence)
-    PresenceAbsence::sensitivity(cmx, st.dev=F) + PresenceAbsence::specificity(cmx, st.dev=F) - 1
-    }
-
-# Calculate explained deviance: null prediction is equivalent to the mean prevalence
-d.square &lt;- function(obs, pred, family=&#39;binomial&#39;){
-    require(dismo)  
-  
-    if (family==&#39;binomial&#39;) {
-      # To avoid dividing by zeros:
-      pred &lt;- ifelse(pred&lt;.00001,.00001,ifelse(pred&gt;.9999,.9999,pred))
-    }
-  # the null model prediction is simply the prevalence of the species:
-    null.pred &lt;- rep(mean(obs), length(obs))
-    
-    # Calculate explained deviance:
-    1 - (calc.deviance(obs, pred, family=family)/
-           calc.deviance(obs, null.pred, family=family))
-}</code></pre>
-<p>In the previous session, we have already stored the results of the model validation and can read them back in:</p>
+<p>We have already validated model performance on the hold-out test data in last session, and stored the results of the model validation:</p>
 <pre class="r"><code># Adapt the file path to your folder structure
 (comp_perf &lt;- read.table(&#39;data/SDM_alg_performances.txt&#39;, header=T))</code></pre>
-<pre><code>##      alg       pcc   sens      spec       TSS       AUC         D2 maxTSS
-## 1     bc 0.8486842 0.7500 0.8602941 0.6102941 0.7948070 -0.4583228  0.260
-## 2    dom 0.7894737 0.7500 0.7941176 0.5441176 0.7821691 -1.0856837  0.680
-## 3    glm 0.8618421 0.8750 0.8602941 0.7352941 0.9333640  0.4607125  0.120
-## 4   gamS 0.8486842 0.9375 0.8382353 0.7757353 0.9375000  0.4586095  0.100
-## 5   cart 0.8684211 0.7500 0.8823529 0.6323529 0.8244485  0.2546056  0.320
-## 6     rf 0.8355263 0.8750 0.8308824 0.7058824 0.9037224  0.2391433  0.120
-## 7    brt 0.8618421 0.8750 0.8602941 0.7352941 0.9388787  0.3974611  0.120
-## 8 maxent 0.8355263 0.9375 0.8235294 0.7610294 0.9384191  0.3160077  0.265</code></pre>
+<pre><code>##      alg       AUC       TSS     Kappa   Sens      Spec       PCC         D2
+## 1     bc 0.7948070 0.6102941 0.4317295 0.7500 0.8602941 0.8486842 -0.4583228
+## 2    dom 0.7821691 0.5441176 0.3274336 0.7500 0.7941176 0.7894737 -1.0856837
+## 3    glm 0.9333640 0.7352941 0.5006258 0.8750 0.8602941 0.8618421  0.4607125
+## 4   gamS 0.9375000 0.7757353 0.4912689 0.9375 0.8382353 0.8486842  0.4586095
+## 5   cart 0.8244485 0.6323529 0.4751381 0.7500 0.8823529 0.8684211  0.2546056
+## 6     rf 0.9041820 0.7132353 0.4597156 0.8750 0.8382353 0.8421053  0.2339337
+## 7    brt 0.9370404 0.7352941 0.5006258 0.8750 0.8602941 0.8618421  0.3995577
+## 8 maxent 0.9384191 0.7610294 0.4656918 0.9375 0.8235294 0.8355263  0.3160077
+##   thresh
+## 1  0.260
+## 2  0.680
+## 3  0.120
+## 4  0.100
+## 5  0.320
+## 6  0.120
+## 7  0.125
+## 8  0.265</code></pre>
 </div>
 <div id="predictions" class="section level2">
 <h2><span class="header-section-number">2.4</span> Predictions</h2>
@@ -566,18 +560,18 @@ summary(pred_testdata)</code></pre>
 ##  3rd Qu.:0.22222   3rd Qu.:0.6937   3rd Qu.:0.0830426   3rd Qu.:0.0822473  
 ##  Max.   :0.96296   Max.   :0.8027   Max.   :0.7418596   Max.   :0.9988305  
 ##       cart               rf               brt              maxent         
-##  Min.   :0.00000   Min.   :0.00000   Min.   :0.02430   Min.   :0.0004466  
-##  1st Qu.:0.01351   1st Qu.:0.00000   1st Qu.:0.02433   1st Qu.:0.0238353  
-##  Median :0.01351   Median :0.00000   Median :0.02435   Median :0.0746837  
-##  Mean   :0.11415   Mean   :0.09936   Mean   :0.10106   Mean   :0.1998619  
-##  3rd Qu.:0.01351   3rd Qu.:0.08013   3rd Qu.:0.04313   3rd Qu.:0.2724494  
-##  Max.   :0.77778   Max.   :0.97592   Max.   :0.55592   Max.   :0.9999025</code></pre>
-<p>As we have stored the maxTSS threshold for each model, we can also threshold the predictions to obtain predicted presences and absences.</p>
+##  Min.   :0.00000   Min.   :0.00000   Min.   :0.02389   Min.   :0.0004466  
+##  1st Qu.:0.01351   1st Qu.:0.00000   1st Qu.:0.02391   1st Qu.:0.0238353  
+##  Median :0.01351   Median :0.00000   Median :0.02394   Median :0.0746837  
+##  Mean   :0.11415   Mean   :0.09831   Mean   :0.10105   Mean   :0.1998619  
+##  3rd Qu.:0.01351   3rd Qu.:0.07811   3rd Qu.:0.04307   3rd Qu.:0.2724494  
+##  Max.   :0.77778   Max.   :0.97160   Max.   :0.55435   Max.   :0.9999025</code></pre>
+<p>As we have stored the maxSens+Spec threshold for each model, we can also threshold the predictions to obtain predicted presences and absences.</p>
 <pre class="r"><code># We use the sapply function to apply the thresholding to all columns 
 # in the prediction data frame. You could also use a loop or construct
 # the data frame by hand.
 binpred_testdata &lt;- sapply(names(pred_testdata), FUN=function(alg){ 
-  ifelse(pred_testdata[,alg]&gt;=comp_perf[comp_perf$alg==alg,&#39;maxTSS&#39;],1,0)
+  ifelse(pred_testdata[,alg]&gt;=comp_perf[comp_perf$alg==alg,&#39;thresh&#39;],1,0)
 })
 
 summary(binpred_testdata)</code></pre>
@@ -592,7 +586,7 @@ summary(binpred_testdata)</code></pre>
 ##  Min.   :0.0000   Min.   :0.0000   Min.   :0.0000   Min.   :0.0000  
 ##  1st Qu.:0.0000   1st Qu.:0.0000   1st Qu.:0.0000   1st Qu.:0.0000  
 ##  Median :0.0000   Median :0.0000   Median :0.0000   Median :0.0000  
-##  Mean   :0.1842   Mean   :0.2368   Mean   :0.2171   Mean   :0.2566  
+##  Mean   :0.1842   Mean   :0.2434   Mean   :0.2171   Mean   :0.2566  
 ##  3rd Qu.:0.0000   3rd Qu.:0.0000   3rd Qu.:0.0000   3rd Qu.:1.0000  
 ##  Max.   :1.0000   Max.   :1.0000   Max.   :1.0000   Max.   :1.0000</code></pre>
 </div>
@@ -623,132 +617,37 @@ committee_av &lt;- rowSums(binpred_testdata)/ncol(binpred_testdata)
 sd_prob &lt;- apply(pred_testdata, 1, sd)</code></pre>
 <p>Thus, ensembles can be easily constructed by hand. Of course, if you have many input data, models, and scenarios to put into your ensemble, this is easily becoming tedious. For that purpose, it will be very useful to automatise your code and write automatic functions. For an example for automatising your functions, have a look at the code that we published along with <span class="citation">Zurell et al. (2020)</span>, which you can obtain from the corresponding <a href="https://github.com/damariszurell/SSDM-JSDM">github repository</a>. Also, there are packages like <code>biomod2</code> that make it easy to construct ensembles automatically <span class="citation">(Thuiller et al. 2009)</span>.</p>
 <p>Now, let’s assess the performance of these ensembles.</p>
-<pre class="r"><code>library(PresenceAbsence)
+<pre class="r"><code>library(mecofun)
 
-# Validating the &quot;mean of probabilities&quot;:
-
-# Prepare validation:
-thresh_dat &lt;- data.frame(ID=seq_len(nrow(sp_test)), 
-        obs = sp_test$Turdus_torquatus,
-        pred = mean_prob)
-        
-# optimal threshold
-thresh &lt;- PresenceAbsence::optimal.thresholds(DATA= thresh_dat)</code></pre>
-<pre><code>## Warning in PresenceAbsence::optimal.thresholds(DATA = thresh_dat): req.sens
-## defaults to 0.85</code></pre>
-<pre><code>## Warning in PresenceAbsence::optimal.thresholds(DATA = thresh_dat): req.spec
-## defaults to 0.85</code></pre>
-<pre><code>## Warning in PresenceAbsence::optimal.thresholds(DATA = thresh_dat): costs assumed
-## to be equal</code></pre>
-<pre class="r"><code>cmx_maxSSS &lt;- PresenceAbsence::cmx(DATA= thresh_dat, threshold=thresh[3,2])
-
-# performance measures
-perf_mean_prob &lt;- data.frame(
-  pcc = PresenceAbsence::pcc(cmx_maxSSS, st.dev=F),
-  sens = PresenceAbsence::sensitivity(cmx_maxSSS, st.dev=F),
-  spec = PresenceAbsence::specificity(cmx_maxSSS, st.dev=F),
-  TSS = TSS(cmx_maxSSS),
-  AUC = PresenceAbsence::auc(thresh_dat, st.dev=F),
-  D2 = d.square(thresh_dat$obs, thresh_dat$pred),
-   maxTSS = thresh[3,2])
-
-#---------------------
-
-# Validating the &quot;median of probabilities&quot;:
-
-# Prepare validation:
-thresh_dat &lt;- data.frame(ID=seq_len(nrow(sp_test)), 
-        obs = sp_test$Turdus_torquatus,
-        pred = median_prob)
-        
-# optimal threshold
-thresh &lt;- PresenceAbsence::optimal.thresholds(DATA= thresh_dat)</code></pre>
-<pre><code>## Warning in PresenceAbsence::optimal.thresholds(DATA = thresh_dat): req.sens
-## defaults to 0.85</code></pre>
-<pre><code>## Warning in PresenceAbsence::optimal.thresholds(DATA = thresh_dat): req.spec
-## defaults to 0.85</code></pre>
-<pre><code>## Warning in PresenceAbsence::optimal.thresholds(DATA = thresh_dat): costs assumed
-## to be equal</code></pre>
-<pre class="r"><code>cmx_maxSSS &lt;- PresenceAbsence::cmx(DATA= thresh_dat, threshold=thresh[3,2])
-
-# performance measures
-perf_median_prob &lt;- data.frame(
-  pcc = PresenceAbsence::pcc(cmx_maxSSS, st.dev=F),
-  sens = PresenceAbsence::sensitivity(cmx_maxSSS, st.dev=F),
-  spec = PresenceAbsence::specificity(cmx_maxSSS, st.dev=F),
-  TSS = TSS(cmx_maxSSS),
-  AUC = PresenceAbsence::auc(thresh_dat, st.dev=F),
-  D2 = d.square(thresh_dat$obs, thresh_dat$pred),
-   maxTSS = thresh[3,2])
-
-#---------------------
-
-# Validating the &quot;weighted mean of probabilities&quot;:
-
-# Prepare validation:
-thresh_dat &lt;- data.frame(ID=seq_len(nrow(sp_test)), 
-        obs = sp_test$Turdus_torquatus,
-        pred = wmean_prob)
-        
-# optimal threshold
-thresh &lt;- PresenceAbsence::optimal.thresholds(DATA= thresh_dat)</code></pre>
-<pre><code>## Warning in PresenceAbsence::optimal.thresholds(DATA = thresh_dat): req.sens
-## defaults to 0.85</code></pre>
-<pre><code>## Warning in PresenceAbsence::optimal.thresholds(DATA = thresh_dat): req.spec
-## defaults to 0.85</code></pre>
-<pre><code>## Warning in PresenceAbsence::optimal.thresholds(DATA = thresh_dat): costs assumed
-## to be equal</code></pre>
-<pre class="r"><code>cmx_maxSSS &lt;- PresenceAbsence::cmx(DATA= thresh_dat, threshold=thresh[3,2])
-
-# performance measures
-perf_wmean_prob &lt;- data.frame(
-  pcc = PresenceAbsence::pcc(cmx_maxSSS, st.dev=F),
-  sens = PresenceAbsence::sensitivity(cmx_maxSSS, st.dev=F),
-  spec = PresenceAbsence::specificity(cmx_maxSSS, st.dev=F),
-  TSS = TSS(cmx_maxSSS),
-  AUC = PresenceAbsence::auc(thresh_dat, st.dev=F),
-  D2 = d.square(thresh_dat$obs, thresh_dat$pred),
-   maxTSS = thresh[3,2])
-
-#---------------------
-
-# Validating the &quot;committee average&quot;:
-
-# Prepare validation:
-thresh_dat &lt;- data.frame(ID=seq_len(nrow(sp_test)), 
-        obs = sp_test$Turdus_torquatus,
-        pred = committee_av)
-        
-# optimal threshold
-thresh &lt;- PresenceAbsence::optimal.thresholds(DATA= thresh_dat)</code></pre>
-<pre><code>## Warning in PresenceAbsence::optimal.thresholds(DATA = thresh_dat): req.sens
-## defaults to 0.85</code></pre>
-<pre><code>## Warning in PresenceAbsence::optimal.thresholds(DATA = thresh_dat): req.spec
-## defaults to 0.85</code></pre>
-<pre><code>## Warning in PresenceAbsence::optimal.thresholds(DATA = thresh_dat): costs assumed
-## to be equal</code></pre>
-<pre class="r"><code>cmx_maxSSS &lt;- PresenceAbsence::cmx(DATA= thresh_dat, threshold=thresh[3,2])
-
-# performance measures
-perf_committee_prob &lt;- data.frame(
-  pcc = PresenceAbsence::pcc(cmx_maxSSS, st.dev=F),
-  sens = PresenceAbsence::sensitivity(cmx_maxSSS, st.dev=F),
-  spec = PresenceAbsence::specificity(cmx_maxSSS, st.dev=F),
-  TSS = TSS(cmx_maxSSS),
-  AUC = PresenceAbsence::auc(thresh_dat, st.dev=F),
-  D2 = d.square(thresh_dat$obs, thresh_dat$pred),
-   maxTSS = thresh[3,2])
-
-#---------------
-
-# Compare:
+# performance measures for &quot;mean of probabilities&quot;
+(perf_mean_prob &lt;- evalSDM(sp_test$Turdus_torquatus, mean_prob))</code></pre>
+<pre><code>##         AUC       TSS     Kappa   Sens      Spec       PCC        D2 thresh
+## 1 0.9117647 0.7389706 0.4304069 0.9375 0.8014706 0.8157895 0.2881887   0.17</code></pre>
+<pre class="r"><code># performance measures for &quot;median of probabilities&quot;:
+(perf_median_prob &lt;- evalSDM(sp_test$Turdus_torquatus, median_prob))</code></pre>
+<pre><code>##         AUC       TSS     Kappa   Sens      Spec       PCC        D2 thresh
+## 1 0.9122243 0.7536765 0.4535398 0.9375 0.8161765 0.8289474 0.3942212   0.08</code></pre>
+<pre class="r"><code># performance measures for &quot;weighted mean of probabilities&quot;:
+(perf_wmean_prob &lt;- evalSDM(sp_test$Turdus_torquatus, wmean_prob))</code></pre>
+<pre><code>##         AUC       TSS     Kappa  Sens      Spec       PCC        D2 thresh
+## 1 0.9131434 0.7352941 0.5006258 0.875 0.8602941 0.8618421 0.3177419   0.22</code></pre>
+<pre class="r"><code># performance measures for &quot;committee average&quot;:
+(perf_committee_prob &lt;- evalSDM(sp_test$Turdus_torquatus, committee_av))</code></pre>
+<pre><code>##         AUC       TSS     Kappa   Sens      Spec       PCC        D2 thresh
+## 1 0.8818934 0.7536765 0.4535398 0.9375 0.8161765 0.8289474 -2.310092  0.185</code></pre>
+<pre class="r"><code># Compare:
 (ens_perf &lt;- rbind(mean_prob = perf_mean_prob, median_prob = perf_median_prob, 
                     wmean_prob = perf_mean_prob, committee_av = perf_committee_prob))</code></pre>
-<pre><code>##                    pcc   sens      spec       TSS       AUC         D2 maxTSS
-## mean_prob    0.8157895 0.9375 0.8014706 0.7389706 0.9117647  0.2885281  0.170
-## median_prob  0.8289474 0.9375 0.8161765 0.7536765 0.9131434  0.3964739  0.080
-## wmean_prob   0.8157895 0.9375 0.8014706 0.7389706 0.9117647  0.2885281  0.170
-## committee_av 0.8289474 0.9375 0.8161765 0.7536765 0.8821232 -2.3074817  0.185</code></pre>
+<pre><code>##                    AUC       TSS     Kappa   Sens      Spec       PCC
+## mean_prob    0.9117647 0.7389706 0.4304069 0.9375 0.8014706 0.8157895
+## median_prob  0.9122243 0.7536765 0.4535398 0.9375 0.8161765 0.8289474
+## wmean_prob   0.9117647 0.7389706 0.4304069 0.9375 0.8014706 0.8157895
+## committee_av 0.8818934 0.7536765 0.4535398 0.9375 0.8161765 0.8289474
+##                      D2 thresh
+## mean_prob     0.2881887  0.170
+## median_prob   0.3942212  0.080
+## wmean_prob    0.2881887  0.170
+## committee_av -2.3100922  0.185</code></pre>
 <div id="visualising-response-surfaces" class="section level2">
 <h2><span class="header-section-number">3.1</span> Visualising response surfaces</h2>
 <p>Let’s plot the response surfaces for the ensembles.</p>
@@ -778,7 +677,7 @@ xyz_preds &lt;- data.frame(
 
 # Make binary predictions
 xyz_bin &lt;- sapply(names(xyz_preds), FUN=function(alg){ 
-  ifelse(xyz_preds[,alg]&gt;=comp_perf[comp_perf$alg==alg,&#39;maxTSS&#39;],1,0)
+  ifelse(xyz_preds[,alg]&gt;=comp_perf[comp_perf$alg==alg,&#39;thresh&#39;],1,0)
 })
 
 # Make ensembles:
@@ -796,35 +695,35 @@ wireframe(z ~ bio11 + bio8, data = xyz, zlab = list(&quot;Occurrence prob.&quot;
           drape = TRUE, col.regions = cls, scales = list(arrows = FALSE), 
           zlim = c(0, 1), main=&#39;Ensemble: mean prob&#39;, xlab=&#39;bio11&#39;, 
           ylab=&#39;bio8&#39;, screen=list(z = -120, x = -70, y = 3))</code></pre>
-<p><img src="7_SDM_ensembles_files/figure-html/unnamed-chunk-11-1.png" width="672" /></p>
+<p><img src="7_SDM_ensembles_files/figure-html/unnamed-chunk-10-1.png" width="672" /></p>
 <pre class="r"><code># Plot ensemble of median probabilities:
 xyz$z &lt;- xyz_ensemble[,&#39;median_prob&#39;]
 wireframe(z ~ bio11 + bio8, data = xyz, zlab = list(&quot;Occurrence prob.&quot;, rot=90), 
           drape = TRUE, col.regions = cls, scales = list(arrows = FALSE), 
           zlim = c(0, 1), main=&#39;Ensemble: median prob&#39;, xlab=&#39;bio11&#39;, 
           ylab=&#39;bio8&#39;, screen=list(z = -120, x = -70, y = 3))</code></pre>
-<p><img src="7_SDM_ensembles_files/figure-html/unnamed-chunk-11-2.png" width="672" /></p>
+<p><img src="7_SDM_ensembles_files/figure-html/unnamed-chunk-10-2.png" width="672" /></p>
 <pre class="r"><code># Plot ensemble of weighted mean probabilities:
 xyz$z &lt;- xyz_ensemble[,&#39;wmean_prob&#39;]
 wireframe(z ~ bio11 + bio8, data = xyz, zlab = list(&quot;Occurrence prob.&quot;, rot=90), 
           drape = TRUE, col.regions = cls, scales = list(arrows = FALSE), 
           zlim = c(0, 1), main=&#39;Ensemble: weighted mean prob&#39;, xlab=&#39;bio11&#39;, 
           ylab=&#39;bio8&#39;, screen=list(z = -120, x = -70, y = 3))</code></pre>
-<p><img src="7_SDM_ensembles_files/figure-html/unnamed-chunk-11-3.png" width="672" /></p>
+<p><img src="7_SDM_ensembles_files/figure-html/unnamed-chunk-10-3.png" width="672" /></p>
 <pre class="r"><code># Plot ensemble of committee average:
 xyz$z &lt;- xyz_ensemble[,&#39;committee_av&#39;]
 wireframe(z ~ bio11 + bio8, data = xyz, zlab = list(&quot;Occurrence prob.&quot;, rot=90), 
           drape = TRUE, col.regions = cls, scales = list(arrows = FALSE), 
           zlim = c(0, 1), main=&#39;Ensemble: committee average&#39;, xlab=&#39;bio11&#39;, 
           ylab=&#39;bio8&#39;, screen=list(z = -120, x = -70, y = 3))</code></pre>
-<p><img src="7_SDM_ensembles_files/figure-html/unnamed-chunk-11-4.png" width="672" /></p>
+<p><img src="7_SDM_ensembles_files/figure-html/unnamed-chunk-10-4.png" width="672" /></p>
 <pre class="r"><code># Plot standard deviation of mean probabilities. This gives us an indication where in environmental space we have highest uncertainty:
 xyz$z &lt;- xyz_ensemble[,&#39;sd_prob&#39;]
 wireframe(z ~ bio11 + bio8, data = xyz, zlab = list(&quot;Occurrence prob.&quot;, rot=90), 
           drape = TRUE, col.regions = cls, scales = list(arrows = FALSE), 
           zlim = c(0, 1), main=&#39;Ensemble: sd&#39;, xlab=&#39;bio11&#39;, ylab=&#39;bio8&#39;, 
           screen=list(z = -120, x = -70, y = 3))</code></pre>
-<p><img src="7_SDM_ensembles_files/figure-html/unnamed-chunk-11-5.png" width="672" /></p>
+<p><img src="7_SDM_ensembles_files/figure-html/unnamed-chunk-10-5.png" width="672" /></p>
 </div>
 <div id="mapping-ensemble-predictions" class="section level2">
 <h2><span class="header-section-number">3.2</span> Mapping ensemble predictions</h2>
@@ -848,7 +747,7 @@ env_preds &lt;- data.frame(bio_curr_df[,1:2],
 # Binarise predictions of all algorithms
 env_preds_bin &lt;- data.frame(bio_curr_df[,1:2],
   sapply(names(env_preds[,-c(1:2)]), FUN=function(alg){ 
-    ifelse(env_preds[,alg]&gt;=comp_perf[comp_perf$alg==alg,&#39;maxTSS&#39;],1,0)
+    ifelse(env_preds[,alg]&gt;=comp_perf[comp_perf$alg==alg,&#39;thresh&#39;],1,0)
   }))
 
 # Make rasters from predictions:
@@ -860,10 +759,10 @@ r_preds &lt;- rasterFromXYZ(env_preds, crs=crs(bg))</code></pre>
 ## [64359] ist kein Teiler oder Vielfaches der Anzahl der Zeilen [8052]</code></pre>
 <pre class="r"><code># Map predicted occurrence probabilities:
 spplot(r_preds)</code></pre>
-<p><img src="7_SDM_ensembles_files/figure-html/unnamed-chunk-12-1.png" width="672" /></p>
+<p><img src="7_SDM_ensembles_files/figure-html/unnamed-chunk-11-1.png" width="672" /></p>
 <pre class="r"><code># Map predicted presences:
 spplot(r_preds_bin)</code></pre>
-<p><img src="7_SDM_ensembles_files/figure-html/unnamed-chunk-12-2.png" width="672" /></p>
+<p><img src="7_SDM_ensembles_files/figure-html/unnamed-chunk-11-2.png" width="672" /></p>
 <p>Now, we map the ensemble predictions.</p>
 <pre class="r"><code># We make ensembles:    
 env_ensemble &lt;- data.frame(bio_curr_df[,1:2], 
@@ -879,16 +778,16 @@ r_ens &lt;- rasterFromXYZ(env_ensemble, crs=crs(bg))</code></pre>
 ## [40203] ist kein Teiler oder Vielfaches der Anzahl der Zeilen [8052]</code></pre>
 <pre class="r"><code># Map continuous ensemble predictions:
 spplot(r_ens[[1:4]])</code></pre>
-<p><img src="7_SDM_ensembles_files/figure-html/unnamed-chunk-13-1.png" width="672" /></p>
+<p><img src="7_SDM_ensembles_files/figure-html/unnamed-chunk-12-1.png" width="672" /></p>
 <p>Mapping the standard deviation of model predictions shows us the areas of highest deviation between model algorithms.</p>
 <pre class="r"><code># Map standard deviation across model algorithms:
 plot(r_ens[[&#39;sd_prob&#39;]])</code></pre>
-<p><img src="7_SDM_ensembles_files/figure-html/unnamed-chunk-14-1.png" width="672" /></p>
+<p><img src="7_SDM_ensembles_files/figure-html/unnamed-chunk-13-1.png" width="672" /></p>
 <p>We can also derive binary ensemble predictions. We have already estimated the optimal thresholds when calculating the performance measures for the ensembles.</p>
 <pre class="r"><code># Binarise ensemble predictions
 env_ensemble_bin &lt;- data.frame(bio_curr_df[,1:2], 
     sapply(c(&#39;mean_prob&#39;, &#39;median_prob&#39;, &#39;wmean_prob&#39;), 
-           FUN=function(x){ifelse(env_ensemble[,x]&gt;= ens_perf[x,&#39;maxTSS&#39;],1,0)}))
+           FUN=function(x){ifelse(env_ensemble[,x]&gt;= ens_perf[x,&#39;thresh&#39;],1,0)}))
 
 # Make rasters:
 r_ens_bin &lt;- rasterFromXYZ(env_ensemble_bin, crs=crs(bg))</code></pre>
@@ -896,7 +795,7 @@ r_ens_bin &lt;- rasterFromXYZ(env_ensemble_bin, crs=crs(bg))</code></pre>
 ## [24099] ist kein Teiler oder Vielfaches der Anzahl der Zeilen [8052]</code></pre>
 <pre class="r"><code># Map predicted presence from ensembles:
 spplot(r_ens_bin)   </code></pre>
-<p><img src="7_SDM_ensembles_files/figure-html/unnamed-chunk-15-1.png" width="672" /></p>
+<p><img src="7_SDM_ensembles_files/figure-html/unnamed-chunk-14-1.png" width="672" /></p>
 <div class="alert alert-info">
 <p><em><strong>Exercise:</strong></em></p>
 <p>Use the species-climate data that you prepared for your own species (from practical 1 and 5), run at least three different algorithms and construct ensembles.</p>

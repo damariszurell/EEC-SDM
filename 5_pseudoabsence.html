@@ -422,6 +422,14 @@ div.tocify {
 </div>
 
 
+<div class="alert alert-info">
+<p><strong>RStudio project</strong></p>
+<p>Open the RStudio project that we created in the first session. I recommend to use this RStudio project for the entire course and within the RStudio project create separate R scripts for each session.</p>
+<ul>
+<li>Create a new empty R script by going to the tab “File”, select “New File” and then “R script”</li>
+<li>In the new R script, type <code># Session 5: Pseudo-absence and background data</code> and save the file in your folder “scripts” within your project folder, e.g. as “5_PseudoAbsences.R”</li>
+</ul>
+</div>
 <div id="introduction" class="section level1">
 <h1><span class="header-section-number">1</span> Introduction</h1>
 <p>In the previous sessions, we have worked with very convenient presence/absence data to train our species distribution models (SDMs). However, as you have seen when downloading your own GBIF data, we often have only presence records available. Absence data are also inherently difficult to get because it requires a very high sampling effort to classify a species as absent from a location. For plants, we would need complete inventories of a larger region, e.g. several 100 m plots placed within larger 1 km sample squares. For birds, we would need several visits to a specific region within the breeding season. In both cases, we could still miss some species, meaning that we do not record the species although present (resulting in a false negative).</p>
@@ -577,12 +585,12 @@ load(&#39;data/gbif_shrew.RData&#39;)
 
 head(gbif_shrew[,1:4])</code></pre>
 <pre><code>##          key             scientificName decimalLatitude decimalLongitude
-## 1 2251919320 Sorex alpinus Schinz, 1837        47.69411        13.681602
-## 2 2330155268 Sorex alpinus Schinz, 1837        48.12057         8.109648
-## 3 2269283117 Sorex alpinus Schinz, 1837        46.39159        10.421819
-## 4 2610972391 Sorex alpinus Schinz, 1837        46.02428        10.828994
-## 5 2397538060 Sorex alpinus Schinz, 1837        46.39279        10.363006
-## 6 2609080674 Sorex alpinus Schinz, 1837        46.19628        11.263646</code></pre>
+## 1 2873903585 Sorex alpinus Schinz, 1837        46.03147        11.579116
+## 2 2251919320 Sorex alpinus Schinz, 1837        47.69411        13.681602
+## 3 2330155268 Sorex alpinus Schinz, 1837        48.12057         8.109648
+## 4 2843496135 Sorex alpinus Schinz, 1837        47.65534        13.148056
+## 5 2852112388 Sorex alpinus Schinz, 1837        47.66000        13.150000
+## 6 2269283117 Sorex alpinus Schinz, 1837        46.39159        10.421819</code></pre>
 <pre class="r"><code># Plot the species presences
 library(maptools)
 data(wrld_simpl)
@@ -633,81 +641,81 @@ points(presences, pch=19, cex=0.5)</code></pre>
 <pre class="r"><code># First, we prepare the presences data to contain a column indicating 1 for presence.
 sp_env &lt;- data.frame(gbif_shrew2, occ=1)
 
-# Second, we make sure the background data have the same columns
+# Second, we make sure the background data have the same columns, and indicate 0 for absence.
 bg_dat &lt;- data.frame(bg_dat)
 summary(bg_dat)</code></pre>
 <pre><code>##        x                y        
 ##  Min.   : 3.083   Min.   :42.92  
-##  1st Qu.: 8.583   1st Qu.:45.75  
-##  Median :13.417   Median :47.42  
-##  Mean   :13.404   Mean   :47.36  
-##  3rd Qu.:17.750   3rd Qu.:48.92  
-##  Max.   :24.917   Max.   :52.08</code></pre>
+##  1st Qu.: 9.250   1st Qu.:46.42  
+##  Median :13.583   Median :48.58  
+##  Mean   :14.209   Mean   :48.69  
+##  3rd Qu.:19.250   3rd Qu.:50.75  
+##  Max.   :26.583   Max.   :55.58</code></pre>
 <pre class="r"><code>names(bg_dat) &lt;- c(&#39;decimalLongitude&#39;,&#39;decimalLatitude&#39;)
 bg_dat$occ &lt;- 0
 summary(bg_dat)</code></pre>
 <pre><code>##  decimalLongitude decimalLatitude      occ   
 ##  Min.   : 3.083   Min.   :42.92   Min.   :0  
-##  1st Qu.: 8.583   1st Qu.:45.75   1st Qu.:0  
-##  Median :13.417   Median :47.42   Median :0  
-##  Mean   :13.404   Mean   :47.36   Mean   :0  
-##  3rd Qu.:17.750   3rd Qu.:48.92   3rd Qu.:0  
-##  Max.   :24.917   Max.   :52.08   Max.   :0</code></pre>
+##  1st Qu.: 9.250   1st Qu.:46.42   1st Qu.:0  
+##  Median :13.583   Median :48.58   Median :0  
+##  Mean   :14.209   Mean   :48.69   Mean   :0  
+##  3rd Qu.:19.250   3rd Qu.:50.75   3rd Qu.:0  
+##  Max.   :26.583   Max.   :55.58   Max.   :0</code></pre>
 <pre class="r"><code># Third, we bind these two data sets
 sp_env &lt;- rbind(sp_env, bg_dat)
 summary(sp_env)</code></pre>
 <pre><code>##  decimalLongitude decimalLatitude      occ         
 ##  Min.   : 3.083   Min.   :42.92   Min.   :0.00000  
-##  1st Qu.: 8.083   1st Qu.:45.75   1st Qu.:0.00000  
-##  Median :12.917   Median :47.25   Median :0.00000  
-##  Mean   :13.140   Mean   :47.31   Mean   :0.09091  
-##  3rd Qu.:17.583   3rd Qu.:48.75   3rd Qu.:0.00000  
-##  Max.   :24.917   Max.   :52.08   Max.   :1.00000</code></pre>
+##  1st Qu.: 9.083   1st Qu.:46.39   1st Qu.:0.00000  
+##  Median :13.185   Median :48.25   Median :0.00000  
+##  Mean   :13.969   Mean   :48.53   Mean   :0.09091  
+##  3rd Qu.:18.917   3rd Qu.:50.42   3rd Qu.:0.00000  
+##  Max.   :26.583   Max.   :55.58   Max.   :1.00000</code></pre>
 <pre class="r"><code># Last, we join this combined data set with the climate data.
 sp_env &lt;- cbind(sp_env, raster::extract(x = clim, y = sp_env[,c(&#39;decimalLongitude&#39;,&#39;decimalLatitude&#39;)], cellnumbers=T) )
 summary(sp_env)</code></pre>
 <pre><code>##  decimalLongitude decimalLatitude      occ              cells      
-##  Min.   : 3.083   Min.   :42.92   Min.   :0.00000   Min.   :42937  
-##  1st Qu.: 8.083   1st Qu.:45.75   1st Qu.:0.00000   1st Qu.:49718  
-##  Median :12.917   Median :47.25   Median :0.00000   Median :52796  
-##  Mean   :13.140   Mean   :47.31   Mean   :0.09091   Mean   :52702  
-##  3rd Qu.:17.583   3rd Qu.:48.75   3rd Qu.:0.00000   3rd Qu.:55880  
-##  Max.   :24.917   Max.   :52.08   Max.   :1.00000   Max.   :61728  
+##  Min.   : 3.083   Min.   :42.92   Min.   :0.00000   Min.   :35778  
+##  1st Qu.: 9.083   1st Qu.:46.39   1st Qu.:0.00000   1st Qu.:46316  
+##  Median :13.185   Median :48.25   Median :0.00000   Median :50780  
+##  Mean   :13.969   Mean   :48.53   Mean   :0.09091   Mean   :50187  
+##  3rd Qu.:18.917   3rd Qu.:50.42   3rd Qu.:0.00000   3rd Qu.:54536  
+##  Max.   :26.583   Max.   :55.58   Max.   :1.00000   Max.   :61728  
 ##       bio1             bio2             bio3            bio4     
-##  Min.   :-26.00   Min.   : 50.00   Min.   :25.00   Min.   :5073  
-##  1st Qu.: 69.00   1st Qu.: 83.00   1st Qu.:30.00   1st Qu.:6226  
-##  Median : 82.00   Median : 88.00   Median :31.00   Median :6862  
-##  Mean   : 82.12   Mean   : 87.56   Mean   :30.89   Mean   :6812  
-##  3rd Qu.:100.25   3rd Qu.: 94.00   3rd Qu.:32.00   3rd Qu.:7384  
-##  Max.   :163.00   Max.   :106.00   Max.   :39.00   Max.   :8415  
-##       bio5            bio6             bio7            bio8      
-##  Min.   : 78.0   Min.   :-124.0   Min.   :193.0   Min.   :-72.0  
-##  1st Qu.:217.0   1st Qu.: -73.0   1st Qu.:261.0   1st Qu.:114.0  
-##  Median :234.0   Median : -51.0   Median :281.0   Median :156.0  
-##  Mean   :230.5   Mean   : -48.9   Mean   :279.4   Mean   :135.4  
-##  3rd Qu.:254.0   3rd Qu.: -28.0   3rd Qu.:302.0   3rd Qu.:172.0  
-##  Max.   :300.0   Max.   :  57.0   Max.   :329.0   Max.   :200.0  
-##       bio9            bio10           bio11             bio12       
-##  Min.   :-86.00   Min.   : 40.0   Min.   :-89.000   Min.   : 520.0  
-##  1st Qu.:-12.00   1st Qu.:155.0   1st Qu.:-29.000   1st Qu.: 701.0  
-##  Median : 11.00   Median :171.0   Median : -8.000   Median : 831.5  
-##  Mean   : 31.86   Mean   :167.4   Mean   : -7.465   Mean   : 894.6  
-##  3rd Qu.: 50.00   3rd Qu.:187.0   3rd Qu.: 10.000   3rd Qu.:1044.0  
-##  Max.   :238.00   Max.   :238.0   Max.   : 95.000   Max.   :2121.0  
+##  Min.   :-25.00   Min.   : 53.00   Min.   :24.00   Min.   :5008  
+##  1st Qu.: 66.00   1st Qu.: 81.00   1st Qu.:29.00   1st Qu.:6272  
+##  Median : 80.00   Median : 86.00   Median :31.00   Median :6805  
+##  Mean   : 80.14   Mean   : 85.89   Mean   :30.42   Mean   :6891  
+##  3rd Qu.: 95.00   3rd Qu.: 92.00   3rd Qu.:32.00   3rd Qu.:7506  
+##  Max.   :164.00   Max.   :107.00   Max.   :39.00   Max.   :8869  
+##       bio5            bio6              bio7            bio8    
+##  Min.   : 78.0   Min.   :-126.00   Min.   :198.0   Min.   :-72  
+##  1st Qu.:218.0   1st Qu.: -77.00   1st Qu.:258.0   1st Qu.:132  
+##  Median :230.0   Median : -52.00   Median :279.0   Median :161  
+##  Mean   :228.5   Mean   : -50.26   Mean   :278.7   Mean   :142  
+##  3rd Qu.:244.0   3rd Qu.: -27.00   3rd Qu.:302.0   3rd Qu.:170  
+##  Max.   :300.0   Max.   :  58.00   Max.   :329.0   Max.   :204  
+##       bio9            bio10           bio11            bio12       
+##  Min.   :-87.00   Min.   : 41.0   Min.   :-87.00   Min.   : 483.0  
+##  1st Qu.:-18.00   1st Qu.:158.0   1st Qu.:-34.25   1st Qu.: 646.0  
+##  Median : 10.00   Median :168.0   Median :-11.00   Median : 764.5  
+##  Mean   : 23.45   Mean   :166.4   Mean   :-10.31   Mean   : 845.9  
+##  3rd Qu.: 40.00   3rd Qu.:179.0   3rd Qu.:  7.00   3rd Qu.:1004.0  
+##  Max.   :239.00   Max.   :239.0   Max.   : 97.00   Max.   :1943.0  
 ##      bio13           bio14            bio15           bio16      
-##  Min.   : 62.0   Min.   : 11.00   Min.   : 7.00   Min.   :171.0  
-##  1st Qu.: 86.0   1st Qu.: 34.00   1st Qu.:19.00   1st Qu.:238.0  
-##  Median :102.0   Median : 46.00   Median :27.00   Median :281.0  
-##  Mean   :107.7   Mean   : 50.02   Mean   :26.39   Mean   :300.1  
-##  3rd Qu.:125.0   3rd Qu.: 61.00   3rd Qu.:34.00   3rd Qu.:351.0  
-##  Max.   :200.0   Max.   :153.00   Max.   :47.00   Max.   :580.0  
+##  Min.   : 60.0   Min.   : 10.00   Min.   : 7.00   Min.   :167.0  
+##  1st Qu.: 81.0   1st Qu.: 31.00   1st Qu.:19.00   1st Qu.:225.0  
+##  Median : 92.0   Median : 43.00   Median :27.00   Median :254.0  
+##  Mean   :101.7   Mean   : 47.21   Mean   :25.92   Mean   :284.3  
+##  3rd Qu.:120.0   3rd Qu.: 57.00   3rd Qu.:32.00   3rd Qu.:335.0  
+##  Max.   :195.0   Max.   :143.00   Max.   :46.00   Max.   :561.0  
 ##      bio17           bio18           bio19      
-##  Min.   : 72.0   Min.   : 72.0   Min.   : 80.0  
-##  1st Qu.:112.0   1st Qu.:219.8   1st Qu.:121.8  
-##  Median :151.0   Median :263.0   Median :169.0  
-##  Mean   :163.4   Mean   :275.4   Mean   :184.0  
-##  3rd Qu.:196.0   3rd Qu.:323.2   3rd Qu.:223.0  
-##  Max.   :474.0   Max.   :561.0   Max.   :541.0</code></pre>
+##  Min.   : 72.0   Min.   : 72.0   Min.   : 76.0  
+##  1st Qu.:105.0   1st Qu.:215.0   1st Qu.:116.0  
+##  Median :141.0   Median :238.5   Median :157.0  
+##  Mean   :154.5   Mean   :265.9   Mean   :173.5  
+##  3rd Qu.:183.0   3rd Qu.:300.0   3rd Qu.:210.0  
+##  Max.   :448.0   Max.   :561.0   Max.   :516.0</code></pre>
 <div class="alert alert-info">
 <p><em><strong>Exercise:</strong></em></p>
 <p>Use the GBIF data for your own species (from practical 1), sample background data and prepare a data set with species and climate data. Use these data to run SDMs.</p>

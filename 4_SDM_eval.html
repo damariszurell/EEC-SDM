@@ -422,6 +422,14 @@ div.tocify {
 </div>
 
 
+<div class="alert alert-info">
+<p><strong>RStudio project</strong></p>
+<p>Open the RStudio project that we created in the first session. I recommend to use this RStudio project for the entire course and within the RStudio project create separate R scripts for each session.</p>
+<ul>
+<li>Create a new empty R script by going to the tab “File”, select “New File” and then “R script”</li>
+<li>In the new R script, type <code># Session 4: SDM assessment and prediction</code> and save the file in your folder “scripts” within your project folder, e.g. as “4_SDM_eval.R”</li>
+</ul>
+</div>
 <div id="introduction" class="section level1">
 <h1><span class="header-section-number">1</span> Introduction</h1>
 <p>We have already fitted simple species distribution models (SDMs) in the previous tutorial. Remember the five general model building steps: (i) conceptualisation, (ii) data preparation, (iii) model fitting, (iv) model assessment, and (v) prediction <span class="citation">(Zurell et al. 2020)</span>. In this practical, we will concentrate on steps (iv)-(v). We will learn how to validate SDMs, visualise the fitted species-environment relationships, and make predictions. For getting a deeper understanding of these single steps, I highly recommend studying more advanced reviews <span class="citation">(Guisan and Zimmermann 2000; Guisan and Thuiller 2005; Elith and Leathwick 2009)</span> and textbooks on SDMs <span class="citation">(Franklin 2010; Guisan, Thuiller, and Zimmermann 2017)</span>.</p>
@@ -429,8 +437,10 @@ div.tocify {
 <h2><span class="header-section-number">1.1</span> Recap of last session: data and models</h2>
 <p>We will continue to work on the Ring Ouzel example of the previous session, using data from the British breeding and wintering birds citizen science atlas <span class="citation">(Gillings et al. 2019)</span>. Let’s quickly repeat the main steps of data preparation and model fitting:</p>
 <pre class="r"><code>library(raster)
-bg &lt;- raster(&#39;data/Prac3_UK_mask.grd&#39;)
-sp_dat &lt;- read.table(&#39;data/Prac3_RingOuzel.txt&#39;,header=T)</code></pre>
+bg &lt;- raster(&#39;data/Prac3_UK_mask.grd&#39;)</code></pre>
+<pre><code>## Warning in showSRID(uprojargs, format = &quot;PROJ&quot;, multiline = &quot;NO&quot;): Discarded datum OSGB_1936 in CRS definition,
+##  but +towgs84= values preserved</code></pre>
+<pre class="r"><code>sp_dat &lt;- read.table(&#39;data/Prac3_RingOuzel.txt&#39;,header=T)</code></pre>
 <pre class="r"><code>m1 &lt;- glm( Turdus_torquatus ~ bio11 + bio8, family=&#39;binomial&#39;, data=sp_dat)
 
 summary(m1)</code></pre>
@@ -510,141 +520,88 @@ wireframe(z ~ bio11 + bio8, data = xyz, zlab = list(&quot;Occurrence prob.&quot;
           screen=list(z = -160, x = -70, y = 3))</code></pre>
 <p><img src="4_SDM_eval_files/figure-html/unnamed-chunk-4-2.png" width="672" /></p>
 <p>This looks very nice. However, if the model gets more complicated and contains more variables than just two, how can we then visualise it?</p>
-<p>One way is to cut the response surface into slices. Most often, we simply plot the response along one environmental gradient while keeping all other gradients constant at their mean. We call this <strong><em>partial response plots</em></strong>.</p>
-<pre class="r"><code># Again, we make a new data frame containing the two predictors. However, we only 
-# produce a sequence of environmental values for one of the predictors 
-# while keeping the other constant at its means.
-
-# We want two panels next to each other:
-par(mfrow=c(1,2))
+<p>One way is to cut the response surface into slices. Most often, we simply plot the response along one environmental gradient while keeping all other gradients constant at their mean. We call this <strong><em>partial response plots</em></strong>. For simplicity, we can use the function <code>partial_response()</code> from the <code>mecofun</code> package for plotting.</p>
+<pre class="r"><code>library(mecofun)
 
 # Names of our variables:
 my_preds &lt;- c(&#39;bio11&#39;, &#39;bio8&#39;)
 
-# We loop over the two predictors and make a partial response plot for each:
-for (i in 1:2){
-  
-  # Create new data frame with predictor variables
-  xyz &lt;- data.frame(
-    # Make sequence for one predictor:
-    seq(min(sp_dat[,my_preds[i]]),max(sp_dat[,my_preds[i]]),length=50),
-    
-    # Calculate the mean of the other predictor:
-      mean(sp_dat[,my_preds[-i]]) 
-    )
-  
-  # Make sure the new data frame contains the correct predictor names
-  names(xyz) &lt;- c(my_preds[i], my_preds[-i])
-  
-  # Make prediction to new data
-  xyz$z &lt;- predict(m1, newdata=xyz, type=&#39;response&#39;)
+# We want two panels next to each other:
+par(mfrow=c(1,2))
 
-  # Plot the response curve
-  plot(xyz[,my_preds[i]],xyz$z,type=&#39;l&#39;, ylim=c(0,1), xlab=my_preds[i], ylab=&#39;Occurrence probability&#39;)
-}</code></pre>
+# Plot the partial responses
+partial_response(m1, predictors = sp_dat[,my_preds])</code></pre>
 <p><img src="4_SDM_eval_files/figure-html/unnamed-chunk-5-1.png" width="672" /></p>
 <p>When you compare the response surface and the partial response curves, you see that the latter only give us an incomplete picture of what is going on as they are only “slicing” the response surface in the middle.</p>
 </div>
 <div id="assessing-sdm-performance" class="section level2">
 <h2><span class="header-section-number">2.2</span> Assessing SDM performance</h2>
 <p>In the previous session, we already learned about the measure “explained deviance” that tells us something about the goodness-of-fit, meaning how well the model fits the data.</p>
-<pre class="r"><code>library(ecospat)
-ecospat.adj.D2.glm(m1)</code></pre>
-<pre><code>## [1] 0.4128202</code></pre>
+<pre class="r"><code>expl_deviance(obs = sp_dat$Turdus_torquatus,
+              pred = m1$fitted)</code></pre>
+<pre><code>## [1] 0.4151411</code></pre>
 <p>Here, our two-predictor model explains roughly 40% of the variance in the data. However, often we are not only interested in how well our model fits the data but how robust the model is against changes in the input data and, thus, how robust predictions to other places and times might be. This assessment of model performance is often referred to as validation or evaluation. Evaluating the model on the calibration or training data is often referred to as internal validation (“resubstitution”) <span class="citation">(Araujo et al. 2005)</span>. This generally gives a too optimistic picture of model performance. It is better to evaluate the model using data that have not been used for model fitting. One way is to split the data and only train the model on some proportion of the data and validate it on the hold-out data. Potential procedures are repeated split-samples (e.g. splitting into 70% training and 30% test data and repeat several times) and <em>k</em>-fold cross-validation (e.g. 5-fold or 10-fold), where the data are split into <em>k</em> portions, the <em>k</em>th portion is held out for validation and the procedure is repeated <em>k</em> times. If these folds are stratified in geographic or environmental space, we talk of spatial block cross-validation and environmental block cross-validation <span class="citation">(Roberts et al. 2017)</span>.</p>
-<p>Here, we will use 5-fold cross-validation as example. First, we build a small function for making predictions to 5-fold data.</p>
-<pre class="r"><code>library(dismo)
-
-# Build a function for cross-validation
-cross.val &lt;- function(model, k=5, data = model$data){
-    # Ensure the dismo package is loaded for &quot;kfold&quot; function:
-    require(dismo) 
-  
-  # This function returns a vector with group assignments, 
-  # meaning that each data point is assigned to a specific fold/group
-    ks &lt;- kfold(model$data, k = k, by = model$data[,as.character(formula(model)[2])])
-    
-    # We prepare an empty data frame for storing the predictions
-    crossval_preds &lt;- data.frame(row = row.names(data), 
-        crossval_preds = numeric(length = nrow(data))) 
-        
-    # We loop through the k folds
-    for(i in seq_len(k)){
-
-      # all data points belonging to fold i will be used as test data
-      test &lt;- data[ks==i,]    
-      
-      # all other data points (from the other folds) will serve as training data
-        train &lt;- data[ks!=i,]
-
-        # Now we re-estimate/update the model using the new training data
-        modtmp &lt;- update(model, data = train)
-        
-        # We make predictions to the hold-out test data and store these
-        crossval_preds[which(ks==i),2] &lt;- 
-            predict(modtmp, newdata = test, type = &#39;response&#39;)
-    }
-    
-    # The function outputs a vector of cross-validated predictions
-    return(crossval_preds) 
-    }</code></pre>
-<p>Now we can use this function to split our data into 5 folds, re-calibrate the model using only 4/5 of the original data and predict the model to the hold-out 1/5 of the data.</p>
-<pre class="r"><code>preds_cv &lt;- cross.val(m1)</code></pre>
-<p>We receive a data frame containing for each original row entry a cross-validated prediction.Out of curiosity, let us compare the fitted values on the training data and the predictions on the cross-validation data. You should see that the predictions are similar (this is good, otherwise our model would be very sensitive to changes in input data) but not identical - thus, we have basically added some noise.</p>
-<pre class="r"><code>plot(m1$fitted.values, preds_cv[,2], xlab=&#39;Fitted values&#39;, ylab=&#39;Predicted values from CV&#39;)
+<p>Here, we will use the function <code>crossvalSDM()</code> from the <code>mecofun</code> package to split our data into 5 folds, re-calibrate the model using only 4/5 of the original data and predict the model to the hold-out 1/5 of the data.</p>
+<pre class="r"><code>preds_cv &lt;- crossvalSDM(m1, traindat = sp_dat, colname_species = &#39;Turdus_torquatus&#39;, colname_pred = my_preds)</code></pre>
+<p>We receive a numeric vector of cross-validated prediction. Out of curiosity, let us compare the fitted values on the training data and the predictions on the cross-validation data. You should see that the predictions are similar (this is good, otherwise our model would be very sensitive to changes in input data) but not identical - thus, we have basically added some noise.</p>
+<pre class="r"><code>plot(m1$fitted.values, preds_cv, xlab=&#39;Fitted values&#39;, ylab=&#39;Predicted values from CV&#39;)
 abline(0,1,col=&#39;red&#39;,lwd=2)</code></pre>
-<p><img src="4_SDM_eval_files/figure-html/unnamed-chunk-9-1.png" width="672" /></p>
+<p><img src="4_SDM_eval_files/figure-html/unnamed-chunk-8-1.png" width="672" /></p>
 <p>We will use these cross-validated predictions to assess model performance.</p>
 <div id="threshold-dependent-performance-measures" class="section level3">
 <h3><span class="header-section-number">2.2.1</span> Threshold-dependent performance measures</h3>
-<p>Now, we want to know how well our model predicts the observations. Different measures are available for quantifying this. A lot of these measures are threshold-dependent. You have probably realised that our model predicts a continuous response, the probability of occurrence, while our observations are binary. Many performance measures rely on comparisons like “How many presence observations does the model correctly predict as presence”. In order to answer that we first need to convert the continuous probabilities into binary predictions. Different thresholds are introduced in <span class="citation">Liu et al. (2005)</span>. Most of these are implemented in the <code>PresenceAbsence</code> package in the <code>optimal.thresholds</code> function.</p>
+<p>Now, we want to know how well our model predicts the observations. Different measures are available for quantifying this. A lot of these measures are threshold-dependent. You have probably realised that our model predicts a continuous response, the probability of occurrence, while our observations are binary. Many performance measures rely on comparisons like “How many presence observations does the model correctly predict as presence”. In order to answer this we first need to convert the continuous probabilities into binary predictions. Different thresholds are introduced in <span class="citation">Liu et al. (2005)</span>. Most of these are implemented in the <code>PresenceAbsence</code> package in the <code>optimal.thresholds</code> function.</p>
 <pre class="r"><code>library(PresenceAbsence)
 
 # We first prepare our data:
-# Prepare predictions on training data:
-thresh_dat_train &lt;- data.frame(
-  ID = seq_len(nrow(sp_dat)), 
-    obs = sp_dat$Turdus_torquatus,
-    pred = m1$fitted)
-
 # Prepare cross-validated predictions:
-thresh_dat_cv &lt;- data.frame(
+thresh_dat &lt;- data.frame(
   ID = seq_len(nrow(sp_dat)), 
     obs = sp_dat$Turdus_torquatus,
-    pred = preds_cv[,2])
+    pred = preds_cv)
         
 # Then, we find the optimal thresholds:     
-thresh_train &lt;- PresenceAbsence::optimal.thresholds(DATA= thresh_dat_train)
-
-thresh_cv &lt;- PresenceAbsence::optimal.thresholds(DATA= thresh_dat_cv)</code></pre>
+(thresh_cv &lt;- PresenceAbsence::optimal.thresholds(DATA= thresh_dat))</code></pre>
+<pre><code>##          Method       pred
+## 1       Default 0.50000000
+## 2     Sens=Spec 0.09000000
+## 3  MaxSens+Spec 0.08000000
+## 4      MaxKappa 0.31500000
+## 5        MaxPCC 0.51400000
+## 6  PredPrev=Obs 0.28500000
+## 7       ObsPrev 0.08481262
+## 8      MeanProb 0.08528766
+## 9    MinROCdist 0.08000000
+## 10      ReqSens 0.08000000
+## 11      ReqSpec 0.09000000
+## 12         Cost 0.46500000</code></pre>
 <p>We can compare observed vs. predicted presences and absences based on these tresholds. For this, we take our predictions from the cross-validation. The comparison is easiest illustrated in a confusion matrix, for example using the function <code>cmx</code> in the <code>PresenceAbsence</code> package.</p>
 <p>Have a look at <span class="citation">Liu et al. (2005)</span> to see which thresholds they recommend. Here, we will use the threshold that maximises the sum of sensitivity and specificity (the third row in the thresholds data frame):</p>
-<pre class="r"><code>(cmx_maxSSS &lt;- PresenceAbsence::cmx(DATA= thresh_dat_cv, threshold=thresh_cv[3,2]))</code></pre>
+<pre class="r"><code>(cmx_maxSSS &lt;- PresenceAbsence::cmx(DATA= thresh_dat, threshold=thresh_cv[3,2]))</code></pre>
 <pre><code>##          observed
 ## predicted   1   0
-##         1  39  82
-##         0   4 382</code></pre>
+##         1  39  70
+##         0   4 394</code></pre>
 <p>From such a confusion matrix, we can calculate different evaluation criteria. For example,<br />
 - the proportion of correctly classified test observations <code>pcc</code><br />
 - the proportion of correctly classified presences, the sensitivity or true positive rate<br />
 - the proportion of correctly classified absences, the specificity or true negative rate</p>
-<pre class="r"><code>PresenceAbsence::pcc(cmx_maxSSS, st.dev=F)</code></pre>
-<pre><code>## [1] 0.8303748</code></pre>
-<pre class="r"><code>PresenceAbsence::sensitivity(cmx_maxSSS, st.dev=F)</code></pre>
+<pre class="r"><code># Proportion of correctly classified observations
+PresenceAbsence::pcc(cmx_maxSSS, st.dev=F)</code></pre>
+<pre><code>## [1] 0.8540434</code></pre>
+<pre class="r"><code># Sensitivity = true positive rate
+PresenceAbsence::sensitivity(cmx_maxSSS, st.dev=F)</code></pre>
 <pre><code>## [1] 0.9069767</code></pre>
-<pre class="r"><code>PresenceAbsence::specificity(cmx_maxSSS, st.dev=F)</code></pre>
-<pre><code>## [1] 0.8232759</code></pre>
+<pre class="r"><code># Specificity = true negative rate
+PresenceAbsence::specificity(cmx_maxSSS, st.dev=F)</code></pre>
+<pre><code>## [1] 0.8491379</code></pre>
 <p>Other measures are <em>Kappa</em> and <em>TSS</em> (the true skill statistic). <span class="citation">Allouche, Tsoar, and Kadmon (2006)</span> explain how to calculate these.</p>
-<pre class="r"><code>PresenceAbsence::Kappa(cmx_maxSSS, st.dev=F)</code></pre>
-<pre><code>## [1] 0.4005939</code></pre>
-<pre class="r"><code># TSS is not implemented. We write the function ourselves:
-TSS = function(cmx){
-    require(PresenceAbsence)
-    PresenceAbsence::sensitivity(cmx, st.dev=F) + PresenceAbsence::specificity(cmx, st.dev=F) - 1
-    }
-    
+<pre class="r"><code># Kappa
+PresenceAbsence::Kappa(cmx_maxSSS, st.dev=F)</code></pre>
+<pre><code>## [1] 0.4457379</code></pre>
+<pre class="r"><code># True skill statistic
 TSS(cmx_maxSSS) </code></pre>
-<pre><code>## [1] 0.7302526</code></pre>
+<pre><code>## [1] 0.7561147</code></pre>
 <p>According to <span class="citation">Araujo et al. (2005)</span>, <em>Kappa</em>&gt;0.4 indicate good predictions. For TSS, we often assume TSS&gt;0.5 to indicate good predictions.</p>
 </div>
 <div id="threshold-independent-performance-measures" class="section level3">
@@ -653,14 +610,17 @@ TSS(cmx_maxSSS) </code></pre>
 <pre class="r"><code>library(AUC)
 
 # Let&#39;s have a look a the ROC curve:
-roc_cv &lt;- roc(preds_cv[,2], as.factor(sp_dat$Turdus_torquatus))
+roc_cv &lt;- roc(preds_cv, as.factor(sp_dat$Turdus_torquatus))
 plot(roc_cv, col = &quot;grey70&quot;, lwd = 2)</code></pre>
-<p><img src="4_SDM_eval_files/figure-html/unnamed-chunk-14-1.png" width="672" /></p>
+<p><img src="4_SDM_eval_files/figure-html/unnamed-chunk-13-1.png" width="672" /></p>
 <pre class="r"><code># Compute the AUC:
-auc(roc_cv)</code></pre>
-<pre><code>## [1] 0.9092322</code></pre>
+AUC::auc(roc_cv)</code></pre>
+<pre><code>## [1] 0.9100341</code></pre>
 <p>It seems our model is performing pretty well on hold-out data. We can thus attempt making predictions in space and time.</p>
-<p>Please be aware that many packages contain functions for evaluatinng SDMs. As always you have to find your own way. Here, I provide merely examples.</p>
+<p>Please be aware that many packages contain functions for evaluatinng SDMs. As always you have to find your own way. Here, I provide merely examples. To ease further performance assessments during this course, the <code>mecofun</code> package contains a function <code>evalSDM()</code> that computes the here-mentioned performance measures. By default, this function uses the <em>MaxSens+Spec</em> threshold.</p>
+<pre class="r"><code>evalSDM(sp_dat$Turdus_torquatus, preds_cv)</code></pre>
+<pre><code>##         AUC       TSS     Kappa      Sens      Spec       PCC        D2 thresh
+## 1 0.9100341 0.7561147 0.4457379 0.9069767 0.8491379 0.8540434 0.4068533   0.08</code></pre>
 </div>
 </div>
 </div>
@@ -731,18 +691,24 @@ bio_curr_df$bin_glm &lt;- ifelse(bio_curr_df$pred_glm &gt;= thresh_cv[3,2], 1, 0
 bio_fut_df$bin_glm &lt;- ifelse(bio_fut_df$pred_glm &gt;= thresh_cv[3,2], 1, 0)
 
 # Make raster stack of predictions to current environment:
-r_pred_curr &lt;- rasterFromXYZ(bio_curr_df[,c(&#39;x&#39;,&#39;y&#39;,&#39;pred_glm&#39;,&#39;bin_glm&#39;)])
-plot(r_pred_curr, axes=F)</code></pre>
+r_pred_curr &lt;- rasterFromXYZ(bio_curr_df[,c(&#39;x&#39;,&#39;y&#39;,&#39;pred_glm&#39;,&#39;bin_glm&#39;)])</code></pre>
+<pre><code>## Warning in matrix(values, nrow = ncell(x), ncol = nlayers(x)): Datenlänge
+## [16047] ist kein Teiler oder Vielfaches der Anzahl der Zeilen [8052]</code></pre>
+<pre class="r"><code>plot(r_pred_curr, axes=F)</code></pre>
 <p><img src="4_SDM_eval_files/figure-html/unnamed-chunk-22-1.png" width="672" /></p>
 <pre class="r"><code># Make raster stack of predictions to future environment:
-r_pred_fut &lt;- rasterFromXYZ(bio_fut_df[,c(&#39;x&#39;,&#39;y&#39;,&#39;pred_glm&#39;,&#39;bin_glm&#39;)])
-plot(r_pred_fut, axes=F)</code></pre>
+r_pred_fut &lt;- rasterFromXYZ(bio_fut_df[,c(&#39;x&#39;,&#39;y&#39;,&#39;pred_glm&#39;,&#39;bin_glm&#39;)])</code></pre>
+<pre><code>## Warning in matrix(values, nrow = ncell(x), ncol = nlayers(x)): Datenlänge
+## [16047] ist kein Teiler oder Vielfaches der Anzahl der Zeilen [8052]</code></pre>
+<pre class="r"><code>plot(r_pred_fut, axes=F)</code></pre>
 <p><img src="4_SDM_eval_files/figure-html/unnamed-chunk-22-2.png" width="672" /></p>
 </div>
 <div id="assessing-novel-environments" class="section level2">
 <h2><span class="header-section-number">3.3</span> Assessing novel environments</h2>
 <p>Novel environments are conditions that were not realised in the sampled data but are realised in the projection data. For example, in the future it may be warmer than today. If the entire niche of the species is encompassed by data, then the model does not need to extrapolate even if the projection data contain some novel environments. Mostly, novel environments only prove problematic if the niche is truncated in the sampled data <span class="citation">(Zurell, Elith, and Schroeder 2012)</span>. Novel environments can be assessed in different ways. MESS (Multivariate environmental similarity surface) maps are contained in the <code>dismo</code> package and described in <span class="citation">Elith, Kearney, and Phillips (2010)</span>. They assess for each environmental variables separately whether the projection data contain novel conditions beyond the sampled range.</p>
-<pre class="r"><code># MESS maps from the dismo package:
+<pre class="r"><code>library(dismo)
+
+# MESS maps from the dismo package:
 r.mess &lt;- mess(bio_fut[[my_preds]], sp_dat[,my_preds])
 plot(r.mess, axes=F)</code></pre>
 <p><img src="4_SDM_eval_files/figure-html/unnamed-chunk-23-1.png" width="672" /></p>
@@ -869,7 +835,7 @@ $(document).ready(function ()  {
       theme: "bootstrap3",
       context: '.toc-content',
       hashGenerator: function (text) {
-        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_').toLowerCase();
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_');
       },
       ignoreSelector: ".toc-ignore",
       scrollTo: 0
