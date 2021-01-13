@@ -25,8 +25,19 @@
 <script src="site_libs/navigation-1.1/tabsets.js"></script>
 <link href="site_libs/highlightjs-9.12.0/textmate.css" rel="stylesheet" />
 <script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+<link href="site_libs/anchor-sections-1.0/anchor-sections.css" rel="stylesheet" />
+<script src="site_libs/anchor-sections-1.0/anchor-sections.js"></script>
 <link href="site_libs/font-awesome-5.1.0/css/all.css" rel="stylesheet" />
 <link href="site_libs/font-awesome-5.1.0/css/v4-shims.css" rel="stylesheet" />
+
+<style type="text/css">
+  code{white-space: pre-wrap;}
+  span.smallcaps{font-variant: small-caps;}
+  span.underline{text-decoration: underline;}
+  div.column{display: inline-block; vertical-align: top; width: 50%;}
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+  ul.task-list{list-style: none;}
+    </style>
 
 <style type="text/css">code{white-space: pre;}</style>
 <style type="text/css">
@@ -391,12 +402,6 @@ div.tocify {
       </ul>
       <ul class="nav navbar-nav navbar-right">
         <li>
-  <a href="mailto:damaris@zurell.de">
-    <span class="fa fa-envelope"></span>
-     
-  </a>
-</li>
-<li>
   <a href="https://damariszurell.github.io">
     <span class="fa fa-home"></span>
      
@@ -589,7 +594,7 @@ head(gbif_shrew[,1:4])</code></pre>
 ## 2 2251919320 Sorex alpinus Schinz, 1837        47.69411        13.681602
 ## 3 2330155268 Sorex alpinus Schinz, 1837        48.12057         8.109648
 ## 4 2843496135 Sorex alpinus Schinz, 1837        47.65534        13.148056
-## 5 2852112388 Sorex alpinus Schinz, 1837        47.66000        13.150000
+## 5 3010682738 Sorex alpinus Schinz, 1837        47.66000        13.150000
 ## 6 2269283117 Sorex alpinus Schinz, 1837        46.39159        10.421819</code></pre>
 <pre class="r"><code># Plot the species presences
 library(maptools)
@@ -645,77 +650,77 @@ sp_env &lt;- data.frame(gbif_shrew2, occ=1)
 bg_dat &lt;- data.frame(bg_dat)
 summary(bg_dat)</code></pre>
 <pre><code>##        x                y        
-##  Min.   : 3.083   Min.   :42.92  
-##  1st Qu.: 9.250   1st Qu.:46.42  
-##  Median :13.583   Median :48.58  
-##  Mean   :14.209   Mean   :48.69  
-##  3rd Qu.:19.250   3rd Qu.:50.75  
-##  Max.   :26.583   Max.   :55.58</code></pre>
+##  Min.   : 3.083   Min.   :43.08  
+##  1st Qu.: 9.083   1st Qu.:46.42  
+##  Median :13.750   Median :48.42  
+##  Mean   :14.195   Mean   :48.62  
+##  3rd Qu.:19.583   3rd Qu.:50.42  
+##  Max.   :26.917   Max.   :55.58</code></pre>
 <pre class="r"><code>names(bg_dat) &lt;- c(&#39;decimalLongitude&#39;,&#39;decimalLatitude&#39;)
 bg_dat$occ &lt;- 0
 summary(bg_dat)</code></pre>
 <pre><code>##  decimalLongitude decimalLatitude      occ   
-##  Min.   : 3.083   Min.   :42.92   Min.   :0  
-##  1st Qu.: 9.250   1st Qu.:46.42   1st Qu.:0  
-##  Median :13.583   Median :48.58   Median :0  
-##  Mean   :14.209   Mean   :48.69   Mean   :0  
-##  3rd Qu.:19.250   3rd Qu.:50.75   3rd Qu.:0  
-##  Max.   :26.583   Max.   :55.58   Max.   :0</code></pre>
+##  Min.   : 3.083   Min.   :43.08   Min.   :0  
+##  1st Qu.: 9.083   1st Qu.:46.42   1st Qu.:0  
+##  Median :13.750   Median :48.42   Median :0  
+##  Mean   :14.195   Mean   :48.62   Mean   :0  
+##  3rd Qu.:19.583   3rd Qu.:50.42   3rd Qu.:0  
+##  Max.   :26.917   Max.   :55.58   Max.   :0</code></pre>
 <pre class="r"><code># Third, we bind these two data sets
 sp_env &lt;- rbind(sp_env, bg_dat)
 summary(sp_env)</code></pre>
 <pre><code>##  decimalLongitude decimalLatitude      occ         
-##  Min.   : 3.083   Min.   :42.92   Min.   :0.00000  
-##  1st Qu.: 9.083   1st Qu.:46.39   1st Qu.:0.00000  
-##  Median :13.185   Median :48.25   Median :0.00000  
-##  Mean   :13.969   Mean   :48.53   Mean   :0.09091  
-##  3rd Qu.:18.917   3rd Qu.:50.42   3rd Qu.:0.00000  
-##  Max.   :26.583   Max.   :55.58   Max.   :1.00000</code></pre>
+##  Min.   : 3.083   Min.   :43.08   Min.   :0.00000  
+##  1st Qu.: 8.917   1st Qu.:46.38   1st Qu.:0.00000  
+##  Median :13.250   Median :48.25   Median :0.00000  
+##  Mean   :13.949   Mean   :48.48   Mean   :0.09091  
+##  3rd Qu.:19.083   3rd Qu.:50.25   3rd Qu.:0.00000  
+##  Max.   :26.917   Max.   :55.58   Max.   :1.00000</code></pre>
 <pre class="r"><code># Last, we join this combined data set with the climate data.
 sp_env &lt;- cbind(sp_env, raster::extract(x = clim, y = sp_env[,c(&#39;decimalLongitude&#39;,&#39;decimalLatitude&#39;)], cellnumbers=T) )
 summary(sp_env)</code></pre>
 <pre><code>##  decimalLongitude decimalLatitude      occ              cells      
-##  Min.   : 3.083   Min.   :42.92   Min.   :0.00000   Min.   :35778  
-##  1st Qu.: 9.083   1st Qu.:46.39   1st Qu.:0.00000   1st Qu.:46316  
-##  Median :13.185   Median :48.25   Median :0.00000   Median :50780  
-##  Mean   :13.969   Mean   :48.53   Mean   :0.09091   Mean   :50187  
-##  3rd Qu.:18.917   3rd Qu.:50.42   3rd Qu.:0.00000   3rd Qu.:54536  
-##  Max.   :26.583   Max.   :55.58   Max.   :1.00000   Max.   :61728  
+##  Min.   : 3.083   Min.   :43.08   Min.   :0.00000   Min.   :35779  
+##  1st Qu.: 8.917   1st Qu.:46.38   1st Qu.:0.00000   1st Qu.:46708  
+##  Median :13.250   Median :48.25   Median :0.00000   Median :50811  
+##  Mean   :13.949   Mean   :48.48   Mean   :0.09091   Mean   :50310  
+##  3rd Qu.:19.083   3rd Qu.:50.25   3rd Qu.:0.00000   3rd Qu.:54547  
+##  Max.   :26.917   Max.   :55.58   Max.   :1.00000   Max.   :61385  
 ##       bio1             bio2             bio3            bio4     
-##  Min.   :-25.00   Min.   : 53.00   Min.   :24.00   Min.   :5008  
-##  1st Qu.: 66.00   1st Qu.: 81.00   1st Qu.:29.00   1st Qu.:6272  
-##  Median : 80.00   Median : 86.00   Median :31.00   Median :6805  
-##  Mean   : 80.14   Mean   : 85.89   Mean   :30.42   Mean   :6891  
-##  3rd Qu.: 95.00   3rd Qu.: 92.00   3rd Qu.:32.00   3rd Qu.:7506  
-##  Max.   :164.00   Max.   :107.00   Max.   :39.00   Max.   :8869  
-##       bio5            bio6              bio7            bio8    
-##  Min.   : 78.0   Min.   :-126.00   Min.   :198.0   Min.   :-72  
-##  1st Qu.:218.0   1st Qu.: -77.00   1st Qu.:258.0   1st Qu.:132  
-##  Median :230.0   Median : -52.00   Median :279.0   Median :161  
-##  Mean   :228.5   Mean   : -50.26   Mean   :278.7   Mean   :142  
-##  3rd Qu.:244.0   3rd Qu.: -27.00   3rd Qu.:302.0   3rd Qu.:170  
-##  Max.   :300.0   Max.   :  58.00   Max.   :329.0   Max.   :204  
+##  Min.   :-25.00   Min.   : 53.00   Min.   :24.00   Min.   :5073  
+##  1st Qu.: 67.00   1st Qu.: 81.00   1st Qu.:29.00   1st Qu.:6258  
+##  Median : 81.00   Median : 86.00   Median :31.00   Median :6821  
+##  Mean   : 79.83   Mean   : 85.88   Mean   :30.37   Mean   :6898  
+##  3rd Qu.: 95.00   3rd Qu.: 92.00   3rd Qu.:32.00   3rd Qu.:7546  
+##  Max.   :157.00   Max.   :105.00   Max.   :39.00   Max.   :8893  
+##       bio5            bio6             bio7            bio8      
+##  Min.   : 78.0   Min.   :-126.0   Min.   :198.0   Min.   :-72.0  
+##  1st Qu.:218.0   1st Qu.: -77.0   1st Qu.:258.0   1st Qu.:131.0  
+##  Median :230.0   Median : -52.0   Median :279.0   Median :162.0  
+##  Mean   :228.2   Mean   : -50.9   Mean   :279.1   Mean   :142.8  
+##  3rd Qu.:245.0   3rd Qu.: -28.0   3rd Qu.:304.0   3rd Qu.:171.0  
+##  Max.   :302.0   Max.   :  47.0   Max.   :331.0   Max.   :204.0  
 ##       bio9            bio10           bio11            bio12       
-##  Min.   :-87.00   Min.   : 41.0   Min.   :-87.00   Min.   : 483.0  
-##  1st Qu.:-18.00   1st Qu.:158.0   1st Qu.:-34.25   1st Qu.: 646.0  
-##  Median : 10.00   Median :168.0   Median :-11.00   Median : 764.5  
-##  Mean   : 23.45   Mean   :166.4   Mean   :-10.31   Mean   : 845.9  
-##  3rd Qu.: 40.00   3rd Qu.:179.0   3rd Qu.:  7.00   3rd Qu.:1004.0  
-##  Max.   :239.00   Max.   :239.0   Max.   : 97.00   Max.   :1943.0  
-##      bio13           bio14            bio15           bio16      
-##  Min.   : 60.0   Min.   : 10.00   Min.   : 7.00   Min.   :167.0  
-##  1st Qu.: 81.0   1st Qu.: 31.00   1st Qu.:19.00   1st Qu.:225.0  
-##  Median : 92.0   Median : 43.00   Median :27.00   Median :254.0  
-##  Mean   :101.7   Mean   : 47.21   Mean   :25.92   Mean   :284.3  
-##  3rd Qu.:120.0   3rd Qu.: 57.00   3rd Qu.:32.00   3rd Qu.:335.0  
-##  Max.   :195.0   Max.   :143.00   Max.   :46.00   Max.   :561.0  
-##      bio17           bio18           bio19      
-##  Min.   : 72.0   Min.   : 72.0   Min.   : 76.0  
-##  1st Qu.:105.0   1st Qu.:215.0   1st Qu.:116.0  
-##  Median :141.0   Median :238.5   Median :157.0  
-##  Mean   :154.5   Mean   :265.9   Mean   :173.5  
-##  3rd Qu.:183.0   3rd Qu.:300.0   3rd Qu.:210.0  
-##  Max.   :448.0   Max.   :561.0   Max.   :516.0</code></pre>
+##  Min.   :-87.00   Min.   : 41.0   Min.   :-87.00   Min.   : 492.0  
+##  1st Qu.:-19.00   1st Qu.:158.0   1st Qu.:-35.00   1st Qu.: 647.0  
+##  Median :  9.00   Median :168.0   Median :-11.00   Median : 765.0  
+##  Mean   : 23.86   Mean   :166.2   Mean   :-10.75   Mean   : 842.9  
+##  3rd Qu.: 38.00   3rd Qu.:180.0   3rd Qu.:  7.00   3rd Qu.: 983.0  
+##  Max.   :236.00   Max.   :236.0   Max.   : 87.00   Max.   :1973.0  
+##      bio13           bio14            bio15           bio16           bio17    
+##  Min.   : 61.0   Min.   : 10.00   Min.   : 7.00   Min.   :169.0   Min.   : 65  
+##  1st Qu.: 81.0   1st Qu.: 31.00   1st Qu.:19.00   1st Qu.:226.0   1st Qu.:105  
+##  Median : 92.0   Median : 43.00   Median :27.00   Median :257.0   Median :139  
+##  Mean   :101.9   Mean   : 46.69   Mean   :26.39   Mean   :284.7   Mean   :153  
+##  3rd Qu.:119.0   3rd Qu.: 56.00   3rd Qu.:33.00   3rd Qu.:330.0   3rd Qu.:181  
+##  Max.   :195.0   Max.   :145.00   Max.   :48.00   Max.   :563.0   Max.   :458  
+##      bio18           bio19      
+##  Min.   : 71.0   Min.   : 65.0  
+##  1st Qu.:214.0   1st Qu.:116.0  
+##  Median :238.0   Median :154.0  
+##  Mean   :265.8   Mean   :171.9  
+##  3rd Qu.:304.0   3rd Qu.:207.0  
+##  Max.   :563.0   Max.   :516.0</code></pre>
 <div class="alert alert-info">
 <p><em><strong>Exercise:</strong></em></p>
 <p>Use the GBIF data for your own species (from practical 1), sample background data and prepare a data set with species and climate data. Use these data to run SDMs.</p>
@@ -757,7 +762,7 @@ summary(sp_env)</code></pre>
 
 // add bootstrap table styles to pandoc tables
 function bootstrapStylePandocTables() {
-  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+  $('tr.odd').parent('tbody').parent('table').addClass('table table-condensed');
 }
 $(document).ready(function () {
   bootstrapStylePandocTables();

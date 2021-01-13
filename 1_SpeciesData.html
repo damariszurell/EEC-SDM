@@ -25,8 +25,19 @@
 <script src="site_libs/navigation-1.1/tabsets.js"></script>
 <link href="site_libs/highlightjs-9.12.0/textmate.css" rel="stylesheet" />
 <script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+<link href="site_libs/anchor-sections-1.0/anchor-sections.css" rel="stylesheet" />
+<script src="site_libs/anchor-sections-1.0/anchor-sections.js"></script>
 <link href="site_libs/font-awesome-5.1.0/css/all.css" rel="stylesheet" />
 <link href="site_libs/font-awesome-5.1.0/css/v4-shims.css" rel="stylesheet" />
+
+<style type="text/css">
+  code{white-space: pre-wrap;}
+  span.smallcaps{font-variant: small-caps;}
+  span.underline{text-decoration: underline;}
+  div.column{display: inline-block; vertical-align: top; width: 50%;}
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+  ul.task-list{list-style: none;}
+    </style>
 
 <style type="text/css">code{white-space: pre;}</style>
 <style type="text/css">
@@ -391,12 +402,6 @@ div.tocify {
       </ul>
       <ul class="nav navbar-nav navbar-right">
         <li>
-  <a href="mailto:damaris@zurell.de">
-    <span class="fa fa-envelope"></span>
-     
-  </a>
-</li>
-<li>
   <a href="https://damariszurell.github.io">
     <span class="fa fa-home"></span>
      
@@ -440,23 +445,18 @@ div.tocify {
 
 # Check out the number of occurrences found in GBIF:
 occ_count()</code></pre>
-<pre><code>## [1] 1622110032</code></pre>
+<pre><code>## [1] 1644940485</code></pre>
 <pre class="r"><code># number of observations:
 occ_count(basisOfRecord=&#39;OBSERVATION&#39;)</code></pre>
-<pre><code>## [1] 19491559</code></pre>
+<pre><code>## [1] 18458886</code></pre>
 <pre class="r"><code># number of occurrences reported for Germany:
 occ_count(country=isocodes[grep(&quot;Germany&quot;, isocodes$name), &quot;code&quot;])</code></pre>
-<pre><code>## [1] 39657842</code></pre>
+<pre><code>## [1] 41809205</code></pre>
 <pre class="r"><code># number of observations reported for Germany:
 occ_count(country=isocodes[grep(&quot;Germany&quot;, isocodes$name), &quot;code&quot;],basisOfRecord=&#39;OBSERVATION&#39;)</code></pre>
-<pre><code>## [1] 246614</code></pre>
+<pre><code>## [1] 289572</code></pre>
 <p>As example, I picked the Alpine shrew (<em>Sorex alpinus</em>) for today, a small mammal species occurring in Central and Suuth-Eastern European mountain ranges. Its conservation status is near threatened (<a href="https://www.iucnredlist.org/species/29660/9514588">Link to IUCN redlist</a>).</p>
-<div class="figure">
-<img src="figures/shrew.png" alt="**Figure 1. The Alpine shrew (*Sorex alpinus*). Picture by Dr. Richard Kraft, downloaded from https://kleinsaeuger.at/sorex-alpinus.html.**" width="50%" />
-<p class="caption">
-<strong>Figure 1. The Alpine shrew (<em>Sorex alpinus</em>). Picture by Dr. Richard Kraft, downloaded from <a href="https://kleinsaeuger.at/sorex-alpinus.html" class="uri">https://kleinsaeuger.at/sorex-alpinus.html</a>.</strong>
-</p>
-</div>
+<p><img src="figures/shrew.png" title="**Figure 1. The Alpine shrew (*Sorex alpinus*). Picture by Dr. Richard Kraft, downloaded from https://kleinsaeuger.at/sorex-alpinus.html.**" alt="**Figure 1. The Alpine shrew (*Sorex alpinus*). Picture by Dr. Richard Kraft, downloaded from https://kleinsaeuger.at/sorex-alpinus.html.**" width="50%" /></p>
 <p>We first check whether any synonyms exist and how many records exist for the species. Download will be slow for high numbers of records.</p>
 <pre class="r"><code># Check for synonyms
 name_suggest(q=&#39;Sorex alpinus&#39;, rank=&#39;species&#39;)
@@ -497,7 +497,7 @@ cl_gbif_shrew &lt;- clean_coordinates(gbif_shrew, lon=&quot;decimalLongitude&quo
 <pre><code>## Flagged 26 records.</code></pre>
 <pre><code>## Testing duplicates</code></pre>
 <pre><code>## Flagged 188 records.</code></pre>
-<pre><code>## Flagged 210 of 479 records, EQ = 0.44.</code></pre>
+<pre><code>## Flagged 210 of 483 records, EQ = 0.43.</code></pre>
 <pre class="r"><code>plot(wrld_simpl,xlim=c(5,130), ylim=c(40,55))
 points(gbif_shrew$decimalLongitude, gbif_shrew$decimalLatitude, col=&#39;red&#39;,  pch=19)
 points(gbif_shrew$decimalLongitude[cl_gbif_shrew$.summary], gbif_shrew$decimalLatitude[cl_gbif_shrew$.summary], col=&#39;blue&#39;,  pch=18)</code></pre>
@@ -545,7 +545,7 @@ points(gbif_shrew$decimalLongitude[cl_gbif_shrew$.summary], gbif_shrew$decimalLa
 
 // add bootstrap table styles to pandoc tables
 function bootstrapStylePandocTables() {
-  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+  $('tr.odd').parent('tbody').parent('table').addClass('table table-condensed');
 }
 $(document).ready(function () {
   bootstrapStylePandocTables();

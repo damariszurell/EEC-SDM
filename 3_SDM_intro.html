@@ -25,8 +25,19 @@
 <script src="site_libs/navigation-1.1/tabsets.js"></script>
 <link href="site_libs/highlightjs-9.12.0/textmate.css" rel="stylesheet" />
 <script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+<link href="site_libs/anchor-sections-1.0/anchor-sections.css" rel="stylesheet" />
+<script src="site_libs/anchor-sections-1.0/anchor-sections.js"></script>
 <link href="site_libs/font-awesome-5.1.0/css/all.css" rel="stylesheet" />
 <link href="site_libs/font-awesome-5.1.0/css/v4-shims.css" rel="stylesheet" />
+
+<style type="text/css">
+  code{white-space: pre-wrap;}
+  span.smallcaps{font-variant: small-caps;}
+  span.underline{text-decoration: underline;}
+  div.column{display: inline-block; vertical-align: top; width: 50%;}
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+  ul.task-list{list-style: none;}
+    </style>
 
 <style type="text/css">code{white-space: pre;}</style>
 <style type="text/css">
@@ -391,12 +402,6 @@ div.tocify {
       </ul>
       <ul class="nav navbar-nav navbar-right">
         <li>
-  <a href="mailto:damaris@zurell.de">
-    <span class="fa fa-envelope"></span>
-     
-  </a>
-</li>
-<li>
   <a href="https://damariszurell.github.io">
     <span class="fa fa-home"></span>
      
@@ -434,20 +439,10 @@ div.tocify {
 <h1><span class="header-section-number">1</span> Introduction</h1>
 <p>This session will introduce you to simple species distribution models (SDMs). Species distribution models (SDMs) are a popular tool in quantitative ecology <span class="citation">(Franklin 2010; Peterson et al. 2011; Guisan, Thuiller, and Zimmermann 2017)</span> and constitute the most widely used modelling framework in global change impact assessments for projecting potential future range shifts of species <span class="citation">(IPBES 2016)</span>. There are several reasons that make them so popular: they are comparably easy to use because many software packages <span class="citation">(e.g. Thuiller et al. 2009; Phillips, Anderson, and Schapire 2006)</span> and guidelines <span class="citation">(e.g. Elith, Leathwick, and Hastie 2008; Elith et al. 2011; Merow, Smith, and Silander Jr 2013; Guisan, Thuiller, and Zimmermann 2017)</span> are available, and they have comparably low data requirements.</p>
 <p>SDMs relate biodiversity observations (e.g. presence-only, presence/absence, abundance, species richness) at specific sites to the prevailing environmental conditions at those sites. Different statistical and machine-learning algorithms are available for this. Based on the estimated biodiversity-environment relationship, we can make predictions in space and in time by projecting the model onto available environmental layers (Figure 1).</p>
-<div class="figure">
-<img src="figures/sdm.png" alt="**Figure 1. Schematic representation of the species distribution modelling concept. First, biodiversity and environmental information are sampled in geographic space. Second, a statistical model (here, generalised linear model) is used to estimate the species-environment relationship. Third, the species–environment relationship can be mapped onto geographic layers of environmental information to delineate the potential distribution of the species. Mapping to the sampling area and period is usually referred to as interpolation, while transferring to a different time period or geographic area is referred to as extrapolation.**" width="70%" />
-<p class="caption">
-<strong>Figure 1. Schematic representation of the species distribution modelling concept. First, biodiversity and environmental information are sampled in geographic space. Second, a statistical model (here, generalised linear model) is used to estimate the species-environment relationship. Third, the species–environment relationship can be mapped onto geographic layers of environmental information to delineate the potential distribution of the species. Mapping to the sampling area and period is usually referred to as interpolation, while transferring to a different time period or geographic area is referred to as extrapolation.</strong>
-</p>
-</div>
+<p><img src="figures/sdm.png" title="**Figure 1. Schematic representation of the species distribution modelling concept. First, biodiversity and environmental information are sampled in geographic space. Second, a statistical model (here, generalised linear model) is used to estimate the species-environment relationship. Third, the species–environment relationship can be mapped onto geographic layers of environmental information to delineate the potential distribution of the species. Mapping to the sampling area and period is usually referred to as interpolation, while transferring to a different time period or geographic area is referred to as extrapolation.**" alt="**Figure 1. Schematic representation of the species distribution modelling concept. First, biodiversity and environmental information are sampled in geographic space. Second, a statistical model (here, generalised linear model) is used to estimate the species-environment relationship. Third, the species–environment relationship can be mapped onto geographic layers of environmental information to delineate the potential distribution of the species. Mapping to the sampling area and period is usually referred to as interpolation, while transferring to a different time period or geographic area is referred to as extrapolation.**" width="70%" /></p>
 <p>We distinguish five main modelling steps for SDMs: (i) conceptualisation, (ii) data preparation, (iii) model fitting, (iv) model assessment, and (v) prediction (Figure 2.). The last step (prediction) is not always part of SDM studies but depends on the model objective <span class="citation">(Zurell et al. 2020)</span>. Generally, we distinguish three main objectives for SDMs: (a) inference and explanation, (b) mapping and interpolation, and (c) forecast and transfer. I recommend getting more familiar with critical assumptions and modelling decisions by studying the many excellent review articles <span class="citation">(Guisan and Zimmermann 2000; Guisan and Thuiller 2005; Elith and Leathwick 2009)</span> and textbooks on SDMs <span class="citation">(Peterson et al. 2011; Franklin 2010; Guisan, Thuiller, and Zimmermann 2017)</span>.</p>
 <p>I would also like to emphasise that model building is an iterative process and there is much to learn on the way. In consequence, you may want to revisit and improve certain modelling steps, for example improve the spatial sampling design. Because of that I like to regard model building as a cycle rather than a workflow with a pre-defined termination point (Figure 2.)<span class="citation">(Zurell et al. 2020)</span>.</p>
-<div class="figure">
-<img src="figures/sdm_steps.png" alt="**Figure 2. The main modelling cycle in species distribution modelling.**" width="50%" />
-<p class="caption">
-<strong>Figure 2. The main modelling cycle in species distribution modelling.</strong>
-</p>
-</div>
+<p><img src="figures/sdm_steps.png" title="**Figure 2. The main modelling cycle in species distribution modelling.**" alt="**Figure 2. The main modelling cycle in species distribution modelling.**" width="50%" /></p>
 <div id="prac-overview" class="section level2">
 <h2><span class="header-section-number">1.1</span> Prac overview</h2>
 <p>In this session, we will only work with Generalised Linear Models (GLMs) and concentrate on the first three model building steps (Figure 2.)</p>
@@ -469,12 +464,7 @@ div.tocify {
 <div id="example-ring-ouzel" class="section level2">
 <h2><span class="header-section-number">2.1</span> Example: Ring Ouzel</h2>
 <p>We aim at assessing potential climate change effects on the Ring Ouzel (<em>Turdus torquatus</em>) in UK (Figure 3), a typical upland bird. First, we try to make ourselves familiar with Ring Ouzel ecology. For example, the RSPB in UK (The Royal Society for the Protection of Birds) as well as the IUCN (Internatinal Union for the Conservation of Nature) provide some species details on their websites (<a href="https://www.rspb.org.uk/birds-and-wildlife/wildlife-guides/bird-a-z/ring-ouzel/">RSPB</a>, <a href="https://www.iucnredlist.org/species/22708768/155629409">IUCN</a>). Think about which factors could limit the distribution of Ring Ouzel in UK.</p>
-<div class="figure">
-<img src="figures/ringouzel.png" alt="A male ring ouzel. Copyright Ruedi Aeschlimann. Downloaded from www.vogelwarte.ch." width="40%" />
-<p class="caption">
-A male ring ouzel. Copyright Ruedi Aeschlimann. Downloaded from www.vogelwarte.ch.
-</p>
-</div>
+<p><img src="figures/ringouzel.png" title="A male ring ouzel. Copyright Ruedi Aeschlimann. Downloaded from www.vogelwarte.ch." alt="A male ring ouzel. Copyright Ruedi Aeschlimann. Downloaded from www.vogelwarte.ch." width="40%" /></p>
 </div>
 </div>
 <div id="data-preparation" class="section level1">
@@ -484,8 +474,8 @@ A male ring ouzel. Copyright Ruedi Aeschlimann. Downloaded from www.vogelwarte.c
 <p>Read in the data table:</p>
 <pre class="r"><code>library(raster)
 bg &lt;- raster(&#39;data/Prac3_UK_mask.grd&#39;)</code></pre>
-<pre><code>## Warning in showSRID(uprojargs, format = &quot;PROJ&quot;, multiline = &quot;NO&quot;): Discarded datum OSGB_1936 in CRS definition,
-##  but +towgs84= values preserved</code></pre>
+<pre><code>## Warning in showSRID(uprojargs, format = &quot;PROJ&quot;, multiline = &quot;NO&quot;, prefer_proj =
+## prefer_proj): Discarded datum OSGB 1936 in CRS definition</code></pre>
 <pre class="r"><code>sp_dat &lt;- read.table(&#39;data/Prac3_RingOuzel.txt&#39;,header=T)</code></pre>
 <p>Inspect the data, and plot the presence and absence locations:</p>
 <pre class="r"><code>summary(sp_dat)</code></pre>
@@ -840,7 +830,7 @@ expl_deviance(obs = sp_dat$Turdus_torquatus,
 
 // add bootstrap table styles to pandoc tables
 function bootstrapStylePandocTables() {
-  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+  $('tr.odd').parent('tbody').parent('table').addClass('table table-condensed');
 }
 $(document).ready(function () {
   bootstrapStylePandocTables();

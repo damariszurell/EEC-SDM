@@ -25,8 +25,19 @@
 <script src="site_libs/navigation-1.1/tabsets.js"></script>
 <link href="site_libs/highlightjs-9.12.0/textmate.css" rel="stylesheet" />
 <script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+<link href="site_libs/anchor-sections-1.0/anchor-sections.css" rel="stylesheet" />
+<script src="site_libs/anchor-sections-1.0/anchor-sections.js"></script>
 <link href="site_libs/font-awesome-5.1.0/css/all.css" rel="stylesheet" />
 <link href="site_libs/font-awesome-5.1.0/css/v4-shims.css" rel="stylesheet" />
+
+<style type="text/css">
+  code{white-space: pre-wrap;}
+  span.smallcaps{font-variant: small-caps;}
+  span.underline{text-decoration: underline;}
+  div.column{display: inline-block; vertical-align: top; width: 50%;}
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+  ul.task-list{list-style: none;}
+    </style>
 
 <style type="text/css">code{white-space: pre;}</style>
 <style type="text/css">
@@ -391,12 +402,6 @@ div.tocify {
       </ul>
       <ul class="nav navbar-nav navbar-right">
         <li>
-  <a href="mailto:damaris@zurell.de">
-    <span class="fa fa-envelope"></span>
-     
-  </a>
-</li>
-<li>
   <a href="https://damariszurell.github.io">
     <span class="fa fa-home"></span>
      
@@ -438,8 +443,8 @@ div.tocify {
 <p>We will continue to work on the Ring Ouzel example of the previous session, using data from the British breeding and wintering birds citizen science atlas <span class="citation">(Gillings et al. 2019)</span>. Let’s quickly repeat the main steps of data preparation and model fitting:</p>
 <pre class="r"><code>library(raster)
 bg &lt;- raster(&#39;data/Prac3_UK_mask.grd&#39;)</code></pre>
-<pre><code>## Warning in showSRID(uprojargs, format = &quot;PROJ&quot;, multiline = &quot;NO&quot;): Discarded datum OSGB_1936 in CRS definition,
-##  but +towgs84= values preserved</code></pre>
+<pre><code>## Warning in showSRID(uprojargs, format = &quot;PROJ&quot;, multiline = &quot;NO&quot;, prefer_proj =
+## prefer_proj): Discarded datum OSGB 1936 in CRS definition</code></pre>
 <pre class="r"><code>sp_dat &lt;- read.table(&#39;data/Prac3_RingOuzel.txt&#39;,header=T)</code></pre>
 <pre class="r"><code>m1 &lt;- glm( Turdus_torquatus ~ bio11 + bio8, family=&#39;binomial&#39;, data=sp_dat)
 
@@ -564,44 +569,44 @@ thresh_dat &lt;- data.frame(
 (thresh_cv &lt;- PresenceAbsence::optimal.thresholds(DATA= thresh_dat))</code></pre>
 <pre><code>##          Method       pred
 ## 1       Default 0.50000000
-## 2     Sens=Spec 0.09000000
-## 3  MaxSens+Spec 0.08000000
-## 4      MaxKappa 0.31500000
-## 5        MaxPCC 0.51400000
-## 6  PredPrev=Obs 0.28500000
+## 2     Sens=Spec 0.08000000
+## 3  MaxSens+Spec 0.07000000
+## 4      MaxKappa 0.35000000
+## 5        MaxPCC 0.56000000
+## 6  PredPrev=Obs 0.29000000
 ## 7       ObsPrev 0.08481262
-## 8      MeanProb 0.08528766
-## 9    MinROCdist 0.08000000
+## 8      MeanProb 0.08543472
+## 9    MinROCdist 0.07000000
 ## 10      ReqSens 0.08000000
 ## 11      ReqSpec 0.09000000
-## 12         Cost 0.46500000</code></pre>
+## 12         Cost 0.57000000</code></pre>
 <p>We can compare observed vs. predicted presences and absences based on these tresholds. For this, we take our predictions from the cross-validation. The comparison is easiest illustrated in a confusion matrix, for example using the function <code>cmx</code> in the <code>PresenceAbsence</code> package.</p>
 <p>Have a look at <span class="citation">Liu et al. (2005)</span> to see which thresholds they recommend. Here, we will use the threshold that maximises the sum of sensitivity and specificity (the third row in the thresholds data frame):</p>
 <pre class="r"><code>(cmx_maxSSS &lt;- PresenceAbsence::cmx(DATA= thresh_dat, threshold=thresh_cv[3,2]))</code></pre>
 <pre><code>##          observed
 ## predicted   1   0
-##         1  39  70
-##         0   4 394</code></pre>
+##         1  39  78
+##         0   4 386</code></pre>
 <p>From such a confusion matrix, we can calculate different evaluation criteria. For example,<br />
 - the proportion of correctly classified test observations <code>pcc</code><br />
 - the proportion of correctly classified presences, the sensitivity or true positive rate<br />
 - the proportion of correctly classified absences, the specificity or true negative rate</p>
 <pre class="r"><code># Proportion of correctly classified observations
 PresenceAbsence::pcc(cmx_maxSSS, st.dev=F)</code></pre>
-<pre><code>## [1] 0.8540434</code></pre>
+<pre><code>## [1] 0.8382643</code></pre>
 <pre class="r"><code># Sensitivity = true positive rate
 PresenceAbsence::sensitivity(cmx_maxSSS, st.dev=F)</code></pre>
 <pre><code>## [1] 0.9069767</code></pre>
 <pre class="r"><code># Specificity = true negative rate
 PresenceAbsence::specificity(cmx_maxSSS, st.dev=F)</code></pre>
-<pre><code>## [1] 0.8491379</code></pre>
+<pre><code>## [1] 0.8318966</code></pre>
 <p>Other measures are <em>Kappa</em> and <em>TSS</em> (the true skill statistic). <span class="citation">Allouche, Tsoar, and Kadmon (2006)</span> explain how to calculate these.</p>
 <pre class="r"><code># Kappa
 PresenceAbsence::Kappa(cmx_maxSSS, st.dev=F)</code></pre>
-<pre><code>## [1] 0.4457379</code></pre>
+<pre><code>## [1] 0.4149286</code></pre>
 <pre class="r"><code># True skill statistic
 TSS(cmx_maxSSS) </code></pre>
-<pre><code>## [1] 0.7561147</code></pre>
+<pre><code>## [1] 0.7388733</code></pre>
 <p>According to <span class="citation">Araujo et al. (2005)</span>, <em>Kappa</em>&gt;0.4 indicate good predictions. For TSS, we often assume TSS&gt;0.5 to indicate good predictions.</p>
 </div>
 <div id="threshold-independent-performance-measures" class="section level3">
@@ -615,12 +620,12 @@ plot(roc_cv, col = &quot;grey70&quot;, lwd = 2)</code></pre>
 <p><img src="4_SDM_eval_files/figure-html/unnamed-chunk-13-1.png" width="672" /></p>
 <pre class="r"><code># Compute the AUC:
 AUC::auc(roc_cv)</code></pre>
-<pre><code>## [1] 0.9100341</code></pre>
+<pre><code>## [1] 0.9056235</code></pre>
 <p>It seems our model is performing pretty well on hold-out data. We can thus attempt making predictions in space and time.</p>
 <p>Please be aware that many packages contain functions for evaluatinng SDMs. As always you have to find your own way. Here, I provide merely examples. To ease further performance assessments during this course, the <code>mecofun</code> package contains a function <code>evalSDM()</code> that computes the here-mentioned performance measures. By default, this function uses the <em>MaxSens+Spec</em> threshold.</p>
 <pre class="r"><code>evalSDM(sp_dat$Turdus_torquatus, preds_cv)</code></pre>
-<pre><code>##         AUC       TSS     Kappa      Sens      Spec       PCC        D2 thresh
-## 1 0.9100341 0.7561147 0.4457379 0.9069767 0.8491379 0.8540434 0.4068533   0.08</code></pre>
+<pre><code>##         AUC       TSS     Kappa      Sens      Spec       PCC       D2 thresh
+## 1 0.9056235 0.7388733 0.4149286 0.9069767 0.8318966 0.8382643 0.393365   0.07</code></pre>
 </div>
 </div>
 </div>
@@ -691,16 +696,12 @@ bio_curr_df$bin_glm &lt;- ifelse(bio_curr_df$pred_glm &gt;= thresh_cv[3,2], 1, 0
 bio_fut_df$bin_glm &lt;- ifelse(bio_fut_df$pred_glm &gt;= thresh_cv[3,2], 1, 0)
 
 # Make raster stack of predictions to current environment:
-r_pred_curr &lt;- rasterFromXYZ(bio_curr_df[,c(&#39;x&#39;,&#39;y&#39;,&#39;pred_glm&#39;,&#39;bin_glm&#39;)])</code></pre>
-<pre><code>## Warning in matrix(values, nrow = ncell(x), ncol = nlayers(x)): Datenlänge
-## [16047] ist kein Teiler oder Vielfaches der Anzahl der Zeilen [8052]</code></pre>
-<pre class="r"><code>plot(r_pred_curr, axes=F)</code></pre>
+r_pred_curr &lt;- rasterFromXYZ(bio_curr_df[,c(&#39;x&#39;,&#39;y&#39;,&#39;pred_glm&#39;,&#39;bin_glm&#39;)])
+plot(r_pred_curr, axes=F)</code></pre>
 <p><img src="4_SDM_eval_files/figure-html/unnamed-chunk-22-1.png" width="672" /></p>
 <pre class="r"><code># Make raster stack of predictions to future environment:
-r_pred_fut &lt;- rasterFromXYZ(bio_fut_df[,c(&#39;x&#39;,&#39;y&#39;,&#39;pred_glm&#39;,&#39;bin_glm&#39;)])</code></pre>
-<pre><code>## Warning in matrix(values, nrow = ncell(x), ncol = nlayers(x)): Datenlänge
-## [16047] ist kein Teiler oder Vielfaches der Anzahl der Zeilen [8052]</code></pre>
-<pre class="r"><code>plot(r_pred_fut, axes=F)</code></pre>
+r_pred_fut &lt;- rasterFromXYZ(bio_fut_df[,c(&#39;x&#39;,&#39;y&#39;,&#39;pred_glm&#39;,&#39;bin_glm&#39;)])
+plot(r_pred_fut, axes=F)</code></pre>
 <p><img src="4_SDM_eval_files/figure-html/unnamed-chunk-22-2.png" width="672" /></p>
 </div>
 <div id="assessing-novel-environments" class="section level2">
@@ -796,7 +797,7 @@ plot(r_novel_fut, axes=F)</code></pre>
 
 // add bootstrap table styles to pandoc tables
 function bootstrapStylePandocTables() {
-  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+  $('tr.odd').parent('tbody').parent('table').addClass('table table-condensed');
 }
 $(document).ready(function () {
   bootstrapStylePandocTables();

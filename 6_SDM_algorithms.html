@@ -25,8 +25,19 @@
 <script src="site_libs/navigation-1.1/tabsets.js"></script>
 <link href="site_libs/highlightjs-9.12.0/textmate.css" rel="stylesheet" />
 <script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+<link href="site_libs/anchor-sections-1.0/anchor-sections.css" rel="stylesheet" />
+<script src="site_libs/anchor-sections-1.0/anchor-sections.js"></script>
 <link href="site_libs/font-awesome-5.1.0/css/all.css" rel="stylesheet" />
 <link href="site_libs/font-awesome-5.1.0/css/v4-shims.css" rel="stylesheet" />
+
+<style type="text/css">
+  code{white-space: pre-wrap;}
+  span.smallcaps{font-variant: small-caps;}
+  span.underline{text-decoration: underline;}
+  div.column{display: inline-block; vertical-align: top; width: 50%;}
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+  ul.task-list{list-style: none;}
+    </style>
 
 <style type="text/css">code{white-space: pre;}</style>
 <style type="text/css">
@@ -391,12 +402,6 @@ div.tocify {
       </ul>
       <ul class="nav navbar-nav navbar-right">
         <li>
-  <a href="mailto:damaris@zurell.de">
-    <span class="fa fa-envelope"></span>
-     
-  </a>
-</li>
-<li>
   <a href="https://damariszurell.github.io">
     <span class="fa fa-home"></span>
      
@@ -438,8 +443,8 @@ div.tocify {
 <p>I will illustrate the different algorithms using the Ring Ouzel example of sessions 3-4, based on data from the British breeding and wintering birds citizen science atlas <span class="citation">(Gillings et al. 2019)</span>. The species presense/absence data and the bioclimatic variables at these locations are available from file. Also, remember that we have already tested the data for multicollinearity and identified bio11 and bio8 as weakly correlated variables with high univariate variable importance.</p>
 <pre class="r"><code>library(raster)
 bg &lt;- raster(&#39;data/Prac3_UK_mask.grd&#39;)</code></pre>
-<pre><code>## Warning in showSRID(uprojargs, format = &quot;PROJ&quot;, multiline = &quot;NO&quot;): Discarded datum OSGB_1936 in CRS definition,
-##  but +towgs84= values preserved</code></pre>
+<pre><code>## Warning in showSRID(uprojargs, format = &quot;PROJ&quot;, multiline = &quot;NO&quot;, prefer_proj =
+## prefer_proj): Discarded datum OSGB 1936 in CRS definition</code></pre>
 <pre class="r"><code>sp_dat &lt;- read.table(&#39;data/Prac3_RingOuzel.txt&#39;,header=T)
 
 my_preds &lt;- c(&#39;bio11&#39;,&#39;bio8&#39;)</code></pre>
@@ -722,19 +727,19 @@ m_rf &lt;- randomForest( x=sp_train[,my_preds], y=sp_train$Turdus_torquatus,
 # Variable importance:
 importance(m_rf,type=1)</code></pre>
 <pre><code>##        %IncMSE
-## bio11 17.24741
-## bio8  22.91273</code></pre>
+## bio11 17.92581
+## bio8  21.05596</code></pre>
 <pre class="r"><code>varImpPlot(m_rf)</code></pre>
 <p><img src="6_SDM_algorithms_files/figure-html/unnamed-chunk-14-1.png" width="672" /></p>
 <pre class="r"><code># Look at single trees:
 head(getTree(m_rf,1,T))</code></pre>
 <pre><code>##   left daughter right daughter split var split point status prediction
-## 1             2              3      bio8   25.530595     -3 0.07605634
-## 2             4              5     bio11    9.372776     -3 0.66666667
-## 3             6              7     bio11   23.319794     -3 0.04451039
-## 4             8              9      bio8    7.460640     -3 1.00000000
-## 5            10             11     bio11   10.475868     -3 0.50000000
-## 6            12             13     bio11   23.231469     -3 0.29411765</code></pre>
+## 1             2              3      bio8    35.98936     -3 0.09295775
+## 2             4              5     bio11     1.40692     -3 0.41666667
+## 3             6              7     bio11    21.71712     -3 0.02711864
+## 4             0              0      &lt;NA&gt;     0.00000     -1 1.00000000
+## 5             8              9     bio11    22.75861     -3 0.33962264
+## 6            10             11     bio11    20.92356     -3 0.40000000</code></pre>
 <pre class="r"><code># Now, we plot the response surface:
 xyz$z &lt;- predict(m_rf, xyz, type=&#39;response&#39;)
 wireframe(z ~ bio11 + bio8, data = xyz, zlab = list(&quot;Occurrence prob.&quot;, rot=90), 
@@ -748,8 +753,8 @@ partial_response(m_rf, predictors = sp_train[,my_preds], main=&#39;Random Forest
 <p><img src="6_SDM_algorithms_files/figure-html/unnamed-chunk-14-3.png" width="672" /></p>
 <pre class="r"><code># Performance measures of GAM with spline-smoother 
 (perf_rf &lt;- evalSDM(sp_test$Turdus_torquatus, predict(m_rf, sp_test[,my_preds],  type=&#39;response&#39;) ))</code></pre>
-<pre><code>##        AUC       TSS     Kappa  Sens      Spec       PCC        D2 thresh
-## 1 0.904182 0.7132353 0.4597156 0.875 0.8382353 0.8421053 0.2339337   0.12</code></pre>
+<pre><code>##         AUC       TSS     Kappa  Sens      Spec       PCC        D2 thresh
+## 1 0.9067096 0.7205882 0.4728589 0.875 0.8455882 0.8486842 0.2236552   0.12</code></pre>
 <pre class="r"><code># Map predictions:
 r_rf_bin &lt;- r_rf_pred &lt;- rasterFromXYZ(cbind(bio_curr_df[,1:2],
                                  predict(m_rf, bio_curr_df,type=&#39;response&#39;)))
@@ -788,16 +793,16 @@ m_brt &lt;- gbm.step(data = sp_train,
 <pre class="r"><code># Variable importance:
 m_brt$contributions</code></pre>
 <pre><code>##         var  rel.inf
-## bio8   bio8 59.00576
-## bio11 bio11 40.99424</code></pre>
+## bio8   bio8 57.57056
+## bio11 bio11 42.42944</code></pre>
 <pre class="r"><code># Interactions (not very meaningful here with only 2 predictors):
 gbm.interactions(m_brt)$interactions</code></pre>
 <pre><code>##       bio11  bio8
-## bio11     0 34.66
+## bio11     0 50.44
 ## bio8      0  0.00</code></pre>
 <pre class="r"><code>gbm.interactions(m_brt)$rank.list</code></pre>
 <pre><code>##   var1.index var1.names var2.index var2.names int.size
-## 1          2       bio8          1      bio11    34.66
+## 1          2       bio8          1      bio11    50.44
 ## 2          3       &lt;NA&gt;          0                0.00</code></pre>
 <pre class="r"><code># dismo provides some build-in functions for plotting response:
 gbm.plot(m_brt, n.plots=2, write.title = FALSE)</code></pre>
@@ -817,8 +822,8 @@ partial_response(m_brt, predictors = sp_train[,my_preds], main=&#39;BRT&#39;)</c
 <p><img src="6_SDM_algorithms_files/figure-html/unnamed-chunk-15-5.png" width="672" /></p>
 <pre class="r"><code># Performance measures of GAM with spline-smoother 
 (perf_brt &lt;- evalSDM(sp_test$Turdus_torquatus, predict.gbm(m_brt, sp_test[,my_preds], n.trees=m_brt$gbm.call$best.trees, type=&#39;response&#39;) ))</code></pre>
-<pre><code>##         AUC       TSS     Kappa  Sens      Spec       PCC        D2 thresh
-## 1 0.9370404 0.7352941 0.5006258 0.875 0.8602941 0.8618421 0.3995577  0.125</code></pre>
+<pre><code>##         AUC       TSS     Kappa Sens      Spec       PCC        D2 thresh
+## 1 0.9356618 0.7426471 0.3779233    1 0.7426471 0.7697368 0.3950431   0.02</code></pre>
 <pre class="r"><code># Map predictions:
 r_brt_bin &lt;- r_brt_pred &lt;- rasterFromXYZ(cbind(bio_curr_df[,1:2],
                                   predict.gbm(m_brt, bio_curr_df,
@@ -875,8 +880,8 @@ plot(stack(r_maxent_pred, r_maxent_bin),main=c(&#39;Maxent prob.&#39;,&#39;Maxen
 ## glm    0.9333640 0.7352941 0.5006258 0.8750 0.8602941 0.8618421  0.4607125
 ## gamS   0.9375000 0.7757353 0.4912689 0.9375 0.8382353 0.8486842  0.4586095
 ## cart   0.8244485 0.6323529 0.4751381 0.7500 0.8823529 0.8684211  0.2546056
-## rf     0.9041820 0.7132353 0.4597156 0.8750 0.8382353 0.8421053  0.2339337
-## brt    0.9370404 0.7352941 0.5006258 0.8750 0.8602941 0.8618421  0.3995577
+## rf     0.9067096 0.7205882 0.4728589 0.8750 0.8455882 0.8486842  0.2236552
+## brt    0.9356618 0.7426471 0.3779233 1.0000 0.7426471 0.7697368  0.3950431
 ## maxent 0.9384191 0.7610294 0.4656918 0.9375 0.8235294 0.8355263  0.3160077
 ##        thresh
 ## bc      0.260
@@ -885,7 +890,7 @@ plot(stack(r_maxent_pred, r_maxent_bin),main=c(&#39;Maxent prob.&#39;,&#39;Maxen
 ## gamS    0.100
 ## cart    0.320
 ## rf      0.120
-## brt     0.125
+## brt     0.020
 ## maxent  0.265</code></pre>
 <pre class="r"><code># Adapt the file path to your folder structure
 write.table(data.frame(alg=row.names(comp_perf),comp_perf), 
@@ -971,7 +976,7 @@ write.table(data.frame(alg=row.names(comp_perf),comp_perf),
 
 // add bootstrap table styles to pandoc tables
 function bootstrapStylePandocTables() {
-  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+  $('tr.odd').parent('tbody').parent('table').addClass('table table-condensed');
 }
 $(document).ready(function () {
   bootstrapStylePandocTables();
