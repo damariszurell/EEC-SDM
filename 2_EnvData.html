@@ -462,15 +462,6 @@ plot(clim)</code></pre>
 <p><img src="2_EnvData_files/figure-html/unnamed-chunk-4-1.png" width="672" /></p>
 <p>The <code>raster</code> package offers different functionalities to manipulate the spatial data, for example aggregating the data to coarser resolutions (<code>aggregate</code>), cropping (<code>crop()</code>), stacking (<code>stack()</code>):</p>
 <pre class="r"><code>aggregate(clim[[1]], fact=6, fun=mean)</code></pre>
-<p>Instead of aggregating the bioclim layers, you can also download the “raw” data needed to calculate bioclimatic variables (prec, tmin, tmax), aggregate these to coarser resolution, and then re-calculate the bioclimatic variables. The latter can be done using the <code>biovars()</code> function in the <em>dismo</em> package.</p>
-<pre class="r"><code>library(dismo)
-
-# You may have to adjust the path to your folder structure:
-tmin &lt;- getData(&quot;worldclim&quot;, var=&quot;tmin&quot;, res=10, download=T, path=&quot;data/clim_data&quot;)
-tmax &lt;- getData(&quot;worldclim&quot;, var=&quot;tmax&quot;, res=10, download=T, path=&quot;data/clim_data&quot;)
-prec &lt;- getData(&quot;worldclim&quot;, var=&quot;prec&quot;, res=10, download=T, path=&quot;data/clim_data&quot;)</code></pre>
-<pre class="r"><code># Now, recalculate the bioclimatic variables:
-biovars(prec, tmin, tmax)</code></pre>
 <p>You can also write raster stacks to file:</p>
 <pre class="r"><code>writeRaster(clim,filename=&#39;data/clim_data/bioclim.grd&#39;)</code></pre>
 <p><em>*.grd</em> is the native file format of the <code>raster</code> package. It consists of two files, a data file and a header file (<em>*.gri</em>).</p>
@@ -528,27 +519,27 @@ gbif_shrew2 &lt;- cbind(gbif_shrew2, raster::extract(x = clim, y = data.frame(gb
 duplicated(gbif_shrew2$cells)</code></pre>
 <pre><code>##   [1] FALSE FALSE FALSE FALSE  TRUE FALSE FALSE FALSE FALSE  TRUE FALSE FALSE
 ##  [13] FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE
-##  [25] FALSE FALSE FALSE  TRUE FALSE FALSE  TRUE FALSE FALSE  TRUE FALSE  TRUE
-##  [37] FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE  TRUE FALSE
-##  [49] FALSE FALSE  TRUE FALSE FALSE FALSE  TRUE  TRUE FALSE  TRUE FALSE  TRUE
-##  [61]  TRUE FALSE FALSE  TRUE FALSE FALSE  TRUE FALSE FALSE  TRUE  TRUE FALSE
-##  [73] FALSE FALSE  TRUE  TRUE FALSE FALSE FALSE FALSE  TRUE FALSE FALSE  TRUE
-##  [85] FALSE  TRUE FALSE FALSE  TRUE FALSE  TRUE  TRUE FALSE FALSE FALSE  TRUE
-##  [97] FALSE FALSE  TRUE  TRUE  TRUE FALSE  TRUE FALSE  TRUE FALSE FALSE  TRUE
-## [109]  TRUE FALSE FALSE  TRUE FALSE  TRUE FALSE  TRUE FALSE  TRUE  TRUE FALSE
-## [121]  TRUE  TRUE FALSE FALSE  TRUE  TRUE FALSE  TRUE FALSE  TRUE  TRUE  TRUE
-## [133] FALSE FALSE  TRUE  TRUE FALSE FALSE FALSE FALSE  TRUE  TRUE  TRUE FALSE
-## [145]  TRUE  TRUE  TRUE FALSE  TRUE  TRUE FALSE  TRUE FALSE  TRUE FALSE  TRUE
-## [157] FALSE  TRUE  TRUE  TRUE  TRUE  TRUE FALSE  TRUE  TRUE  TRUE FALSE FALSE
-## [169]  TRUE  TRUE  TRUE  TRUE  TRUE FALSE FALSE  TRUE  TRUE  TRUE FALSE  TRUE
-## [181] FALSE  TRUE FALSE FALSE FALSE  TRUE  TRUE FALSE  TRUE  TRUE  TRUE  TRUE
-## [193]  TRUE  TRUE FALSE  TRUE  TRUE  TRUE FALSE FALSE  TRUE FALSE  TRUE  TRUE
-## [205]  TRUE FALSE  TRUE  TRUE FALSE FALSE  TRUE FALSE  TRUE  TRUE  TRUE  TRUE
-## [217] FALSE  TRUE  TRUE  TRUE FALSE  TRUE  TRUE FALSE  TRUE FALSE FALSE  TRUE
-## [229]  TRUE FALSE FALSE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE FALSE FALSE  TRUE
-## [241]  TRUE FALSE FALSE FALSE FALSE FALSE  TRUE  TRUE FALSE FALSE FALSE  TRUE
-## [253] FALSE  TRUE  TRUE  TRUE FALSE  TRUE  TRUE FALSE FALSE FALSE FALSE FALSE
-## [265] FALSE FALSE  TRUE  TRUE FALSE</code></pre>
+##  [25] FALSE FALSE FALSE FALSE  TRUE FALSE FALSE  TRUE FALSE FALSE  TRUE FALSE
+##  [37]  TRUE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE  TRUE FALSE FALSE
+##  [49] FALSE  TRUE FALSE FALSE FALSE  TRUE FALSE FALSE  TRUE FALSE  TRUE FALSE
+##  [61]  TRUE  TRUE FALSE  TRUE FALSE  TRUE FALSE FALSE FALSE FALSE  TRUE FALSE
+##  [73] FALSE  TRUE  TRUE FALSE FALSE FALSE  TRUE  TRUE FALSE FALSE FALSE FALSE
+##  [85]  TRUE FALSE FALSE  TRUE FALSE  TRUE FALSE FALSE  TRUE FALSE  TRUE  TRUE
+##  [97] FALSE FALSE FALSE  TRUE FALSE FALSE  TRUE  TRUE  TRUE FALSE  TRUE FALSE
+## [109]  TRUE FALSE FALSE FALSE FALSE FALSE  TRUE  TRUE FALSE  TRUE  TRUE  TRUE
+## [121] FALSE FALSE FALSE FALSE  TRUE  TRUE FALSE FALSE  TRUE  TRUE  TRUE FALSE
+## [133]  TRUE  TRUE  TRUE  TRUE  TRUE FALSE  TRUE  TRUE FALSE FALSE FALSE FALSE
+## [145]  TRUE  TRUE  TRUE FALSE  TRUE  TRUE  TRUE FALSE  TRUE  TRUE FALSE FALSE
+## [157]  TRUE  TRUE FALSE  TRUE FALSE  TRUE  TRUE  TRUE  TRUE FALSE  TRUE  TRUE
+## [169]  TRUE  TRUE  TRUE FALSE  TRUE  TRUE FALSE  TRUE  TRUE FALSE FALSE  TRUE
+## [181]  TRUE  TRUE FALSE FALSE  TRUE  TRUE FALSE FALSE FALSE  TRUE  TRUE FALSE
+## [193]  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE FALSE  TRUE  TRUE  TRUE FALSE FALSE
+## [205]  TRUE FALSE  TRUE  TRUE  TRUE FALSE  TRUE  TRUE FALSE FALSE FALSE  TRUE
+## [217]  TRUE  TRUE  TRUE  TRUE FALSE  TRUE  TRUE  TRUE FALSE  TRUE  TRUE FALSE
+## [229]  TRUE FALSE FALSE  TRUE  TRUE FALSE FALSE  TRUE  TRUE  TRUE  TRUE  TRUE
+## [241]  TRUE FALSE FALSE FALSE FALSE FALSE FALSE FALSE  TRUE  TRUE FALSE FALSE
+## [253]  TRUE  TRUE FALSE FALSE FALSE FALSE FALSE  TRUE  TRUE FALSE FALSE FALSE
+## [265]  TRUE FALSE  TRUE  TRUE  TRUE FALSE  TRUE  TRUE FALSE</code></pre>
 <pre class="r"><code># Only retain non-duplicated cells:
 gbif_shrew_env &lt;- gbif_shrew2[!duplicated(gbif_shrew2$cells),]</code></pre>
 <p>Remember to save your resulting data frames!</p>
